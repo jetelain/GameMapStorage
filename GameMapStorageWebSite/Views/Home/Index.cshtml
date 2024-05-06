@@ -1,0 +1,22 @@
+﻿@model HomeIndexViewModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="row row-cols-1 row-cols-md-4">
+    @foreach (var game in Model.Games.OrderBy(m => m.EnglishTitle))
+    {
+        <div class="col p-2">
+            <div class="card h-100">
+                <a asp-controller="Home" asp-action="Game" asp-route-gameName="@game.Name">
+                    <img src="@ImagePathHelper.GetLogo(Model.AcceptWebp, game)" alt="Game Logo" class="card-img-top" />
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title text-center">
+                        <a asp-controller="Home" asp-action="Game" asp-route-gameName="@game.Name">@game.EnglishTitle</a>
+                    </h5>
+                </div>
+            </div>
+        </div>
+    }
+</div>
