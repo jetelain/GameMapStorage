@@ -81,7 +81,7 @@ namespace GameMapStorageWebSite
 
             services.AddScoped<IWorker<MigrateArma3MapWorkData>,MigrateArma3MapWorker>();
             services.AddScoped<BackgroundWorker>();
-            services.AddHostedService<BackgroundWorkerHostedService>();
+            //services.AddHostedService<BackgroundWorkerHostedService>();
         }
 
         /// <summary>

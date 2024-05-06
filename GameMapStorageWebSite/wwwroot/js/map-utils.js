@@ -403,7 +403,7 @@ var GameMapUtils = {
         });
     },
 
-    basicInit: function (mapInfos, mapDivId = 'map', markersForCities = false) {
+    basicInit: function (mapInfos, mapDivId = 'map') {
 
         var map = L.map(mapDivId, {
             minZoom: mapInfos.minZoom,
@@ -411,24 +411,18 @@ var GameMapUtils = {
             crs: GameMapUtils.CRS(mapInfos.factorx, mapInfos.factory, mapInfos.tileSize)
         });
 
-        L.tileLayer('.' + mapInfos.tilePattern, {
+        L.tileLayer(mapInfos.tilePattern, {
             attribution: mapInfos.attribution,
             tileSize: mapInfos.tileSize
         }).addTo(map);
 
-        map.setView(mapInfos.center, mapInfos.defaultZoom);
+        map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
 
         L.latlngGraticule().addTo(map);
 
         L.control.scale({ maxWidth: 200, imperial: false }).addTo(map);
 
         L.control.gridMousePosition().addTo(map);
-
-        if (markersForCities) {
-            mapInfos.cities.forEach(city => {
-                L.marker([city.y, city.x]).addTo(map).bindPopup(city.name);
-            });
-        }
     }
 
 };

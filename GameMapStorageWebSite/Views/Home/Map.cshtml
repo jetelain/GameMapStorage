@@ -1,0 +1,57 @@
+﻿@model HomeMapViewModel
+@{
+    ViewData["Title"] = Model.Map.EnglishTitle + " - " +  Model.Game.EnglishTitle;
+    ViewData["IsFullSize"] = true;
+}
+
+<h1 class="h3 text-center">
+    @Model.Map.EnglishTitle
+</h1>
+
+<div class="row">
+    <div class="col-lg-10 col-md-8">
+        <div class="map" id="map" style="width:100%; height:85vh; margin:0;padding:0;border:0;">
+
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4">
+        <h2 class="h6">Links</h2>
+        <div class="list-group text-center">
+        @if (!string.IsNullOrEmpty(Model.Map.OfficialSiteUri))
+        {
+                <a class="list-group-item" href=" @Model.Map.OfficialSiteUri"><i class="fab fa-steam"></i> Web Site</a>
+        }
+        @if (!string.IsNullOrEmpty(Model.Map.SteamWorkshopId))
+        {
+                <a class="list-group-item" href="https://steamcommunity.com/workshop/filedetails/?id=@Model.Map.SteamWorkshopId"><i class="fab fa-steam"></i> Steam Workshop</a>
+            }
+        </div>
+
+        <h2 class="h6 mt-4">Render</h2>
+        <div class="list-group text-center">
+        @foreach(var layer in Model.Map.Layers!)
+        {
+            <a class="list-group-item@(layer.GameMapLayerId == Model.Layer.GameMapLayerId ? " active" : "")" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game.Name" asp-route-mapName="@Model.Map.Name" asp-route-layerId="@layer.GameMapLayerId">
+                <img src="@ImagePathHelper.GetZero(Model.AcceptWebp, layer)" class="mw-100" style="max-height: 64px;" /> <br />
+                @layer.Type
+            </a>
+        }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="~/js/map-utils.js" asp-append-version="true"></script>
+    <script>
+        GameMapUtils.basicInit(@Json.Serialize(Model.MapInfos));
+    </script>
+}
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="" />
+    <link rel="stylesheet" href="~/css/map-utils.css" asp-append-version="true" />
+}

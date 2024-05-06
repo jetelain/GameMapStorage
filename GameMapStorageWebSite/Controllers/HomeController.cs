@@ -80,7 +80,25 @@ namespace GameMapStorageWebSite.Controllers
                 return NotFound();
             }
 
-            return View(new HomeMapViewModel() { Layer = layer, AcceptWebp = ImagePathHelper.AcceptWebp(Request) });
+            return View(new HomeMapViewModel() {
+                Game = map.Game!, 
+                Map = map, 
+                Layer = layer,
+                AcceptWebp = ImagePathHelper.AcceptWebp(Request),
+                MapInfos = new MapInfos()
+                {
+                    FactorX = layer.FactorX,
+                    DefaultPosition = new double[] { map.SizeInMeters  / 2, map.SizeInMeters / 2 },
+                    DefaultZoom = layer.DefaultZoom,
+                    FactorY = layer.FactorY,
+                    MaxZoom = layer.MaxZoom,
+                    MinZoom = layer.MinZoom,
+                    TilePattern = ImagePathHelper.GetPattern(Request, layer),
+                    TileSize = layer.TileSize
+
+
+                }
+            });
         }
 
         private GameMapLayer? GetLayer(List<GameMapLayer> layers, int? layerId)

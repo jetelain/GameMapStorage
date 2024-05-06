@@ -20,6 +20,14 @@ namespace GameMapStorageWebSite
             }
             return FormattableString.Invariant($"/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/{{z}}/{{x}}/{{y}}.png");
         }
+        public static string GetZero(bool useWebp, IGameMapLayerIdentifier layer)
+        {
+            if (useWebp)
+            {
+                return FormattableString.Invariant($"/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/0/0/0.webp");
+            }
+            return FormattableString.Invariant($"/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/0/0/0.png");
+        }
 
         public static string GetThumbnail(HttpRequest request, IGameMapIdentifier gameMap)
         {
