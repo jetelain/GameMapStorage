@@ -158,6 +158,11 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 client = httpClientFactory.CreateClient("CDN");
                 return await ReadImageAsync(uri, attempt+1);
             }
+            catch(UnknownImageFormatException)
+            {
+                logger.LogError("Image '{Uri}' is invalid.", uri);
+                throw;
+            }
         }
 
         private static GameMapLayer PrepareLayer(MigrateArma3MapWorkData task, GameMap map)
