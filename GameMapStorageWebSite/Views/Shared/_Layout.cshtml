@@ -1,0 +1,95 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService authorizationService
+@{
+    var isAdmin = (await authorizationService.AuthorizeAsync(User, "Admin")).Succeeded;
+    var isFullSize = ViewData["IsFullSize"] as bool? ?? false;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PLANOPS Atlas</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GameMapStorageWebSite.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/fontawesome/css/fontawesome.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/fontawesome/css/brands.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/fontawesome/css/solid.min.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">PLANOPS Atlas</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Game" asp-route-gameName="arma3">Arma 3</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Other games</a>
+                        </li>
+                        @if (isAdmin)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" asp-area="" asp-controller="AdminGames" asp-action="Index">Games</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="AdminGameMaps" asp-action="Index">Maps</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="AdminGameMapLayers" asp-action="Index">Layers</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="AdminBackgroundWorks" asp-action="Index">Tasks</a>
+                                </ul>
+                            </li>
+
+                        }
+                    </ul>
+                </div>
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <span>
+                        <span class="mr-sm-2">@User.Identity.Name</span>
+                        @if (isAdmin)
+                        {
+                            <span class="badge bg-primary">admin</span>
+                        }
+                        <a asp-controller="Home" asp-action="SignOutUser" class="btn btn-sm btn-secondary" title="@User.Identity.Name">
+                            Disconnect
+                        </a>
+                    </span>
+                }
+                else
+                {
+                    <form class="form-inline" asp-controller="Home" asp-action="SignInUser">
+                        <input type="hidden" name="provider" value="Steam" />
+                        <input type="hidden" name="isPersistent" value="true" />
+                        <button asp-controller="Home" asp-action="SignInUser" class="btn btn-sm btn-secondary">Signin with Steam</button>
+                    </form>
+                }
+            </div>
+        </nav>
+    </header>
+    <div class="@(isFullSize ? "" : "container")">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - atlas.plan-ops.fr - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

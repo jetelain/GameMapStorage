@@ -1,0 +1,67 @@
+﻿@model GameMapStorageWebSite.Entities.GameMap
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>GameMap</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="EnglishTitle" class="control-label"></label>
+                <input asp-for="EnglishTitle" class="form-control" />
+                <span asp-validation-for="EnglishTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AppendAttribution" class="control-label"></label>
+                <input asp-for="AppendAttribution" class="form-control" />
+                <span asp-validation-for="AppendAttribution" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SteamWorkshopId" class="control-label"></label>
+                <input asp-for="SteamWorkshopId" class="form-control" />
+                <span asp-validation-for="SteamWorkshopId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="OfficialSiteUri" class="control-label"></label>
+                <input asp-for="OfficialSiteUri" class="form-control" />
+                <span asp-validation-for="OfficialSiteUri" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SizeInMeters" class="control-label"></label>
+                <input asp-for="SizeInMeters" class="form-control" />
+                <span asp-validation-for="SizeInMeters" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Aliases" class="control-label"></label>
+                <input asp-for="Aliases" class="form-control" />
+                <span asp-validation-for="Aliases" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GameId" class="control-label"></label>
+                <select asp-for="GameId" class ="form-control" asp-items="ViewBag.GameId"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

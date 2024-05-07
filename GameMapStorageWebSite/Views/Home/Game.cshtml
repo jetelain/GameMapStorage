@@ -1,0 +1,34 @@
+﻿@model HomeGameViewModel
+@{
+    ViewData["Title"] = Model.Game.EnglishTitle;
+}
+
+<div class="row row-cols-1 row-cols-md-4">
+    @foreach (var map in Model.Maps.OrderBy(m => m.EnglishTitle))
+    {
+        <div class="col p-2">
+            <div class="card h-100">
+                <a asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game.Name" asp-route-mapName="@map.Name">
+                    <img src="@ImagePathHelper.GetThumbnail(Model.AcceptWebp, map)" alt="Map Preview" class="card-img-top" />
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game.Name" asp-route-mapName="@map.Name">@map.EnglishTitle</a>
+                    </h5>
+                    <p class="card-text">
+                        @string.Format("{0}x{0} km, {1} km², {2} cities", Math.Round(map.SizeInMeters / 1000.0), Math.Round(map.SizeInMeters*map.SizeInMeters / 1000000.0), map.CitiesCount)
+                    </p>
+
+                        @if (!string.IsNullOrEmpty(map.OfficialSiteUri))
+                        {
+                        <a href="@map.OfficialSiteUri" class="btn btn-sm btn-secondary"><i class="fa-solid fa-arrow-up-right-from-square"></i> Web Site</a>
+                        }
+                        @if (!string.IsNullOrEmpty(map.SteamWorkshopId))
+                        {
+                        <a href="https://steamcommunity.com/workshop/filedetails/?id=@map.SteamWorkshopId" class="btn btn-sm btn-secondary"><i class="fa-brands fa-steam"></i> Steam Workshop</a>
+                        }
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,80 @@
+﻿@model GameMapStorageWebSite.Entities.Game
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Game</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" asp-route-id="@Model.GameId">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="GameId" />
+            <div class="form-group">
+                <label asp-for="EnglishTitle" class="control-label"></label>
+                <input asp-for="EnglishTitle" class="form-control" />
+                <span asp-validation-for="EnglishTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Attribution" class="control-label"></label>
+                <input asp-for="Attribution" class="form-control" />
+                <span asp-validation-for="Attribution" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="OfficialSiteUri" class="control-label"></label>
+                <input asp-for="OfficialSiteUri" class="form-control" />
+                <span asp-validation-for="OfficialSiteUri" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SteamAppId" class="control-label"></label>
+                <input asp-for="SteamAppId" class="form-control" />
+                <span asp-validation-for="SteamAppId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<h4>Logo</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="SetLogo" asp-route-id="@Model.GameId">
+            <input type="hidden" asp-for="GameId" />
+            @if (ViewBag.ImageError != null)
+            {
+                <div class="text-danger">
+                    @ViewBag.ImageError
+                </div>
+            }
+            <div class="form-group">
+                <img src="@ImagePathHelper.GetLogo(false, Model)" class="mw-100" />
+            </div>
+            <div class="form-group">
+                <label for="imageUri" class="control-label">URL to new game logo</label>
+                <input name="imageUri" class="form-control" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
