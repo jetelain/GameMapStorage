@@ -1,0 +1,55 @@
+#!/bin/sh
+
+# Basic script to install / update a GameMapStorage instance on a Linux server
+# Requires dotnet SDK, see https://learn.microsoft.com/en-us/dotnet/core/install/linux, `sudo apt-get install -y dotnet-sdk-8.0` on Ubuntu 24.04 LTS
+
+if [ ! -d ~/build/GameMapStorage ]; then
+	mkdir ~/build
+	cd ~/build
+	git clone https://github.com/jetelain/GameMapStorage.git GameMapStorage
+fi
+
+if [ ! -d /opt/GameMapStorage ]; then
+	sudo mkdir /opt/GameMapStorage
+	sudo chown $USER:$USER /opt/GameMapStorage
+fi
+
+if [ ! -d /var/GameMapStorage ]; then
+	sudo mkdir /var/GameMapStorage
+	sudo chown www-data:www-data /var/GameMapStorage
+	
+	sudo mkdir /var/GameMapStorage/storage
+	sudo chown www-data:www-data /var/GameMapStorage/storage
+fi
+
+cd ~/build/GameMapStorage
+
+echo "Update git"
+git pull main
+
+echo "Check config"
+if [ ! -f /opt/GameMapStorage/appsettings.Production.json ]; then
+	echo " * Create appsettings.Production.json"
+	cp setup/appsettings.Production.json /opt/GameMapStorage/appsettings.Production.json
+	read -p "Type the Steam Api Key obtained from https://steamcommunity.com/dev/apikey, then press [ENTER]:" STEAM_API_KEY
+	read -p "Type your Steam Id (for admin access), then press [ENTER]:" STEAM_ADMIN_ID
+	sed -i "s/STEAM_API_KEY/$STEAM_API_KEY/g"  /opt/GameMapStorage/appsettings.Production.json
+	sed -i "s/STEAM_ADMIN_ID/$STEAM_ADMIN_ID/g"  /opt/GameMapStorage/appsettings.Production.json
+fi
+
+if [ ! -f /etc/systemd/system/kestrel-gms.service ]; then
+	echo " * Create kestrel-gms.service"
+	sudo cp setup/kestrel-gms.service /etc/systemd/system/kestrel-gms.service
+fi
+
+echo "Build"
+dotnet publish -c Release -o dotnet-webapp -r linux-x64 --self-contained false GameMapStorageWebSite/GameMapStorageWebSite.csproj
+
+echo "Stop Service"
+sudo systemctl stop kestrel-gms
+
+echo "Copy files"
+rsync -avu "dotnet-webapp/" "/opt/GameMapStorage"
+
+echo "Start Service"
+sudo systemctl start kestrel-gms
