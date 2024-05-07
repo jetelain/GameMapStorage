@@ -198,9 +198,9 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                     await Task.Delay(Random.Shared.Next(5, 50));
                     return await client.GetStreamAsync(jsLocation);
                 }
-                catch(HttpRequestException ex)
+                catch(Exception ex)
                 {
-                    if (ex.StatusCode != null)
+                    if (ex is HttpRequestException http && http.StatusCode != null)
                     {
                         throw;
                     }

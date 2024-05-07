@@ -49,6 +49,8 @@ namespace GameMapStorageWebSite.Controllers.Admin
             if (backgroundWork != null)
             {
                 backgroundWork.Error = null;
+                backgroundWork.FinishedUtc = null;
+                backgroundWork.StartedUtc = null;
                 backgroundWork.State = BackgroundWorkState.Pending;
                 _context.Update(backgroundWork);
                 await _context.SaveChangesAsync();
