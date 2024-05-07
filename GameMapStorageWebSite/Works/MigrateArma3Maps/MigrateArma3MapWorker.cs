@@ -19,14 +19,16 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
         private readonly IThumbnailService thumbnailService;
         private readonly IImageLayerService imageLayerService;
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly ILogger<MigrateArma3MapWorker> logger;
         private HttpClient client;
 
-        public MigrateArma3MapWorker(GameMapStorageContext context, IThumbnailService thumbnailService, IImageLayerService imageLayerService, IHttpClientFactory httpClientFactory)
+        public MigrateArma3MapWorker(GameMapStorageContext context, IThumbnailService thumbnailService, IImageLayerService imageLayerService, IHttpClientFactory httpClientFactory, ILogger<MigrateArma3MapWorker> logger)
             : base(context)
         {
             this.thumbnailService = thumbnailService;
             this.imageLayerService = imageLayerService;
             this.httpClientFactory = httpClientFactory;
+            this.logger = logger;
             this.client = httpClientFactory.CreateClient("CDN");
         }
 
@@ -50,8 +52,6 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
 
             await MarkLayerAsReady(layer);
         }
-
-
 
         private async Task<GameMapLayer> GetOrCreateLayer(MigrateArma3MapWorkData taskData, Game game)
         {
@@ -190,7 +190,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
             }
         }
 
-        private async Task<Stream> OpenStream(string jsLocation)
+        private async Task<Stream> OpenStream(string jsLocation, int attempt = 1)
         {
             if (jsLocation.StartsWith("https://"))
             {
@@ -201,13 +201,21 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 }
                 catch(Exception ex)
                 {
-                    if (ex is HttpRequestException http && http.StatusCode != null && http.StatusCode != HttpStatusCode.TooManyRequests)
+                    logger.LogWarning("Fetching '{File}' failed: {Message}", jsLocation, ex.Message);
+                    if (ex is HttpRequestException http 
+                        && http.StatusCode != null 
+                        && http.StatusCode != HttpStatusCode.TooManyRequests
+                        && http.StatusCode != HttpStatusCode.ServiceUnavailable)
+                    {
+                        throw;
+                    }
+                    if (attempt > 10)
                     {
                         throw;
                     }
                     await Task.Delay(Random.Shared.Next(2000, 10000));
                     client = httpClientFactory.CreateClient("CDN");
-                    return await client.GetStreamAsync(jsLocation);
+                    return await OpenStream(jsLocation, attempt + 1);
                 }
             }
             return File.OpenRead(jsLocation);

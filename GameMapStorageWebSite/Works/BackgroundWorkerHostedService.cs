@@ -30,10 +30,18 @@ namespace GameMapStorageWebSite.Works
             {
                 while (await timer.WaitForNextTickAsync(cts.Token))
                 {
-                    using (var scope = services.CreateScope())
+                    var didSomething = false;
+                    do
                     {
-                        await scope.ServiceProvider.GetRequiredService<BackgroundWorker>().DoPendingWorks(cts.Token);
-                    }
+                        using (var scope = services.CreateScope())
+                        {
+                            didSomething = await scope.ServiceProvider.GetRequiredService<BackgroundWorker>().DoOnePendingWork();
+                        }
+                        if(didSomething)
+                        {
+                            await Task.Delay(1000);
+                        }
+                    } while (didSomething && !cts.Token.IsCancellationRequested);
                 }
             }
             catch (OperationCanceledException)

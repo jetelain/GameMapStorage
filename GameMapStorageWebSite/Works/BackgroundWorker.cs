@@ -19,24 +19,20 @@ namespace GameMapStorageWebSite.Works
             this.logger = logger;
         }
 
-        internal async Task DoPendingWorks(CancellationToken token)
+        internal async Task<bool> DoOnePendingWork()
         {
             var nextTask = context.Works.FirstOrDefault(t => t.State == BackgroundWorkState.Pending || t.State == BackgroundWorkState.Running);
-            while (nextTask != null && !token.IsCancellationRequested)
+            if (nextTask != null)
             {
                 await DoWork(nextTask);
-                nextTask = context.Works.FirstOrDefault(t => t.State == BackgroundWorkState.Pending || t.State == BackgroundWorkState.Running);
-                
-                if (nextTask != null)
-                {
-                    await Task.Delay(1000);
-                }
+                return true;
             }
+            return false;
         }
 
         private async Task DoWork(BackgroundWork work)
         {
-            logger.LogInformation($"Start work {work.BackgroundWorkId} of type {work.Type}.");
+            logger.LogInformation("Start work '{Id}' of type '{Type}'.", work.BackgroundWorkId, work.Type);
 
             work.State = BackgroundWorkState.Running;
             work.StartedUtc = DateTime.UtcNow;
@@ -50,7 +46,7 @@ namespace GameMapStorageWebSite.Works
             }
             catch(Exception ex)
             {
-                logger.LogError(ex, $"Work {work.BackgroundWorkId} failed.");
+                logger.LogError(ex, "Work '{Id}' failed.", work.BackgroundWorkId);
                 work.State = BackgroundWorkState.Failed;
                 work.Error = ex.ToString();
             }
@@ -58,7 +54,7 @@ namespace GameMapStorageWebSite.Works
             context.Update(work);
             await context.SaveChangesAsync();
 
-            logger.LogInformation($"Work {work.BackgroundWorkId} done.");
+            logger.LogInformation("Work '{Id}' done.", work.BackgroundWorkId);
         }
 
         private Task CallWorker(BackgroundWork work)
