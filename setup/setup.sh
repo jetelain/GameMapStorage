@@ -22,10 +22,16 @@ if [ ! -d /var/GameMapStorage ]; then
 	sudo chown www-data:www-data /var/GameMapStorage/storage
 fi
 
+if [ ! -d /var/aspnet-keys ]; then
+	sudo mkdir /var/aspnet-keys
+	sudo chown www-data:www-data /var/aspnet-keys
+fi
+
 cd ~/build/GameMapStorage
 
 echo "Update git"
-git pull main
+git pull
+git checkout main
 
 echo "Check config"
 if [ ! -f /opt/GameMapStorage/appsettings.Production.json ]; then

@@ -3,7 +3,7 @@ Description=GameMapStorage
 
 [Service]
 WorkingDirectory=/opt/GameMapStorage
-ExecStart=/opt/GameMapStorage/GameMapStorage --urls http://localhost:5090/
+ExecStart=/opt/GameMapStorage/GameMapStorageWebSite --urls http://localhost:5090/
 Restart=always
 RestartSec=10
 KillSignal=SIGINT
