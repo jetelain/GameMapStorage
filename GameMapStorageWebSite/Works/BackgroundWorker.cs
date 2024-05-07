@@ -26,6 +26,11 @@ namespace GameMapStorageWebSite.Works
             {
                 await DoWork(nextTask);
                 nextTask = context.Works.FirstOrDefault(t => t.State == BackgroundWorkState.Pending || t.State == BackgroundWorkState.Running);
+                
+                if (nextTask != null)
+                {
+                    await Task.Delay(1000);
+                }
             }
         }
 

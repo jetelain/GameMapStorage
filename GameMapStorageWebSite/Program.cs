@@ -137,7 +137,8 @@ namespace GameMapStorageWebSite
                     await context.Database.MigrateAsync();
                     context.InitData();
 
-                    if (await context.Works.Where(t => t.Type == BackgroundWorkType.MigrateArma3Map).CountAsync() == 0)
+                    if (await context.Works.Where(t => t.Type == BackgroundWorkType.MigrateArma3Map).CountAsync() == 0
+                        && await context.GameMaps.CountAsync() == 0)
                     {
                         var factory = new MigrateArma3MapFactory(app.Configuration, context, services.GetRequiredService<IHttpClientFactory>());
                         await factory.InitialWorkLoad();

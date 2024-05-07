@@ -17,13 +17,15 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
 
         private readonly IThumbnailService thumbnailService;
         private readonly IImageLayerService imageLayerService;
-        private readonly HttpClient client;
+        private readonly IHttpClientFactory httpClientFactory;
+        private HttpClient client;
 
         public MigrateArma3MapWorker(GameMapStorageContext context, IThumbnailService thumbnailService, IImageLayerService imageLayerService, IHttpClientFactory httpClientFactory)
             : base(context)
         {
             this.thumbnailService = thumbnailService;
             this.imageLayerService = imageLayerService;
+            this.httpClientFactory = httpClientFactory;
             this.client = httpClientFactory.CreateClient("CDN");
         }
 
@@ -191,7 +193,21 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
         {
             if (jsLocation.StartsWith("https://"))
             {
-                return await client.GetStreamAsync(jsLocation);
+                try
+                {
+                    await Task.Delay(Random.Shared.Next(5, 50));
+                    return await client.GetStreamAsync(jsLocation);
+                }
+                catch(HttpRequestException ex)
+                {
+                    if (ex.StatusCode != null)
+                    {
+                        throw;
+                    }
+                    await Task.Delay(Random.Shared.Next(1000, 2000));
+                    client = httpClientFactory.CreateClient("CDN");
+                    return await client.GetStreamAsync(jsLocation);
+                }
             }
             return File.OpenRead(jsLocation);
         }

@@ -41,6 +41,21 @@ namespace GameMapStorageWebSite.Controllers.Admin
             return View(backgroundWork);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restart(int id)
+        {
+            var backgroundWork = await _context.Works.FindAsync(id);
+            if (backgroundWork != null)
+            {
+                backgroundWork.Error = null;
+                backgroundWork.State = BackgroundWorkState.Pending;
+                _context.Update(backgroundWork);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         // GET: AdminBackgroundWorks/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
