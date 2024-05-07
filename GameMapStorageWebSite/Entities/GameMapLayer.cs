@@ -23,7 +23,7 @@
 
         public double FactorY { get; set; }
 
-        public required string Culture { get; set; }
+        public string? Culture { get; set; }
 
         public DateTime? LastChangeUtc { get; set; }
 

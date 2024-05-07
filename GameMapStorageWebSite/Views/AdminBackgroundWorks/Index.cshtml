@@ -1,0 +1,67 @@
+﻿@model IEnumerable<GameMapStorageWebSite.Entities.BackgroundWork>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.State)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedUtc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StartedUtc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FinishedUtc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Error)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GameMapLayer)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Type)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.State)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedUtc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StartedUtc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FinishedUtc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Error)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GameMapLayerId)
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.BackgroundWorkId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.BackgroundWorkId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

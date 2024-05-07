@@ -4,6 +4,6 @@
     {
         MigrateArma3Map,
 
-        ProcessLayerData
+        ProcessLayer
     }
 }

@@ -19,8 +19,4 @@
 		<PackageReference Include="AspNet.Security.OpenId.Steam" Version="8.0.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Controllers\Admin\" />
-	</ItemGroup>
-
 </Project>

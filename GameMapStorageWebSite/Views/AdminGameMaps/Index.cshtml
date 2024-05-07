@@ -1,0 +1,89 @@
+﻿@model IEnumerable<GameMapStorageWebSite.Entities.GameMap>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.EnglishTitle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AppendAttribution)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SteamWorkshopId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OfficialSiteUri)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SizeInMeters)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CitiesCount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Aliases)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastChangeUtc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Game)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.EnglishTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AppendAttribution)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SteamWorkshopId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OfficialSiteUri)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SizeInMeters)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CitiesCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Aliases)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastChangeUtc)
+            </td>
+            <td>
+                    @Html.DisplayFor(modelItem => item.Game.EnglishTitle)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.GameMapId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.GameMapId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.GameMapId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

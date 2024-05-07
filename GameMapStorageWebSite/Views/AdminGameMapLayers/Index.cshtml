@@ -1,0 +1,107 @@
+﻿@model IEnumerable<GameMapStorageWebSite.Entities.GameMapLayer>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Format)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.State)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MinZoom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaxZoom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DefaultZoom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsDefault)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TileSize)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FactorX)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FactorY)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Culture)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastChangeUtc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GameMap)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Type)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Format)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.State)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MinZoom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaxZoom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DefaultZoom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsDefault)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TileSize)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FactorX)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FactorY)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Culture)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastChangeUtc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GameMap.EnglishTitle)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.GameMapLayerId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.GameMapLayerId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.GameMapLayerId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

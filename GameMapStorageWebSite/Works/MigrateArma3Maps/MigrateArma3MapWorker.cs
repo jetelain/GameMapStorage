@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using Microsoft.EntityFrameworkCore;
@@ -10,20 +9,19 @@ using SixLabors.ImageSharp.Processing;
 
 namespace GameMapStorageWebSite.Works.MigrateArma3Maps
 {
-    public class MigrateArma3MapWorker : IWorker<MigrateArma3MapWorkData>
+    public class MigrateArma3MapWorker : LayerWorkerBase, IWorker<MigrateArma3MapWorkData>
     {
         private static readonly Regex MgrsCrsRegex = new Regex(@"MGRS_CRS\(([\-0-9\.]+), ([\-0-9\.]+), [\-0-9\.]+\)");
         private static readonly Regex AliasesRegex = new Regex(@"^Arma3Map\.Maps\.([a-z0-9_]+) =$");
         private static readonly Regex WorkshopRegex = new Regex(@"^https\://steamcommunity.com/.*/filedetails/\?id=(.*)$");
 
-        private readonly GameMapStorageContext context;
         private readonly IThumbnailService thumbnailService;
         private readonly IImageLayerService imageLayerService;
         private readonly HttpClient client;
 
         public MigrateArma3MapWorker(GameMapStorageContext context, IThumbnailService thumbnailService, IImageLayerService imageLayerService, IHttpClientFactory httpClientFactory)
+            : base(context)
         {
-            this.context = context;
             this.thumbnailService = thumbnailService;
             this.imageLayerService = imageLayerService;
             this.client = httpClientFactory.CreateClient("CDN");
@@ -47,9 +45,10 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
 
             await ImportLayers(taskData, layer);
 
-            layer.State = LayerState.Ready;
-            await context.SaveChangesAsync();
+            await MarkLayerAsReady(layer);
         }
+
+
 
         private async Task<GameMapLayer> GetOrCreateLayer(MigrateArma3MapWorkData taskData, Game game)
         {
@@ -60,6 +59,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 .FirstOrDefaultAsync();
             if (existingLayer != null)
             {
+                await MarkLayerAsProcessing(existingLayer);
                 return existingLayer;
             }
 
@@ -130,7 +130,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
         {
             var layer = new GameMapLayer()
             {
-                Culture = "",
+                Culture = string.Empty,
                 IsDefault = true,
                 DefaultZoom = task.MapInfos.defaultZoom,
                 MaxZoom = task.MapInfos.maxZoom,
@@ -138,7 +138,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 Format = LayerFormat.PngAndWebp,
                 GameMap = map,
                 LastChangeUtc = DateTime.UtcNow,
-                State = LayerState.Created,
+                State = LayerState.Processing,
                 Type = LayerType.Topographic,
                 TileSize = task.MapInfos.tileSize
             };

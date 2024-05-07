@@ -3,6 +3,7 @@ using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Works;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
+using GameMapStorageWebSite.Works.ProcessLayers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -80,8 +81,9 @@ namespace GameMapStorageWebSite
             services.AddResponseCaching();
 
             services.AddScoped<IWorker<MigrateArma3MapWorkData>,MigrateArma3MapWorker>();
+            services.AddScoped<IWorker<ProcessLayerWorkData>, ProcessLayerWorker>();
             services.AddScoped<BackgroundWorker>();
-            //services.AddHostedService<BackgroundWorkerHostedService>();
+            services.AddHostedService<BackgroundWorkerHostedService>();
         }
 
         /// <summary>
@@ -111,9 +113,16 @@ namespace GameMapStorageWebSite
 
             app.UseResponseCaching();
 
+            app.UseRequestLocalization("en-US");
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.MapControllerRoute(
+                name: "areas",
+                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+              );
         }
 
 
@@ -125,7 +134,6 @@ namespace GameMapStorageWebSite
                 try
                 {
                     var context = services.GetRequiredService<GameMapStorageContext>();
-                    await context.Database.EnsureCreatedAsync();
                     await context.Database.MigrateAsync();
                     context.InitData();
 

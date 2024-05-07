@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Controllers
 {
+    /// <summary>
+    /// Allow existing instances of cTabIRL and Arma3TacMap to use our maps
+    /// </summary>
     public class LegacyController : Controller
     {
         private readonly GameMapStorageContext context;
@@ -19,6 +22,7 @@ namespace GameMapStorageWebSite.Controllers
         }
 
         [Route("data/{gameId}/maps/all.js")]
+        [ResponseCache(VaryByHeader = "Accept", Duration = 3600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAllJs(int gameId)
         {
             var layers = await context.GameMapLayers
@@ -47,11 +51,12 @@ namespace GameMapStorageWebSite.Controllers
 
             return new LegacyMapInfos()
             {
+                fullMapTile = ImagePathHelper.GetLayerPreview(Request, layer).Substring(suffix.Length),
                 attribution = HttpUtility.HtmlEncode(layer.GameMap.Game!.Attribution + ", " + layer.GameMap.AppendAttribution),
                 defaultZoom = layer.DefaultZoom,
                 maxZoom = layer.MaxZoom,
                 minZoom = layer.MinZoom,
-                tilePattern = ImagePathHelper.GetPattern(Request, layer).Substring(suffix.Length),
+                tilePattern = ImagePathHelper.GetLayerPattern(Request, layer).Substring(suffix.Length),
                 worldName = layer.GameMap.Name,
                 worldSize = layer.GameMap.SizeInMeters,
                 title = layer.GameMap.EnglishTitle,
@@ -81,6 +86,7 @@ namespace GameMapStorageWebSite.Controllers
         }
 
         [Route("data/{gameId}/maps/all.json")]
+        [ResponseCache(VaryByHeader = "Accept", Duration = 3600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAllJson(int gameId)
         {
             var layers = await context.GameMapLayers
@@ -106,7 +112,8 @@ namespace GameMapStorageWebSite.Controllers
         }
 
         [Route("data/{gameId}/maps/{name}.js")]
-        public async Task<IActionResult> GetAllJs(int gameId, string name)
+        [ResponseCache(VaryByHeader = "Accept", Duration = 3600, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> GetMapJs(int gameId, string name)
         {
             var layer = await context.GameMapLayers
                 .Include(l => l.GameMap)

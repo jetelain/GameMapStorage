@@ -30,7 +30,7 @@ namespace GameMapStorageWebSite.Works
             {
                 while (await timer.WaitForNextTickAsync(cts.Token))
                 {
-                    using(var scope = services.CreateScope())
+                    using (var scope = services.CreateScope())
                     {
                         await scope.ServiceProvider.GetRequiredService<BackgroundWorker>().DoPendingWorks(cts.Token);
                     }

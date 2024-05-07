@@ -12,7 +12,7 @@ namespace GameMapStorageWebSite
             return request.Headers.Accept.Any(v => v?.Contains(WebpContentType) ?? false);
         }
 
-        public static string GetPattern(HttpRequest request, IGameMapLayerIdentifier layer)
+        public static string GetLayerPattern(HttpRequest request, IGameMapLayerIdentifier layer)
         {
             if (AcceptWebp(request))
             {
@@ -20,7 +20,13 @@ namespace GameMapStorageWebSite
             }
             return FormattableString.Invariant($"/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/{{z}}/{{x}}/{{y}}.png");
         }
-        public static string GetZero(bool useWebp, IGameMapLayerIdentifier layer)
+
+        public static string GetLayerPreview(HttpRequest request, IGameMapLayerIdentifier layer)
+        {
+            return GetLayerPreview(AcceptWebp(request), layer);
+        }
+
+        public static string GetLayerPreview(bool useWebp, IGameMapLayerIdentifier layer)
         {
             if (useWebp)
             {

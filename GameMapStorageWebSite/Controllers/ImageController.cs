@@ -8,7 +8,7 @@ namespace GameMapStorageWebSite.Controllers
 {
     public class ImageController : Controller
     {
-        public const int CacheDuractionInSeconds = 30 * 24 * 60 * 60; // 30 days
+        public const int CacheDuractionInSeconds = 4 * 60 * 60; // 4 hours
 
         private static string PngContentType = PngFormat.Instance.DefaultMimeType;
         private static string WebpContentType = WebpFormat.Instance.DefaultMimeType;

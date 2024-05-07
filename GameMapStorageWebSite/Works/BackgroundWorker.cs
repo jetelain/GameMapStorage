@@ -2,6 +2,7 @@
 using System.Text.Json;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
+using GameMapStorageWebSite.Works.ProcessLayers;
 
 namespace GameMapStorageWebSite.Works
 {
@@ -60,6 +61,9 @@ namespace GameMapStorageWebSite.Works
             {
                 case BackgroundWorkType.MigrateArma3Map:
                     return CallWorker<MigrateArma3MapWorkData>(work);
+
+                case BackgroundWorkType.ProcessLayer:
+                    return CallWorker<ProcessLayerWorkData>(work);
             }
             return Task.CompletedTask;
         }

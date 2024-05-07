@@ -46,7 +46,7 @@ namespace GameMapStorageWebSite.Controllers
 
         [Route("maps/{gameName}/{mapName}")]
         [Route("maps/{gameName}/{mapName}/{layerId}")]
-        public async Task<IActionResult> Map(string gameName, string mapName, int? layerId = null)
+        public async Task<IActionResult> Map(string gameName, string mapName, int? layerId = null, double? x = null, double? y = null, int? zoom = null)
         {
             var map = await _context.GameMaps
                 .Include(m => m.Game)
@@ -77,7 +77,7 @@ namespace GameMapStorageWebSite.Controllers
             var layer = GetLayer(map.Layers, layerId);
             if (layer == null)
             {
-                return NotFound();
+                return View("NotYetAvailable", map);
             }
 
             return View(new HomeMapViewModel() {
@@ -88,15 +88,13 @@ namespace GameMapStorageWebSite.Controllers
                 MapInfos = new MapInfos()
                 {
                     FactorX = layer.FactorX,
-                    DefaultPosition = new double[] { map.SizeInMeters  / 2, map.SizeInMeters / 2 },
-                    DefaultZoom = layer.DefaultZoom,
+                    DefaultPosition = [y ?? (map.SizeInMeters  / 2), x ?? (map.SizeInMeters / 2)],
+                    DefaultZoom = zoom ?? layer.DefaultZoom,
                     FactorY = layer.FactorY,
                     MaxZoom = layer.MaxZoom,
                     MinZoom = layer.MinZoom,
-                    TilePattern = ImagePathHelper.GetPattern(Request, layer),
+                    TilePattern = ImagePathHelper.GetLayerPattern(Request, layer),
                     TileSize = layer.TileSize
-
-
                 }
             });
         }
