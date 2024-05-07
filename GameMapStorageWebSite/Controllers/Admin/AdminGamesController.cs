@@ -122,7 +122,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SetLogo(int id, [FromBody] int gameId, [FromBody] string imageUri)
+        public async Task<IActionResult> SetLogo(int id, [FromForm] int gameId, [FromForm] string imageUri)
         {
             if (id != gameId)
             {

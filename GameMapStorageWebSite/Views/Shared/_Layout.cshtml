@@ -30,22 +30,25 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Game" asp-route-gameName="arma3">Arma 3</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Other games</a>
                         </li>
                         @if (isAdmin)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="AdminGames" asp-action="Index">Games</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" asp-area="" asp-controller="AdminGames" asp-action="Index">Games</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="AdminGameMaps" asp-action="Index">Maps</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="AdminGameMapLayers" asp-action="Index">Layers</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="AdminBackgroundWorks" asp-action="Index">Tasks</a>
+                                </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="AdminGameMaps" asp-action="Index">Maps</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="AdminGameMapLayers" asp-action="Index">Layers</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="AdminBackgroundWorks" asp-action="Index">Tasks</a>
-                            </li>
+
                         }
                     </ul>
                 </div>

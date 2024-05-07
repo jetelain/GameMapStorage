@@ -46,6 +46,7 @@ namespace GameMapStorageWebSite.Works
             {
                 await CallWorker(work);
                 work.State = BackgroundWorkState.Success;
+                work.Error = null;
             }
             catch(Exception ex)
             {

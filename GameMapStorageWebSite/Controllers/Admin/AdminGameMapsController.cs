@@ -135,7 +135,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SetThumbnail(int id, int gameMapId, string imageUri)
+        public async Task<IActionResult> SetThumbnail(int id, [FromForm] int gameMapId, [FromForm] string imageUri)
         {
             if (id != gameMapId)
             {
