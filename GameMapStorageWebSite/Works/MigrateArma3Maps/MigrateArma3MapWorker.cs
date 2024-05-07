@@ -5,6 +5,7 @@ using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
@@ -110,8 +111,14 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
 
         private async Task<Image<Rgba32>> ReconstructFullImage(MigrateArma3MapWorkData task, GameMapLayer layer, int z)
         {
+            var configuration = Configuration.Default.Clone();
+            configuration.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions()
+            {
+                AllocationLimitMegabytes = 8192
+            });
+
             var size = imageLayerService.GetSizeAtZoom(layer, z);
-            var image = new Image<Rgba32>(size, size);
+            var image = new Image<Rgba32>(configuration, size, size);
             var count = MapUtils.GetTileRowCount(z);
             var tileSize = layer.TileSize;
             for (int x = 0; x < count; x++)
