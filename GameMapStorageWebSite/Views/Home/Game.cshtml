@@ -1,7 +1,23 @@
 ﻿@model HomeGameViewModel
 @{
     ViewData["Title"] = Model.Game.EnglishTitle;
+    ViewData["Attribution"] = MapUtils.CombineAttibutions( Model.Game.Attribution, Model.Maps.Select(m => m.AppendAttribution));
 }
+<h1 class="text-center">
+    @Model.Game.EnglishTitle
+</h1>
+@if (Model.Maps.Count > 0)
+{
+    <p class="text-center">@string.Format("{0} maps in the atlas. Total of {1} km² and {2} cities.", Model.Maps.Count, Model.Maps.Sum(map => Math.Round(map.SizeInMeters * map.SizeInMeters / 1000000.0)), Model.Maps.Sum(map => map.CitiesCount))</p>
+}
+<p class="text-center">
+    
+    <a href="@Model.Game.OfficialSiteUri" class="btn btn-sm btn-secondary"><i class="fa-solid fa-arrow-up-right-from-square"></i> Official Web Site</a>
+    @if (!string.IsNullOrEmpty(Model.Game.SteamAppId))
+    {
+        <a href="https://store.steampowered.com/app/@(Model.Game.SteamAppId)/" class="btn btn-sm btn-secondary"><i class="fa-brands fa-steam"></i> Steam Store Page</a>
+    }
+</p>
 
 <div class="row row-cols-1 row-cols-md-4">
     @foreach (var map in Model.Maps.OrderBy(m => m.EnglishTitle))

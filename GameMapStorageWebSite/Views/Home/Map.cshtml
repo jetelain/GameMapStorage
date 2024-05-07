@@ -2,19 +2,20 @@
 @{
     ViewData["Title"] = Model.Map.EnglishTitle + " - " +  Model.Game.EnglishTitle;
     ViewData["IsFullSize"] = true;
+    ViewData["Attribution"] = Model.MapInfos.Attribution;
 }
 
 <h1 class="h3 text-center">
     @Model.Map.EnglishTitle
 </h1>
 
-<div class="row">
+<div class="row g-0">
     <div class="col-lg-10 col-md-8">
         <div class="map" id="map" style="width:100%; height:85vh; margin:0;padding:0;border:0;">
 
         </div>
     </div>
-    <div class="col-lg-2 col-md-4">
+    <div class="col-lg-2 col-md-4 ps-3 pe-3">
         <h2 class="h6">Links</h2>
         <div class="list-group text-center">
         @if (!string.IsNullOrEmpty(Model.Map.OfficialSiteUri))
@@ -27,7 +28,7 @@
             }
         </div>
 
-        <h2 class="h6 mt-4">Render</h2>
+        <h2 class="h6 mt-4">Layers</h2>
         <div class="list-group text-center">
         @foreach(var layer in Model.Map.Layers!)
         {

@@ -82,9 +82,16 @@
         </main>
     </div>
 
+    @if (@ViewData["Attribution"] != null)
+    {
+        <p class="container text-muted mt-3 mb-3">
+            Content @ViewData["Attribution"]
+        </p>
+    }
+
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - atlas.plan-ops.fr - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            This service is not affiliated or endorsed by content authors. - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 
