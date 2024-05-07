@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Net;
 using System.Text.RegularExpressions;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
@@ -200,11 +201,11 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 }
                 catch(Exception ex)
                 {
-                    if (ex is HttpRequestException http && http.StatusCode != null)
+                    if (ex is HttpRequestException http && http.StatusCode != null && http.StatusCode != HttpStatusCode.TooManyRequests)
                     {
                         throw;
                     }
-                    await Task.Delay(Random.Shared.Next(1000, 2000));
+                    await Task.Delay(Random.Shared.Next(2000, 10000));
                     client = httpClientFactory.CreateClient("CDN");
                     return await client.GetStreamAsync(jsLocation);
                 }
