@@ -27,5 +27,8 @@ namespace GameMapStorageWebSite.Models
 
         [JsonPropertyName("tilePattern")]
         public required string TilePattern { get; set; }
+
+        [JsonPropertyName("attribution")]
+        public required string Attribution { get; set; }
     }
 }

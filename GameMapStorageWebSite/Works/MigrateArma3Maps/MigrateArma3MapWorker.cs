@@ -5,6 +5,7 @@ using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
@@ -101,25 +102,35 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 {
                     // Ignore if file is not found
                 }
+                catch(UnknownImageFormatException)
+                {
+                    // Ignore bad image format
+                }
             }
         }
 
         private async Task<Image<Rgba32>> ReconstructFullImage(MigrateArma3MapWorkData task, GameMapLayer layer, int z)
         {
+            var configuration = Configuration.Default.Clone();
+            configuration.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions()
+            {
+                MaximumPoolSizeMegabytes = 8192
+            });
+
             var size = imageLayerService.GetSizeAtZoom(layer, z);
-            var image = new Image<Rgba32>(size, size);
+            var image = new Image<Rgba32>(configuration, size, size);
             var count = MapUtils.GetTileRowCount(z);
             var tileSize = layer.TileSize;
             for (int x = 0; x < count; x++)
             {
                 for (int y = 0; y < count; y++)
                 {
-                    using var tileStream = await OpenStream(task.BaseUri +
+                    using var tile = await ReadImageAsync(task.BaseUri +
                         task.MapInfos.tilePattern?
                         .Replace("{z}", z.ToString(NumberFormatInfo.InvariantInfo))
                         .Replace("{x}", x.ToString(NumberFormatInfo.InvariantInfo))
                         .Replace("{y}", y.ToString(NumberFormatInfo.InvariantInfo)));
-                    using var tile = await Image.LoadAsync(tileStream);
+
                     image.Mutate(p =>
                     {
                         p.DrawImage(tile, new Point((x * tileSize), (y * tileSize)), 1.0f);
@@ -127,6 +138,30 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 }
             }
             return image;
+        }
+
+        private async Task<Image> ReadImageAsync(string uri, int attempt = 1)
+        {
+            try
+            {
+                using var tileStream = await OpenStream(uri);
+                return await Image.LoadAsync(tileStream);
+            }
+            catch(HttpIOException)
+            {
+                if (attempt >= 10)
+                {
+                    throw;
+                }
+                await Task.Delay(Random.Shared.Next(2000, 10000));
+                client = httpClientFactory.CreateClient("CDN");
+                return await ReadImageAsync(uri, attempt+1);
+            }
+            catch(UnknownImageFormatException)
+            {
+                logger.LogError("Image '{Uri}' is invalid.", uri);
+                throw;
+            }
         }
 
         private static GameMapLayer PrepareLayer(MigrateArma3MapWorkData task, GameMap map)

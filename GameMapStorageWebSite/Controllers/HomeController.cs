@@ -94,7 +94,8 @@ namespace GameMapStorageWebSite.Controllers
                     MaxZoom = layer.MaxZoom,
                     MinZoom = layer.MinZoom,
                     TilePattern = ImagePathHelper.GetLayerPattern(Request, layer),
-                    TileSize = layer.TileSize
+                    TileSize = layer.TileSize,
+                    Attribution = MapUtils.CombineAttibutions(map.Game!.Attribution, map.AppendAttribution)
                 }
             });
         }
