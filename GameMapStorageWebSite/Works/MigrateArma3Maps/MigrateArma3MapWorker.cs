@@ -101,6 +101,10 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 {
                     // Ignore if file is not found
                 }
+                catch(UnknownImageFormatException)
+                {
+                    // Ignore bad image format
+                }
             }
         }
 
