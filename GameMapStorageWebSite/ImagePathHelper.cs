@@ -9,6 +9,10 @@ namespace GameMapStorageWebSite
 
         public static bool AcceptWebp(HttpRequest request)
         {
+            if (request.Headers.UserAgent.Any(u => u?.Contains("Chrome/") ?? false))
+            {
+                return false; // Chrome has an issue with webp that size it not even
+            }
             return request.Headers.Accept.Any(v => v?.Contains(WebpContentType) ?? false);
         }
 
