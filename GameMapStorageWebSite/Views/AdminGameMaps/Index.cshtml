@@ -13,17 +13,20 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.Game)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.EnglishTitle)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.AppendAttribution)
             </th>
-            <th>
+@*             <th>
                 @Html.DisplayNameFor(model => model.SteamWorkshopId)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.OfficialSiteUri)
-            </th>
+            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.SizeInMeters)
             </th>
@@ -33,14 +36,11 @@
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
-            <th>
+@*             <th>
                 @Html.DisplayNameFor(model => model.Aliases)
-            </th>
+            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.LastChangeUtc)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Game)
             </th>
             <th></th>
         </tr>
@@ -49,17 +49,20 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.EnglishTitle)
+                @Html.DisplayFor(modelItem => item.Game!.EnglishTitle)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.GameMapId">@Html.DisplayFor(modelItem => item.EnglishTitle)</a>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.AppendAttribution)
             </td>
-            <td>
+@*             <td>
                 @Html.DisplayFor(modelItem => item.SteamWorkshopId)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.OfficialSiteUri)
-            </td>
+            </td> *@
             <td>
                 @Html.DisplayFor(modelItem => item.SizeInMeters)
             </td>
@@ -69,14 +72,11 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
+@*             <td>
                 @Html.DisplayFor(modelItem => item.Aliases)
-            </td>
+            </td> *@
             <td>
                 @Html.DisplayFor(modelItem => item.LastChangeUtc)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.Game.EnglishTitle)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.GameMapId">Edit</a> |
