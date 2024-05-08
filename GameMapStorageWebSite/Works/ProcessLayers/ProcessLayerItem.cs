@@ -4,7 +4,7 @@
     {
         public ProcessLayerItem(int minZoom, int maxZoom, string fileName)
         {
-            if (Path.GetFileName(fileName) != fileName)
+            if (!ValidationHelper.IsValidFileName(fileName))
             {
                 throw new ArgumentException($"'{fileName}' is not a valid file name.");
             }
