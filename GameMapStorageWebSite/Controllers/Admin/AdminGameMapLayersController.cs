@@ -1,4 +1,5 @@
 ﻿using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.DataPackages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,10 +11,12 @@ namespace GameMapStorageWebSite.Controllers.Admin
     public class AdminGameMapLayersController : Controller
     {
         private readonly GameMapStorageContext _context;
+        private readonly IPackageService _packageService;
 
-        public AdminGameMapLayersController(GameMapStorageContext context)
+        public AdminGameMapLayersController(GameMapStorageContext context, IPackageService packageService)
         {
             _context = context;
+            _packageService = packageService;
         }
 
         // GET: AdminGameMapLayers
@@ -65,6 +68,28 @@ namespace GameMapStorageWebSite.Controllers.Admin
             }
             ViewData["GameMapId"] = new SelectList(_context.GameMaps, "GameMapId", "EnglishTitle", gameMapLayer.GameMapId);
             return View(gameMapLayer);
+        }
+
+        public IActionResult CreateFromPackage()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateFromPackage(IFormFile package)
+        {
+            using var stream = package.OpenReadStream();
+            try
+            {
+                var layer = await _packageService.CreateLayerFromPackage(stream);
+                return RedirectToAction(nameof(Details), new { id = layer.GameMapLayerId });
+            }
+            catch(Exception ex)
+            {
+                ViewBag.UploadError = ex.Message;
+            }
+            return View();
         }
 
         // GET: AdminGameMapLayers/Edit/5

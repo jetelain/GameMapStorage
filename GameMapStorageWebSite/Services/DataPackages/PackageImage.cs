@@ -1,8 +1,8 @@
-﻿namespace GameMapStorageWebSite.Works.ProcessLayers
+﻿namespace GameMapStorageWebSite.Services.DataPackages
 {
-    public sealed class ProcessLayerItem
+    public sealed class PackageImage
     {
-        public ProcessLayerItem(int minZoom, int maxZoom, string fileName)
+        public PackageImage(int minZoom, int maxZoom, string fileName)
         {
             if (Path.GetFileName(fileName) != fileName)
             {

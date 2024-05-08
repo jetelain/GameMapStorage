@@ -20,7 +20,7 @@ namespace GameMapStorageWebSite.Services
         {
             await AddZoomLevelFromImage(layer, maxZoom, fullImage);
 
-            for (var zoom = maxZoom - 1; zoom <= minZoom; zoom--)
+            for (var zoom = maxZoom - 1; zoom >= minZoom; zoom--)
             {
                 var newSize = GetSizeAtZoom(layer, zoom);
                 fullImage.Mutate(i => i.Resize(newSize, newSize));

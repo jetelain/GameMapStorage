@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
+using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Works;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.ProcessLayers;
@@ -8,8 +9,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Memory;
 
 namespace GameMapStorageWebSite
 {
@@ -77,6 +76,7 @@ namespace GameMapStorageWebSite
 
             services.AddScoped<IImageLayerService, ImageLayerService>();
             services.AddScoped<IThumbnailService, ThumbnailService>();
+            services.AddScoped<IPackageService, PackageService>();
 
             if (configuration["StorageMode"] == "Proxy")
             {
@@ -93,6 +93,8 @@ namespace GameMapStorageWebSite
             {
                 services.AddSingleton<IStorageService, LocalStorageService>();
             }
+
+            services.AddSingleton<IWorkspaceService, WorkspaceService>();
 
             services.AddResponseCaching();
 
