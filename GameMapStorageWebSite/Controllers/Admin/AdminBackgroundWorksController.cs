@@ -1,4 +1,5 @@
 ﻿using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +10,12 @@ namespace GameMapStorageWebSite.Controllers.Admin
     public class AdminBackgroundWorksController : Controller
     {
         private readonly GameMapStorageContext _context;
+        private readonly IMigrateArma3MapFactory _migrateArma3MapFactory;
 
-        public AdminBackgroundWorksController(GameMapStorageContext context)
+        public AdminBackgroundWorksController(GameMapStorageContext context, IMigrateArma3MapFactory migrateArma3MapFactory)
         {
             _context = context;
+            _migrateArma3MapFactory = migrateArma3MapFactory;
         }
 
         // GET: AdminBackgroundWorks
@@ -39,6 +42,14 @@ namespace GameMapStorageWebSite.Controllers.Admin
             }
 
             return View(backgroundWork);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SyncArma3Map()
+        {
+            await _migrateArma3MapFactory.IncrementalWorkLoad();
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

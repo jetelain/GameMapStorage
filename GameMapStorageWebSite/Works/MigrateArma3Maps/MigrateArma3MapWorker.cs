@@ -59,7 +59,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
             var existingLayer = await context.GameMapLayers
                 .Include(m => m.GameMap)
                 .Include(m => m.GameMap!.Game)
-                .Where(g => g.GameMap!.Name == taskData.MapInfos.worldName && g.IsDefault)
+                .Where(g => g.GameMap!.Name == taskData.MapInfos.worldName && g.IsDefault && g.GameMap!.GameId == game.GameId)
                 .FirstOrDefaultAsync();
             if (existingLayer != null)
             {

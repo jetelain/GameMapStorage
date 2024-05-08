@@ -73,6 +73,8 @@ namespace GameMapStorageWebSite
                     .SetApplicationName("gms");
             }
 
+            services.AddScoped<IMigrateArma3MapFactory, MigrateArma3MapFactory>();
+
             services.AddScoped<IImageLayerService, ImageLayerService>();
             services.AddScoped<IThumbnailService, ThumbnailService>();
 
@@ -156,8 +158,7 @@ namespace GameMapStorageWebSite
                         if (await context.Works.Where(t => t.Type == BackgroundWorkType.MigrateArma3Map).CountAsync() == 0
                             && await context.GameMaps.CountAsync() == 0)
                         {
-                            var factory = new MigrateArma3MapFactory(app.Configuration, context, services.GetRequiredService<IHttpClientFactory>());
-                            await factory.InitialWorkLoad();
+                            await services.GetRequiredService<IMigrateArma3MapFactory>().InitialWorkLoad();
                         }
                     }
                 }
