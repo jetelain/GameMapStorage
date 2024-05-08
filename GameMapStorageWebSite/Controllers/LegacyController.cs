@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Web;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Legacy;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,27 @@ namespace GameMapStorageWebSite.Controllers
             this.context = context;
         }
 
+        [Route("data/{gameId}/css/mapUtils.css")]
+        [ResponseCache(VaryByHeader = "Accept", Duration = 3600, Location = ResponseCacheLocation.Any)]
+        public IActionResult GetMapUtilsCss(int gameId)
+        {
+            return RedirectPermanent("/css/map-utils.css");
+        }
+
+        [Route("data/{gameId}/js/mapUtils.js")]
+        [ResponseCache(VaryByHeader = "Accept", Duration = 3600, Location = ResponseCacheLocation.Any)]
+        public IActionResult GetMapUtilsJs(int gameId)
+        {
+            return RedirectPermanent("/js/legacy-map-utils.js");
+        }
+
+        [Route("data/{gameId}/js/defaultMap.js")]
+        [ResponseCache(VaryByHeader = "Accept", Duration = 3600, Location = ResponseCacheLocation.Any)]
+        public IActionResult GetDefaultMap(int gameId)
+        {
+            return RedirectPermanent("/js/legacy-default-map.js");
+        }
+
         [Route("data/{gameId}/maps/all.js")]
         [ResponseCache(VaryByHeader = "Accept", Duration = 3600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAllJs(int gameId)
@@ -35,17 +57,24 @@ namespace GameMapStorageWebSite.Controllers
                 .Where(c => c.GameMap!.GameId == gameId && c.Type == LocationType.City)
                 .ToListAsync();
 
+            var basePath = GetBasePath();
+
             var sb = new StringBuilder();
 
-            foreach(var layer in layers)
+            foreach (var layer in layers)
             {
-                Append(sb, CreateInfo(layer, locations), layer);
+                Append(sb, CreateInfo(layer, locations, basePath), layer);
             }
 
             return Content(sb.ToString(), "text/javascript;charset=utf-8", Encoding.UTF8);
         }
 
-        private LegacyMapInfos CreateInfo(GameMapLayer layer, List<GameMapLocation> locations)
+        private string GetBasePath()
+        {
+            return new Uri(new Uri(Request.GetEncodedUrl()), "/").AbsoluteUri.TrimEnd('/');
+        }
+
+        private LegacyMapInfos CreateInfo(GameMapLayer layer, List<GameMapLocation> locations, string basePath)
         {
             var suffix = $"/data/{layer.GameMap!.GameId}";
 
@@ -63,7 +92,7 @@ namespace GameMapStorageWebSite.Controllers
                 tileSize = layer.TileSize,
                 center = new List<int>() { (int)layer.GameMap.SizeInMeters / 2, (int)layer.GameMap.SizeInMeters / 2 },
                 dlc = string.IsNullOrEmpty(layer.GameMap.SteamWorkshopId) ? layer.GameMap.OfficialSiteUri : null,
-                preview = ImagePathHelper.GetThumbnail(Request, layer.GameMap).Substring(suffix.Length),
+                preview = basePath + ImagePathHelper.GetThumbnail(Request, layer.GameMap),
                 steamWorkshop = !string.IsNullOrEmpty(layer.GameMap.SteamWorkshopId) ? $"https://steamcommunity.com/workshop/filedetails/?id={layer.GameMap.SteamWorkshopId}" : null,
                 cities = locations.Where(c => c.GameMapId == layer.GameMapId).Select(c => new LegacyCityInfo() { name =c.EnglishTitle, x = c.X, y = c.Y }).ToList()
             };
@@ -99,13 +128,15 @@ namespace GameMapStorageWebSite.Controllers
                 .Where(c => c.GameMap!.GameId == gameId && c.Type == LocationType.City)
                 .ToListAsync();
 
+            var basePath = GetBasePath();
+
             var dict = new Dictionary<string, LegacyMapInfos>();
             foreach (var layer in layers)
             {
                 var name = layer.GameMap!.Name;
                 if (!string.IsNullOrEmpty(name))
                 {
-                    dict[name] = CreateInfo(layer, locations);
+                    dict[name] = CreateInfo(layer, locations, basePath);
                 }
             }
             return Json(dict);
@@ -130,9 +161,11 @@ namespace GameMapStorageWebSite.Controllers
                 .Where(c => c.GameMap!.GameId == gameId && c.Type == LocationType.City && c.GameMapId == layer.GameMapId)
                 .ToListAsync();
 
+            var basePath = GetBasePath();
+
             var sb = new StringBuilder();
 
-            Append(sb, CreateInfo(layer, locations), layer);
+            Append(sb, CreateInfo(layer, locations, basePath), layer);
             
             return Content(sb.ToString(), "text/javascript;charset=utf-8", Encoding.UTF8);
         }
