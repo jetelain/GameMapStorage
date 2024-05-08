@@ -1,9 +1,16 @@
 ﻿
 namespace GameMapStorageWebSite.Services
 {
-    public class LocalStorageService : IStorageService
+    public class LocalStorageService : IStorageService, ILocalStorageService
     {
         private readonly string basePath;
+
+        public LocalStorageService(IConfiguration configuration): this(
+                configuration["LocalStoragePath"] ??
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GameMapStorage", "data"))
+        {
+
+        }
 
         public LocalStorageService(string basePath)
         {

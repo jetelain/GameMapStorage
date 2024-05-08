@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
+using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Works;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.ProcessLayers;
@@ -8,8 +9,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Memory;
 
 namespace GameMapStorageWebSite
 {
@@ -73,12 +72,29 @@ namespace GameMapStorageWebSite
                     .SetApplicationName("gms");
             }
 
-            services.AddSingleton<IImageLayerService, ImageLayerService>();
-            services.AddSingleton<IThumbnailService, ThumbnailService>();
+            services.AddScoped<IMigrateArma3MapFactory, MigrateArma3MapFactory>();
 
-            services.AddSingleton<IStorageService>(new LocalStorageService(
-                configuration["LocalStoragePath"] ?? 
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GameMapStorage", "data")));
+            services.AddScoped<IImageLayerService, ImageLayerService>();
+            services.AddScoped<IThumbnailService, ThumbnailService>();
+            services.AddScoped<IPackageService, PackageService>();
+
+            if (configuration["StorageMode"] == "Proxy")
+            {
+                services.AddSingleton<ILocalStorageService, LocalStorageService>();
+
+                services.AddScoped<IStorageService, ProxyStorageService>();
+
+                services.AddHttpClient("ProxyClient", client =>
+                {
+                    client.BaseAddress = new Uri("https://atlas.plan-ops.fr/data/");
+                });
+            }
+            else
+            {
+                services.AddSingleton<IStorageService, LocalStorageService>();
+            }
+
+            services.AddSingleton<IWorkspaceService, WorkspaceService>();
 
             services.AddResponseCaching();
 
@@ -144,8 +160,7 @@ namespace GameMapStorageWebSite
                         if (await context.Works.Where(t => t.Type == BackgroundWorkType.MigrateArma3Map).CountAsync() == 0
                             && await context.GameMaps.CountAsync() == 0)
                         {
-                            var factory = new MigrateArma3MapFactory(app.Configuration, context, services.GetRequiredService<IHttpClientFactory>());
-                            await factory.InitialWorkLoad();
+                            await services.GetRequiredService<IMigrateArma3MapFactory>().InitialWorkLoad();
                         }
                     }
                 }

@@ -1,10 +1,11 @@
 ﻿using System.Text.Json;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Legacy;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Works.MigrateArma3Maps
 {
-    public class MigrateArma3MapFactory
+    public class MigrateArma3MapFactory : IMigrateArma3MapFactory
     {
         private readonly HttpClient client;
         private readonly GameMapStorageContext context;
@@ -25,6 +26,35 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                     Data = JsonSerializer.Serialize(work),
                     CreatedUtc = DateTime.UtcNow, 
                     Type = BackgroundWorkType.MigrateArma3Map });
+            }
+            await context.SaveChangesAsync();
+        }
+
+        public async Task IncrementalWorkLoad()
+        {
+            var game = await context.Games.FirstOrDefaultAsync(g => g.Name == "arma3");
+            if (game == null)
+            {
+                throw new ApplicationException("arma3 was not found.");
+            }
+
+            foreach (var work in await GetAll())
+            {
+                var hasExistingLayer = await context.GameMapLayers
+                    .Include(m => m.GameMap)
+                    .Include(m => m.GameMap!.Game)
+                    .Where(g => g.GameMap!.Name == work.MapInfos.worldName && g.IsDefault && g.GameMap!.GameId == game.GameId)
+                    .AnyAsync();
+
+                if ( !hasExistingLayer)
+                {
+                    context.Works.Add(new BackgroundWork()
+                    {
+                        Data = JsonSerializer.Serialize(work),
+                        CreatedUtc = DateTime.UtcNow,
+                        Type = BackgroundWorkType.MigrateArma3Map
+                    });
+                }
             }
             await context.SaveChangesAsync();
         }
