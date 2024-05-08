@@ -73,12 +73,24 @@ namespace GameMapStorageWebSite
                     .SetApplicationName("gms");
             }
 
-            services.AddSingleton<IImageLayerService, ImageLayerService>();
-            services.AddSingleton<IThumbnailService, ThumbnailService>();
+            services.AddScoped<IImageLayerService, ImageLayerService>();
+            services.AddScoped<IThumbnailService, ThumbnailService>();
 
-            services.AddSingleton<IStorageService>(new LocalStorageService(
-                configuration["LocalStoragePath"] ?? 
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GameMapStorage", "data")));
+            if (configuration["StorageMode"] == "Proxy")
+            {
+                services.AddSingleton<ILocalStorageService, LocalStorageService>();
+
+                services.AddScoped<IStorageService, ProxyStorageService>();
+
+                services.AddHttpClient("ProxyClient", client =>
+                {
+                    client.BaseAddress = new Uri("https://atlas.plan-ops.fr/data/");
+                });
+            }
+            else
+            {
+                services.AddSingleton<IStorageService, LocalStorageService>();
+            }
 
             services.AddResponseCaching();
 

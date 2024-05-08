@@ -14,7 +14,7 @@ namespace GameMapStorageWebSite.Works
         {
             this.logger = logger;
             this.services = services;
-            this.timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
+            this.timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
         }
 
         public Task StartAsync(CancellationToken stoppingToken)
@@ -30,18 +30,10 @@ namespace GameMapStorageWebSite.Works
             {
                 while (await timer.WaitForNextTickAsync(cts.Token))
                 {
-                    var didSomething = false;
-                    do
+                    using (var scope = services.CreateScope())
                     {
-                        using (var scope = services.CreateScope())
-                        {
-                            didSomething = await scope.ServiceProvider.GetRequiredService<BackgroundWorker>().DoOnePendingWork();
-                        }
-                        if(didSomething)
-                        {
-                            await Task.Delay(1000);
-                        }
-                    } while (didSomething && !cts.Token.IsCancellationRequested);
+                        await scope.ServiceProvider.GetRequiredService<BackgroundWorker>().DoOnePendingWork();
+                    }
                 }
             }
             catch (OperationCanceledException)

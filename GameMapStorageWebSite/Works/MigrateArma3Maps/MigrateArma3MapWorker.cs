@@ -11,7 +11,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace GameMapStorageWebSite.Works.MigrateArma3Maps
 {
-    public class MigrateArma3MapWorker : LayerWorkerBase, IWorker<MigrateArma3MapWorkData>
+    public sealed class MigrateArma3MapWorker : LayerWorkerBase, IWorker<MigrateArma3MapWorkData>
     {
         private static readonly Regex MgrsCrsRegex = new Regex(@"MGRS_CRS\(([\-0-9\.]+), ([\-0-9\.]+), [\-0-9\.]+\)");
         private static readonly Regex AliasesRegex = new Regex(@"^Arma3Map\.Maps\.([a-z0-9_]+) =$");
@@ -153,15 +153,21 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 {
                     throw;
                 }
-                await Task.Delay(Random.Shared.Next(2000, 10000));
-                client = httpClientFactory.CreateClient("CDN");
-                return await ReadImageAsync(uri, attempt+1);
+                await RenewHttpClient();
+                return await ReadImageAsync(uri, attempt + 1);
             }
-            catch(UnknownImageFormatException)
+            catch (UnknownImageFormatException)
             {
                 logger.LogError("Image '{Uri}' is invalid.", uri);
                 throw;
             }
+        }
+
+        private async Task RenewHttpClient()
+        {
+            await Task.Delay(Random.Shared.Next(2000, 10000));
+            client.Dispose();
+            client = httpClientFactory.CreateClient("CDN");
         }
 
         private static GameMapLayer PrepareLayer(MigrateArma3MapWorkData task, GameMap map)
@@ -203,7 +209,6 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 map.Locations = task.MapInfos.cities.Select(c => new GameMapLocation() { EnglishTitle = c.name ?? "(unknown)", X = c.x, Y = c.y, Type = LocationType.City, GameMap = map }).ToList();
                 map.CitiesCount = task.MapInfos.cities.Count;
             }
-
             return map;
         }
 
@@ -248,8 +253,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                     {
                         throw;
                     }
-                    await Task.Delay(Random.Shared.Next(2000, 10000));
-                    client = httpClientFactory.CreateClient("CDN");
+                    await RenewHttpClient();
                     return await OpenStream(jsLocation, attempt + 1);
                 }
             }
@@ -267,6 +271,11 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 }
             }
             return null;
+        }
+
+        public void Dispose()
+        {
+            client.Dispose();
         }
     }
 }

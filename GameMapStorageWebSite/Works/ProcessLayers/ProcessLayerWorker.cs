@@ -4,7 +4,7 @@ using SixLabors.ImageSharp;
 
 namespace GameMapStorageWebSite.Works.ProcessLayers
 {
-    public class ProcessLayerWorker : LayerWorkerBase, IWorker<ProcessLayerWorkData>
+    public sealed class ProcessLayerWorker : LayerWorkerBase, IWorker<ProcessLayerWorkData>
     {
         private readonly IImageLayerService imageLayerService;
 
@@ -12,6 +12,11 @@ namespace GameMapStorageWebSite.Works.ProcessLayers
             : base(context)
         {
             this.imageLayerService = imageLayerService;
+        }
+
+        public void Dispose()
+        {
+            // Nothing to do
         }
 
         public async Task Process(ProcessLayerWorkData workData, BackgroundWork work)

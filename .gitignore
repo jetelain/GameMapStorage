@@ -396,7 +396,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-/GameMapStorageWebSite/gms.db
-/GameMapStorageWebSite/gms.db-shm
-/GameMapStorageWebSite/gms.db-wal
-/GameMapStorageWebSite/appsettings.Development.json
+
+*.db
+*.db-shm
+*.db-wal
+appsettings.Development.json
