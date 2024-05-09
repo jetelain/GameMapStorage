@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -117,22 +118,16 @@ namespace GameMapStorageWebSite.Services
             return MapUtils.GetTileRowCount(zoom) * layer.TileSize;
         }
 
-        public async Task ReadTilePng(IGameMapLayerIdentifier layer, int zoom, int x, int y, Func<Stream, Task> read)
+        public async Task<IStorageFile> ReadTilePng(IGameMapLayerIdentifier layer, int zoom, int x, int y)
         {
-            if (!await storageService.TryReadAsync(GetBasePath(layer, zoom, x, y) + ".png", read))
-            {
-                using var source = File.OpenRead("wwwroot/img/missing/tile.png");
-                await read(source);
-            }
+            return (await storageService.GetAsync(GetBasePath(layer, zoom, x, y) + ".png"))
+                ?? new LocalStorageFile("wwwroot/img/missing/tile.png");
         }
 
-        public async Task ReadTileWebp(IGameMapLayerIdentifier layer, int zoom, int x, int y, Func<Stream, Task> read)
+        public async Task<IStorageFile> ReadTileWebp(IGameMapLayerIdentifier layer, int zoom, int x, int y)
         {
-            if (!await storageService.TryReadAsync(GetBasePath(layer, zoom, x, y) + ".webp", read))
-            {
-                using var source = File.OpenRead("wwwroot/img/missing/tile.webp");
-                await read(source);
-            }
+            return (await storageService.GetAsync(GetBasePath(layer, zoom, x, y) + ".webp")) 
+                ?? new LocalStorageFile("wwwroot/img/missing/tile.webp");
         }
     }
 }

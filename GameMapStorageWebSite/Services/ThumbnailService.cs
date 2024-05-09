@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 
 namespace GameMapStorageWebSite.Services
@@ -32,39 +33,27 @@ namespace GameMapStorageWebSite.Services
                 "thumbnail");
         }
 
-        public async Task ReadGameLogoPng(IGameIdentifier game, Func<Stream, Task> read)
+        public async Task<IStorageFile> ReadGameLogoPng(IGameIdentifier game)
         {
-            if (!await storageService.TryReadAsync(GetLogoPath(game) + ".png", read))
-            {
-                using var source = File.OpenRead("wwwroot/img/missing/logo.png");
-                await read(source);
-            }
-        }
-        public async Task ReadGameLogoWebp(IGameIdentifier game, Func<Stream, Task> read)
-        {
-            if (!await storageService.TryReadAsync(GetLogoPath(game) + ".webp", read))
-            {
-                using var source = File.OpenRead("wwwroot/img/missing/logo.webp");
-                await read(source);
-            }
+            return (await storageService.GetAsync(GetLogoPath(game) + ".png")) 
+                ?? new LocalStorageFile("wwwroot/img/missing/logo.png");
         }
 
-
-        public async Task ReadMapThumbnailPng(IGameMapIdentifier map, Func<Stream, Task> read)
+        public async Task<IStorageFile> ReadGameLogoWebp(IGameIdentifier game)
         {
-            if (!await storageService.TryReadAsync(GetThumbnailPath(map) + ".png", read))
-            {
-                using var source = File.OpenRead("wwwroot/img/missing/thumbnail.png");
-                await read(source);
-            }
+            return (await storageService.GetAsync(GetLogoPath(game) + ".webp")) 
+                ?? new LocalStorageFile("wwwroot/img/missing/logo.webp");
         }
-        public async Task ReadMapThumbnailWebp(IGameMapIdentifier map, Func<Stream, Task> read)
+
+        public async Task<IStorageFile> ReadMapThumbnailPng(IGameMapIdentifier map)
         {
-            if (!await storageService.TryReadAsync(GetThumbnailPath(map) + ".webp", read))
-            {
-                using var source = File.OpenRead("wwwroot/img/missing/thumbnail.webp");
-                await read(source);
-            }
+            return (await storageService.GetAsync(GetThumbnailPath(map) + ".png")) 
+                ?? new LocalStorageFile("wwwroot/img/missing/thumbnail.png");
+        }
+        public async Task<IStorageFile> ReadMapThumbnailWebp(IGameMapIdentifier map)
+        {
+            return (await storageService.GetAsync(GetThumbnailPath(map) + ".webp")) 
+                ?? new LocalStorageFile("wwwroot/img/missing/thumbnail.webp");
         }
 
         public Task SetMapThumbnail(IGameMapIdentifier layer, Image image)
