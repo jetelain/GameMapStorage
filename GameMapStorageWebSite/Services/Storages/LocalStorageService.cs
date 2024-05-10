@@ -43,17 +43,5 @@
             using var stream = File.Create(target);
             await write(stream);
         }
-
-        public async Task<bool> TryReadAsync(string path, Func<Stream, Task> read)
-        {
-            var target = Path.Combine(basePath, path);
-            if (File.Exists(target))
-            {
-                using var stream = File.OpenRead(target);
-                await read(stream);
-                return true;
-            }
-            return false;
-        }
     }
 }

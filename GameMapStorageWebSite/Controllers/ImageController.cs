@@ -23,7 +23,6 @@ namespace GameMapStorageWebSite.Controllers
             this.thumbnailService = thumbnailService;
         }
 
-
         private async Task<IResult> ToResult(IStorageFile? file, string contentType)
         {
             if (file != null)
