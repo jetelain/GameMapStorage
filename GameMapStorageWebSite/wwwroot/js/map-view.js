@@ -3,6 +3,9 @@ function mapInit(mapInfos) {
 
     var map = GameMapUtils.basicInit(mapInfos);
 
+    GameMapUtils.addCoordinateScaleToMap(map, mapInfos);
+    GameMapUtils.addProtractorToMap(map, mapInfos);
+
     document.querySelectorAll(".location-link").forEach(element => {
         element.addEventListener("click", event => {
             event.stopPropagation();
@@ -26,5 +29,4 @@ function mapInit(mapInfos) {
         });
     });
 
-    
 }

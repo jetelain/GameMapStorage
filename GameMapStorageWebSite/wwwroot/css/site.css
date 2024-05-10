@@ -24,3 +24,11 @@ body {
 img.thumbnail-640-360 {
     aspect-ratio: 640/360;
 }
+
+.protractor-drag {
+    cursor: move !important;
+}
+
+.protractor-rotate {
+    cursor: ew-resize !important;
+}
