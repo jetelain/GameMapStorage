@@ -376,12 +376,15 @@ var GameMapUtils = {
         return numText.substr(numText.length - 5, precision);
     },
 
-    toGrid: function (latlng, precision) {
+    toGrid: function (latlng, precision, map) {
         return GameMapUtils.toCoord(latlng.lng, precision) + " - " + GameMapUtils.toCoord(latlng.lat, precision);
     },
 
-    bearing: function (latlng1, latlng2) {
-        return ((Math.atan2(latlng2.lng - latlng1.lng, latlng2.lat - latlng1.lat) * 180 / Math.PI) + 360) % 360;
+    bearing: function (p1, p2, map, useMils = false) {
+        if (useMils) {
+            return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400;
+        }
+        return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360;
     },
 
     CRS: function (factorx, factory, tileSize) {
@@ -408,7 +411,9 @@ var GameMapUtils = {
         var map = L.map(mapDivId, {
             minZoom: mapInfos.minZoom,
             maxZoom: mapInfos.maxZoom,
-            crs: GameMapUtils.CRS(mapInfos.factorx, mapInfos.factory, mapInfos.tileSize)
+            crs: GameMapUtils.CRS(mapInfos.factorx, mapInfos.factory, mapInfos.tileSize),
+            zoomDelta: 0.5,
+            zoomSnap: 0.25
         });
 
         L.tileLayer(mapInfos.tilePattern, {
@@ -423,6 +428,8 @@ var GameMapUtils = {
         L.control.scale({ maxWidth: 200, imperial: false }).addTo(map);
 
         L.control.gridMousePosition().addTo(map);
+
+        return map;
     }
 
 };
@@ -440,6 +447,7 @@ L.Control.GridMousePosition = L.Control.extend({
 
     onAdd: function (map) {
         this._container = L.DomUtil.create('div', 'leaflet-grid-mouseposition');
+        this._map = map;
         L.DomEvent.disableClickPropagation(this._container);
         map.on('mousemove', this._onMouseMove, this);
         var placeHolder = '0'.repeat(this.options.precision);
@@ -448,11 +456,12 @@ L.Control.GridMousePosition = L.Control.extend({
     },
 
     onRemove: function (map) {
+        this._map = null;
         map.off('mousemove', this._onMouseMove)
     },
 
     _onMouseMove: function (e) {
-        this._container.innerHTML = GameMapUtils.toGrid(e.latlng, this.options.precision);
+        this._container.innerHTML = GameMapUtils.toGrid(e.latlng, this.options.precision, this._map);
     }
 
 });
