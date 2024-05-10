@@ -96,7 +96,7 @@ namespace GameMapStorageWebSite.Services.DataPackages
                 map = new GameMap()
                 {
                     EnglishTitle = indexContent.EnglishTitle,
-                    Name = indexContent.GameName,
+                    Name = indexContent.MapName,
                     Game = game,
                     GameId = game.GameId,
                     LastChangeUtc = DateTime.UtcNow,
