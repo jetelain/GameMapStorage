@@ -25,18 +25,11 @@ img.thumbnail-640-360 {
     aspect-ratio: 640/360;
 }
 
-.protractor-drag {
-    cursor: move !important;
-    border-radius:50%;
+.btn-primary img.revertable {
+    filter: invert(1);
 }
 
-.coordinatescale-drag {
-    cursor: move !important;
-    border-radius: 4%;
-}
-
-
-.protractor-rotate {
-    cursor: ew-resize !important;
-    border-radius: 50%;
+.btn-outline-secondary:hover img.revertable {
+    filter: invert(1);
+    transition: filter 0.15s ease-in-out;
 }

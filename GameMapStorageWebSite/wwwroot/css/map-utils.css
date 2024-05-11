@@ -8,3 +8,27 @@
     width: 80px;
     text-align: center;
 }
+
+.map-utils-tools-protractor-drag {
+    cursor: move !important;
+    border-radius: 50%;
+}
+
+.map-utils-tools-coordinatescale-drag {
+    cursor: move !important;
+    border-radius: 4%;
+}
+
+.map-utils-tools-ruler-drag {
+    cursor: move !important;
+}
+
+.map-utils-tools-protractor-rotate {
+    cursor: ew-resize !important;
+    border-radius: 50%;
+}
+
+.map-utils-tools-ruler-rotate {
+    cursor: ns-resize !important;
+    border-radius: 50%;
+}

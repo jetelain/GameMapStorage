@@ -3,8 +3,9 @@ function mapInit(mapInfos) {
 
     var map = GameMapUtils.basicInit(mapInfos);
 
-    GameMapUtils.protractor([0, 0]).addTo(map);
-    GameMapUtils.coordinateScale([0, 0]).addTo(map);
+    GameMapUtils.toggleToolButton({ tool: GameMapUtils.ruler, content: '<img src="/img/ruler.svg" width="16" height="16" class="revertable"/>' }).addTo(map);
+    GameMapUtils.toggleToolButton({ tool: GameMapUtils.coordinateScale, content: '<img src="/img/grid.svg" width="16" height="16" class="revertable"/>' }).addTo(map);
+    GameMapUtils.toggleToolButton({ tool: GameMapUtils.protractor, content: '<img src="/img/protractor.svg" width="16" height="16" class="revertable" />' }).addTo(map);
 
     document.querySelectorAll(".location-link").forEach(element => {
         element.addEventListener("click", event => {
@@ -15,7 +16,6 @@ function mapInit(mapInfos) {
                 Number(element.getAttribute("data-location-x"))
             ], mapInfos.maxZoom);
         });
-        console.log(element);
     });
 
     document.getElementById("locations-search").addEventListener("input", function () {
