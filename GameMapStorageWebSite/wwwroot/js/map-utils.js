@@ -681,7 +681,7 @@ GameMapUtils.MapToolBase = L.Layer.extend({
         if (this._rotateMarker) {
             this._rotateMarker.removeFrom(map);
         }
-        map.off('zoomend', this._updateMarkerSize, this);
+        map.off('zoomend', this._updateMarkersSize, this);
     }
 });
 
