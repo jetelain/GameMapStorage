@@ -1,4 +1,5 @@
-﻿@model HomeMapViewModel
+﻿@using System.Globalization
+@model HomeMapViewModel
 @{
     ViewData["Title"] = Model.Map.EnglishTitle + " - " +  Model.Game.EnglishTitle;
     ViewData["IsFullSize"] = true;
@@ -10,42 +11,112 @@
 </h1>
 
 <div class="row g-0">
-    <div class="col-lg-10 col-md-8">
+    <div class="col-xxl-10 col-lg-9 col-md-8">
         <div class="map" id="map" style="width:100%; height:85vh; margin:0;padding:0;border:0;">
 
         </div>
     </div>
-    <div class="col-lg-2 col-md-4 ps-3 pe-3">
-        <h2 class="h6">Links</h2>
-        <div class="list-group text-center">
-        @if (!string.IsNullOrEmpty(Model.Map.OfficialSiteUri))
-        {
-                <a class="list-group-item" href=" @Model.Map.OfficialSiteUri"><i class="fa-solid fa-arrow-up-right-from-square"></i> Web Site</a>
-        }
-        @if (!string.IsNullOrEmpty(Model.Map.SteamWorkshopId))
-        {
-                <a class="list-group-item" href="https://steamcommunity.com/workshop/filedetails/?id=@Model.Map.SteamWorkshopId"><i class="fa-brands fa-steam"></i> Steam Workshop</a>
-            }
+    <div class="col-xxl-2 col-lg-3 col-md-4 ps-3 pe-3">
+
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="infos-tab" data-bs-toggle="tab" data-bs-target="#infos-tab-pane" type="button" role="tab" aria-controls="infos-tab-pane" aria-selected="true">Infos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="locations-tab" data-bs-toggle="tab" data-bs-target="#locations-tab-pane" type="button" role="tab" aria-controls="locations-tab-pane" aria-selected="false">Locations</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="infos-tab-pane" role="tabpanel" aria-labelledby="infos-tab" tabindex="0">
+
+                <dl class="row mt-2">
+                    @if (!string.IsNullOrEmpty(Model.Map.AppendAttribution))
+                    {
+                        <dt class="col-4">Author</dt>
+                        <dd class="col-8">@Model.Map.AppendAttribution</dd>
+                    }
+                    <dt class="col-4">Size</dt>
+                    <dd class="col-8">
+                        @string.Format("{0} x {0} km, {1} km²", Math.Round(Model.Map.SizeInMeters / 1000.0, 1), Math.Round(Model.Map.SizeInMeters * Model.Map.SizeInMeters / 1000000.0))
+                    </dd>
+                </dl>
+
+                <h2 class="h6">Links</h2>
+                <div class="list-group text-center">
+                    @if (!string.IsNullOrEmpty(Model.Map.OfficialSiteUri))
+                    {
+                        <a class="list-group-item" href=" @Model.Map.OfficialSiteUri"><i class="fa-solid fa-arrow-up-right-from-square"></i> Web Site</a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Map.SteamWorkshopId))
+                    {
+                        <a class="list-group-item" href="https://steamcommunity.com/workshop/filedetails/?id=@Model.Map.SteamWorkshopId"><i class="fa-brands fa-steam"></i> Steam Workshop</a>
+                    }
+                </div>
+                @if (Model.Game.Name == "arma3")
+                {
+                    <h2 class="h6 mt-3">Tools</h2>
+                    <div class="list-group text-center">
+                        <a class="list-group-item" href="https://maps.plan-ops.fr/TacMaps/Create?worldName=@Model.Map.Name"><i class="fa-solid fa-map"></i> Create a tactical map</a>
+                    </div>
+                }
+                <h2 class="h6 mt-3">Layers</h2>
+                <div class="list-group text-center">
+                    @foreach (var layer in Model.Map.Layers!)
+                    {
+                        <a class="list-group-item@(layer.GameMapLayerId == Model.Layer.GameMapLayerId ? " active" : "")" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game.Name" asp-route-mapName="@Model.Map.Name" asp-route-layerId="@layer.GameMapLayerId">
+                            <img src="@ImagePathHelper.GetLayerPreview(Model.AcceptWebp, layer)" class="mw-100" style="max-height: 64px;" /> <br />
+                            @layer.Type
+                        </a>
+                    }
+                </div>
+
+            </div>
+            <div class="tab-pane fade" id="locations-tab-pane" role="tabpanel" aria-labelledby="locations-tab" tabindex="0">
+
+                <div class="mt-2 mb-2">
+                    <label class="visually-hidden" for="locations-search">Search for</label>
+                    <div class="input-group">
+                        <div class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <input type="text" class="form-control" id="locations-search" placeholder="Search">
+                    </div>
+                </div>
+
+                <div class="list-group overflow-scroll" style="height: calc(85vh - 5em);">
+                    @foreach (var location in Model.Map.Locations!)
+                    {
+                        <a class="list-group-item location-link"
+                           asp-controller="Home"
+                           asp-action="Map"
+                           asp-route-gameName="@Model.Game.Name"
+                           asp-route-mapName="@Model.Map.Name"
+                           asp-route-layerId="@Model.Layer.GameMapLayerId"
+                           asp-route-x="@location.X"
+                           asp-route-y="@location.Y"
+                           asp-route-zoom="@Model.MapInfos.MaxZoom"
+                           data-location-name="@location.EnglishTitle"
+                           data-location-x="@location.X.ToString(CultureInfo.InvariantCulture)"
+                           data-location-y="@location.Y.ToString(CultureInfo.InvariantCulture)">
+                            @location.EnglishTitle
+                        </a>
+                    }
+                </div>
+
+            </div>
+
         </div>
 
-        <h2 class="h6 mt-4">Layers</h2>
-        <div class="list-group text-center">
-        @foreach(var layer in Model.Map.Layers!)
-        {
-            <a class="list-group-item@(layer.GameMapLayerId == Model.Layer.GameMapLayerId ? " active" : "")" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game.Name" asp-route-mapName="@Model.Map.Name" asp-route-layerId="@layer.GameMapLayerId">
-                <img src="@ImagePathHelper.GetLayerPreview(Model.AcceptWebp, layer)" class="mw-100" style="max-height: 64px;" /> <br />
-                @layer.Type
-            </a>
-        }
-        </div>
+
+        
     </div>
 </div>
 
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js"></script>
     <script src="~/js/map-utils.js" asp-append-version="true"></script>
+    <script src="~/js/map-view.js" asp-append-version="true"></script>
     <script>
-        GameMapUtils.basicInit(@Json.Serialize(Model.MapInfos));
+        mapInit(@Json.Serialize(Model.MapInfos));
     </script>
 }
 @section Styles {
