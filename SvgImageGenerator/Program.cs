@@ -13,7 +13,7 @@ namespace SvgImageGenerator
         {
             const string background = "F1F1F140";
 
-            PdfReader.Open("", PdfDocumentOpenMode.Import);
+            //PdfReader.Open("", PdfDocumentOpenMode.Import);
 
             Render.ToSvg("protractor.svg", new Vector(102, 102), d =>
             {
@@ -26,8 +26,11 @@ namespace SvgImageGenerator
                 var normalTick = d.AllocatePenStyle(Color.Black, 0.1);
                 var textNormal = d.AllocateTextStyle(new[] { "Arial" }, SixLabors.Fonts.FontStyle.Regular, 2.5, new SolidColorBrush(Color.Black), null, false);
                 var textCardinal = d.AllocateTextStyle(new[] { "Arial" }, SixLabors.Fonts.FontStyle.Bold, 5, new SolidColorBrush(Color.Red), null, false);
+                var textCardinalBC = d.AllocateTextStyle(new[] { "Arial" }, SixLabors.Fonts.FontStyle.Bold, 5, new SolidColorBrush(Color.Red), null, false, TextAnchor.BottomCenter);
 
-                d.DrawCircle(new Vector(center, center), center - 0.5f, d.AllocatePenStyle("80808080", 1));
+                var outer = d.AllocatePenStyle("80808080", 1);
+
+                d.DrawCircle(new Vector(center, center), center - 0.5f, outer);
                 d.DrawCircle(new Vector(center, center), center - 1, d.AllocateStyle(background, "000000FF", 0.1));
 
                 for (int i = 0; i < 360; ++i)
@@ -123,10 +126,20 @@ namespace SvgImageGenerator
                 d.DrawPolyline(new[] { new Vector(center - 2, center), new Vector(center + 2, center) }, boldTick);
                 d.DrawPolyline(new[] { new Vector(center, center - 2), new Vector(center, center + 2) }, boldTick);
 
-                d.DrawTextPath(new[] { new Vector(center - 1.5, center - 25), new Vector(center + 1.5, center - 25) }, "N", textCardinal);
+                //d.DrawTextPath(new[] { new Vector(center - 1, center - 25), new Vector(center + 1, center - 25) }, "N", textCardinal);
+
+
                 d.DrawTextPath(new[] { new Vector(center + 1.5, center + 25), new Vector(center - 1.5, center + 25) }, "S", textCardinal);
                 d.DrawTextPath(new[] { new Vector(center + 25, center - 1.5), new Vector(center + 25, center + 1.5) }, "E", textCardinal);
                 d.DrawTextPath(new[] { new Vector(center - 25, center + 1.5), new Vector(center - 25, center - 1.5) }, "W", textCardinal);
+
+                d.DrawText(new Vector(center, center - 23.5), "N", textCardinalBC);
+
+                d.DrawCircle(new Vector(center, center - 25), 5f, outer);
+                d.DrawCircle(new Vector(center, center - 25), 5.5f, normalTick);
+
+
+
             },"prtt");
 
   
@@ -183,6 +196,25 @@ namespace SvgImageGenerator
 
             },"cdsc");
 
+            //Render.ToSvg("grip.svg", new Vector(50, 50), d =>
+            //{
+            //    //var color1 = d.AllocateBrushStyle("80808080");
+            //    //var color2 = d.AllocateStyle("FFFFFFFF", "80808080", 0.25);
+            //    //for (var x= 0; x <50; x += 10)
+            //    //{
+            //    //    for (var y = 0; y < 50; y += 10)
+            //    //    {
+            //    //        d.DrawCircle(new Vector(x + 6, y + 6), 3, color1);
+            //    //        d.DrawCircle(new Vector(x + 5, y + 5), 3, color2);
+            //    //    }
+            //    //}
+
+            //    d.DrawCircle(new Vector(25, 25), 22, d.AllocatePenStyle("80808080", 4));
+            //    d.DrawCircle(new Vector(25, 25), 24, d.AllocatePenStyle("000000FF", 1));
+
+
+
+            //}, "grp");
 
             var protractorForJS = CleanForJs(File.ReadAllText("protractor.svg"));
 

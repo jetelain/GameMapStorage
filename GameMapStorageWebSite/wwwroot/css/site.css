@@ -27,8 +27,16 @@ img.thumbnail-640-360 {
 
 .protractor-drag {
     cursor: move !important;
+    border-radius:50%;
 }
+
+.coordinatescale-drag {
+    cursor: move !important;
+    border-radius: 4%;
+}
+
 
 .protractor-rotate {
     cursor: ew-resize !important;
+    border-radius: 50%;
 }
