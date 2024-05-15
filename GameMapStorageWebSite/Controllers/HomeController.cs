@@ -72,6 +72,7 @@ namespace GameMapStorageWebSite.Controllers
 
             map.Locations = await _context.GameMapLocations
                 .Where(m => m.GameMap == map)
+                .OrderBy(m => m.EnglishTitle)
                 .ToListAsync();
 
             var layer = GetLayer(map.Layers, layerId);

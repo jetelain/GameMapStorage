@@ -77,6 +77,8 @@ namespace GameMapStorageWebSite.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
         public async Task<IActionResult> CreateFromPackage(IFormFile package)
         {
             using var stream = package.OpenReadStream();
