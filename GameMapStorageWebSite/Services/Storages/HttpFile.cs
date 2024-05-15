@@ -29,6 +29,11 @@ namespace GameMapStorageWebSite.Services.Storages
             } 
         }
 
+        public Task CopyTo(Stream target)
+        {
+            return response.Content.CopyToAsync(target);
+        }
+
         public void Dispose()
         {
             response.Dispose();

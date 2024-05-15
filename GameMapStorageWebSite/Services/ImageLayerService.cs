@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.IO.Compression;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
@@ -128,6 +129,48 @@ namespace GameMapStorageWebSite.Services
         {
             return (await storageService.GetAsync(GetBasePath(layer, zoom, x, y) + ".webp")) 
                 ?? new LocalStorageFile("wwwroot/img/missing/tile.webp");
+        }
+
+        public async Task WriteArchiveTo(GameMapLayer layer, Stream target)
+        {
+            ValidateLayer(layer);
+            using var zip = new ZipArchive(target, ZipArchiveMode.Create);
+            // Add a JSON with metadata ?
+            for(int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
+            {
+                await CreateEntry(zip, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                var count = MapUtils.GetTileRowCount(zoom);
+                for (int x = 0; x < count; x++)
+                {
+                    for (int y = 0; y < count; y++)
+                    {
+                        await CreateEntry(zip, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png"); 
+                        if (layer.Format == LayerFormat.PngAndWebp)
+                        {
+                            await CreateEntry(zip, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task CreateEntry(ZipArchive zip, string entryName, string storageFile)
+        {
+            var file = await storageService.GetAsync(storageFile);
+            if (file != null)
+            {
+                var entry = zip.CreateEntry(entryName, CompressionLevel.NoCompression);
+                using var targetStream = entry.Open();
+                using var sourceStream = await file.OpenRead();
+                await sourceStream.CopyToAsync(targetStream);
+            }
+        }
+
+        public Task<IStorageFile> GetArchive(GameMapLayer layer)
+        {
+            ValidateLayer(layer);
+            // TODO: Create a cache option to avoid re-creating the zip each time
+            return Task.FromResult<IStorageFile>(new MemoryStorageFile(s => WriteArchiveTo(layer, s), layer.LastChangeUtc));
         }
     }
 }

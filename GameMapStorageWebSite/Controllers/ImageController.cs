@@ -7,7 +7,7 @@ using SixLabors.ImageSharp.Formats.Webp;
 
 namespace GameMapStorageWebSite.Controllers
 {
-    public class ImageController : Controller
+    public sealed class ImageController : DownloadControllerBase
     {
         public const int CacheDuractionInSeconds = 4 * 60 * 60; // 4 hours
 
@@ -21,17 +21,6 @@ namespace GameMapStorageWebSite.Controllers
         {
             this.layerService = layerService;
             this.thumbnailService = thumbnailService;
-        }
-
-        private async Task<IResult> ToResult(IStorageFile? file, string contentType)
-        {
-            if (file != null)
-            {
-                Response.RegisterForDispose(file);
-                var stream = await file.OpenRead();
-                return Results.Stream(stream, contentType, null, file.LastModified);
-            }
-            return Results.NotFound();
         }
 
         private Task<IResult> ToResultWebp(IStorageFile? file)

@@ -11,6 +11,12 @@
 
         public DateTimeOffset? LastModified => new DateTimeOffset(File.GetLastWriteTimeUtc(path), TimeSpan.Zero);
 
+        public async Task CopyTo(Stream target)
+        {
+            using var source = File.OpenRead(path);
+            await source.CopyToAsync(target);
+        }
+
         public void Dispose()
         {
         }

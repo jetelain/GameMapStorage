@@ -15,5 +15,7 @@ namespace GameMapStorageWebSite.Services
         Task<IStorageFile> ReadTileWebp(IGameMapLayerIdentifier layer, int zoom, int x, int y);
 
         int GetSizeAtZoom(GameMapLayer layer, int zoom);
+
+        Task<IStorageFile> GetArchive(GameMapLayer layer);
     }
 }

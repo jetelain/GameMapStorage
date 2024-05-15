@@ -5,5 +5,7 @@
         DateTimeOffset? LastModified { get; }
 
         Task<Stream> OpenRead();
+
+        Task CopyTo(Stream target);
     }
 }
