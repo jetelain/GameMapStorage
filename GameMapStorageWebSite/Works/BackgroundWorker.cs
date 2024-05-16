@@ -2,11 +2,12 @@
 using System.Text.Json;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
+using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
 
 namespace GameMapStorageWebSite.Works
 {
-    public class BackgroundWorker
+    public sealed class BackgroundWorker
     {
         private readonly GameMapStorageContext context;
         private readonly IServiceProvider services;
@@ -66,6 +67,9 @@ namespace GameMapStorageWebSite.Works
 
                 case BackgroundWorkType.ProcessLayer:
                     return CallWorker<ProcessLayerWorkData>(work);
+
+                case BackgroundWorkType.MirrorLayer:
+                    return CallWorker<MirrorLayerWorkData>(work);
             }
             return Task.CompletedTask;
         }

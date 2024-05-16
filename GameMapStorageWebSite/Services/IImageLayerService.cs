@@ -1,4 +1,5 @@
-﻿using GameMapStorageWebSite.Entities;
+﻿using System.IO.Compression;
+using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 
@@ -17,5 +18,6 @@ namespace GameMapStorageWebSite.Services
         int GetSizeAtZoom(GameMapLayer layer, int zoom);
 
         Task<IStorageFile> GetArchive(GameMapLayer layer);
+        Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive);
     }
 }

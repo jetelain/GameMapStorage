@@ -5,6 +5,7 @@ using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Storages;
 using GameMapStorageWebSite.Works;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
+using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -101,6 +102,7 @@ namespace GameMapStorageWebSite
 
             services.AddScoped<IWorker<MigrateArma3MapWorkData>,MigrateArma3MapWorker>();
             services.AddScoped<IWorker<ProcessLayerWorkData>, ProcessLayerWorker>();
+            services.AddScoped<IWorker<MirrorLayerWorkData>, MirrorLayerWorker>();
             services.AddScoped<BackgroundWorker>();
             services.AddHostedService<BackgroundWorkerHostedService>();
         }

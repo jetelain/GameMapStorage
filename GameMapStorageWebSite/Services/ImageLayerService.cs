@@ -172,5 +172,36 @@ namespace GameMapStorageWebSite.Services
             // TODO: Create a cache option to avoid re-creating the zip each time
             return Task.FromResult<IStorageFile>(new MemoryStorageFile(s => WriteArchiveTo(layer, s), layer.LastChangeUtc));
         }
+
+        public async Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive)
+        {
+            ValidateLayer(layer);
+            for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
+            {
+                await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                var count = MapUtils.GetTileRowCount(zoom);
+                for (int x = 0; x < count; x++)
+                {
+                    for (int y = 0; y < count; y++)
+                    {
+                        await UnPack(archive, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
+                        if (layer.Format == LayerFormat.PngAndWebp)
+                        {
+                            await UnPack(archive, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task UnPack(ZipArchive zip, string entryName, string storageFile)
+        {
+            var entry = zip.GetEntry(entryName);
+            if ( entry != null)
+            {
+                using var source = entry.Open();
+                await storageService.StoreAsync(storageFile, source.CopyToAsync);
+            }
+        }
     }
 }
