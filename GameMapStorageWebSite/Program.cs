@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
@@ -60,7 +61,11 @@ namespace GameMapStorageWebSite
                 options.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.NameIdentifier, admins));
             });
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                .AddJsonOptions(jsonOptions =>
+                {
+                    jsonOptions.JsonSerializerOptions.Converters.Add( new JsonStringEnumConverter());
+                });
 
             services.AddDbContext<GameMapStorageContext>(options =>
                 options.UseSqlite(
@@ -139,11 +144,6 @@ namespace GameMapStorageWebSite
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            app.MapControllerRoute(
-                name: "areas",
-                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-              );
         }
 
 
