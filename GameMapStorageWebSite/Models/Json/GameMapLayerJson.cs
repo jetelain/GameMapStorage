@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
-using SixLabors.ImageSharp.Drawing.Processing;
 
 namespace GameMapStorageWebSite.Models.Json
 {
-    public class GameMapLayerJson
+    public class GameMapLayerJson : IWithTimestamp
     {
         public GameMapLayerJson()
         {

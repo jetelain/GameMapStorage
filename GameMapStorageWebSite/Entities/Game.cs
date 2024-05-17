@@ -2,7 +2,7 @@
 
 namespace GameMapStorageWebSite.Entities
 {
-    public class Game : IGameIdentifier
+    public class Game : IGameIdentifier, IWithTimestamp
     {
         public int GameId { get; set; }
 

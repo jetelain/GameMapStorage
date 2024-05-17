@@ -3,7 +3,7 @@ using GameMapStorageWebSite.Entities;
 
 namespace GameMapStorageWebSite.Models.Json
 {
-    public class GameJson
+    public class GameJson : IWithTimestamp
     {
         public GameJson()
         {

@@ -34,8 +34,10 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             target.LastChangeUtc = source.LastChangeUtc;
             target.Name = source.Name;
             target.Aliases = source.Aliases;
+
             target.Layers = layers.UpdateOrCreateEntities(source.Layers!, target.Layers!);
             target.Locations = locations.UpdateOrCreateEntities(source.Locations!, target.Locations!);
+
             target.CitiesCount = target.Locations.Count(l => l.Type == LocationType.City);
             return true;
         }
@@ -43,11 +45,6 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
         protected override string GetDetailEndpoint(GameMapJson sourceLight) => $"/api/v1/games/{sourceGame.GameId}/maps/{sourceLight.GameMapId}";
 
         protected override string GetListEndpoint() => $"/api/v1/games/{sourceGame.GameId}/maps";
-
-        protected override bool IsFullRequired(GameMapJson sourceLight, GameMap target)
-        {
-            return sourceLight.LastChangeUtc != target.LastChangeUtc;
-        }
 
         protected override bool IsMatch(GameMapJson source, GameMap target)
         {
@@ -94,17 +91,22 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             return new GameMap()
             {
                 GameMapId = keepId ? source.GameMapId : default,
+
                 EnglishTitle = source.EnglishTitle!,
                 AppendAttribution = source.AppendAttribution,
                 SteamWorkshopId = source.SteamWorkshopId,
                 OfficialSiteUri = source.OfficialSiteUri,
                 SizeInMeters = source.SizeInMeters,
+                LastChangeUtc = source.LastChangeUtc,
                 Name = source.Name,
                 Aliases = source.Aliases,
+
                 Layers = layers.CreateEntities(source.Layers),
                 Locations = locationsEntities,
+
                 Game = targetGame,
                 GameId = targetGame.GameId,
+
                 CitiesCount = locationsEntities?.Count(l => l.Type == LocationType.City) ?? 0
             };
         }

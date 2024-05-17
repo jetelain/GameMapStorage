@@ -30,6 +30,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             target.FactorY = source.FactorY;
             target.Culture = source.Culture;
             target.LastChangeUtc = source.LastChangeUtc;
+
             LayersToDownload.Add((target, source)); // TODO: Should create a DataLastChangeUtc column to avoid full download if a metadata changed
             return true;
         }
@@ -49,6 +50,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             var layer = new GameMapLayer()
             {
                 GameMapLayerId = keepId ? source.GameMapLayerId : default,
+
                 Type = source.Type,
                 Format = source.Format,
                 MinZoom = source.MinZoom,
@@ -58,7 +60,8 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
                 TileSize = source.TileSize,
                 FactorX = source.FactorX,
                 FactorY = source.FactorY,
-                Culture = source.Culture
+                Culture = source.Culture,
+                LastChangeUtc = source.LastChangeUtc
             };
             LayersToDownload.Add((layer, source));
             return layer;

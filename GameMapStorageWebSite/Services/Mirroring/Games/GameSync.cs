@@ -26,6 +26,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
             target.OfficialSiteUri = source.OfficialSiteUri;
             target.SteamAppId = source.SteamAppId;
             target.LastChangeUtc = source.LastChangeUtc;
+
             target.Colors = colors.UpdateOrCreateEntities(source.Colors!, target.Colors!);
             target.Markers = markers.UpdateOrCreateEntities(source.Markers!, target.Markers!);
             return true;
@@ -41,11 +42,6 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
             await context.GameColors.ToListAsync();
             await context.GameMarkers.ToListAsync();
             return localGames;
-        }
-
-        protected override bool IsFullRequired(GameJson sourceLight, Game target)
-        {
-            return sourceLight.LastChangeUtc != target.LastChangeUtc;
         }
 
         protected override bool IsMatch(GameJson source, Game target)
@@ -66,14 +62,17 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
         {
             return new Game()
             {
+                GameId = keepId ? source.GameId : default,
+
                 Attribution = source.Attribution!,
                 EnglishTitle = source.EnglishTitle!,
                 Name = source.Name!,
-                GameId = keepId ? source.GameId : default,
+                OfficialSiteUri = source.OfficialSiteUri,
+                SteamAppId = source.SteamAppId,
+                LastChangeUtc = source.LastChangeUtc,
+
                 Colors = colors.CreateEntities(source.Colors),
                 Markers = markers.CreateEntities(source.Markers),
-                OfficialSiteUri = source.OfficialSiteUri,
-                SteamAppId = source.SteamAppId
             };
         }
 

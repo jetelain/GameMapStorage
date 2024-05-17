@@ -1,12 +1,13 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using GameMapStorageWebSite.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Services.Mirroring
 {
     internal abstract class RemoteSyncBase<TJson, TEntity> : SyncBase<TJson, TEntity>
-        where TEntity : class
-        where TJson : class
+        where TEntity : class, IWithTimestamp
+        where TJson : class, IWithTimestamp
     {
         private readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions() { Converters = { new JsonStringEnumConverter() } };
 
@@ -57,7 +58,10 @@ namespace GameMapStorageWebSite.Services.Mirroring
 
         protected abstract void UpdateLight(TJson sourceLight, TEntity target);
 
-        protected abstract bool IsFullRequired(TJson sourceLight, TEntity target);
+        protected virtual bool IsFullRequired(TJson sourceLight, TEntity target)
+        {
+            return sourceLight.LastChangeUtc != target.LastChangeUtc;
+        }
 
         protected abstract string GetDetailEndpoint(TJson sourceLight);
 

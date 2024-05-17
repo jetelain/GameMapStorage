@@ -26,7 +26,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             {
                 return source.GameMapLocationId == target.GameMapLocationId;
             }
-            return source.X == target.X && source.Y == target.Y;
+            return source.X == target.X && source.Y == target.Y; // TODO: Should use a GameMapLocationGuid
         }
 
         protected override GameMapLocation ToEntity(GameMapLocationJson source)
@@ -34,6 +34,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             return new GameMapLocation()
             {
                 GameMapLocationId = keepId ? source.GameMapLocationId : default,
+
                 EnglishTitle = source.EnglishTitle!,
                 Type = source.Type,
                 X = source.X,
