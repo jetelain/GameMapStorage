@@ -42,6 +42,8 @@ namespace GameMapStorageWebSite
         /// <param name="builder"></param>
         private static void AddServices(IServiceCollection services, IConfiguration configuration)
         {
+            var config = new DataConfigurationService(configuration.GetSection("Data").Get<DataConfiguration>());
+
             AddHttpClients(services);
 
             services.AddAuthentication(options =>
@@ -85,23 +87,9 @@ namespace GameMapStorageWebSite
             services.AddScoped<IImageLayerService, ImageLayerService>();
             services.AddScoped<IThumbnailService, ThumbnailService>();
             services.AddScoped<IPackageService, PackageService>();
+            services.AddSingleton<ILocalStorageService, LocalStorageService>();
 
-            if (configuration["StorageMode"] == "Proxy")
-            {
-                services.AddSingleton<ILocalStorageService, LocalStorageService>();
-
-                services.AddScoped<IStorageService, ProxyStorageService>();
-
-                services.AddHttpClient("Proxy", client =>
-                    {
-                        client.BaseAddress = new Uri("https://atlas.plan-ops.fr/data/");
-                    })
-                    .AddStandardResilienceHandler(); ;
-            }
-            else
-            {
-                services.AddSingleton<IStorageService, LocalStorageService>();
-            }
+            SetupDataMode(services, config);
 
             services.AddSingleton<IWorkspaceService, WorkspaceService>();
 
@@ -112,6 +100,27 @@ namespace GameMapStorageWebSite
             services.AddScoped<IWorker<MirrorLayerWorkData>, MirrorLayerWorker>();
             services.AddScoped<BackgroundWorker>();
             services.AddHostedService<BackgroundWorkerHostedService>();
+            services.AddSingleton<IDataConfigurationService>(config);
+        }
+
+        private static void SetupDataMode(IServiceCollection services, DataConfigurationService config)
+        {
+            if (config.Mode == DataMode.Proxy)
+            {
+                services.AddScoped<IStorageService, ProxyStorageService>();
+                services.AddHttpClient("Proxy", client => { client.BaseAddress = config.ProxyUri!; })
+                    .AddStandardResilienceHandler();
+            }
+            else if (config.Mode == DataMode.Mirror)
+            {
+                services.AddSingleton<IStorageService, LocalStorageService>();
+                services.AddHttpClient("Mirror", client => { client.BaseAddress = config.MirrorUri!; })
+                    .AddResilienceHandler("retry", ConfigureBackgroundRetryHandler);
+            }
+            else
+            {
+                services.AddSingleton<IStorageService, LocalStorageService>();
+            }
         }
 
         private static void AddHttpClients(IServiceCollection services)
@@ -121,10 +130,6 @@ namespace GameMapStorageWebSite
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0");
                 })
-                .AddResilienceHandler("retry", ConfigureBackgroundRetryHandler);
-
-            services
-                .AddHttpClient("Mirror")
                 .AddResilienceHandler("retry", ConfigureBackgroundRetryHandler);
 
             services
@@ -202,15 +207,6 @@ namespace GameMapStorageWebSite
                     var context = services.GetRequiredService<GameMapStorageContext>();
                     await context.Database.MigrateAsync();
                     context.InitData();
-
-                    if (app.Configuration.GetValue<bool?>("AutoMigrateArma3Map") ?? false)
-                    {
-                        if (await context.Works.Where(t => t.Type == BackgroundWorkType.MigrateArma3Map).CountAsync() == 0
-                            && await context.GameMaps.CountAsync() == 0)
-                        {
-                            await services.GetRequiredService<IMigrateArma3MapFactory>().InitialWorkLoad();
-                        }
-                    }
                 }
                 catch (Exception ex)
                 {
