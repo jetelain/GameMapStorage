@@ -20,6 +20,7 @@ namespace GameMapStorageWebSite.Models.Json
             SizeInMeters = gameMap.SizeInMeters;
             Name = gameMap.Name;
             Aliases = gameMap.Aliases;
+            LastChangeUtc = gameMap.LastChangeUtc;
 
             Thumbnail = basePath + ImagePathHelper.GetThumbnail(useWebp, gameMap);
             ThumbnailWebp = basePath + ImagePathHelper.GetThumbnail(true, gameMap);
