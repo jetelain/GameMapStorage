@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GameMapStorageWebSite.Entities.Converters;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Entities
 {
@@ -21,6 +22,11 @@ namespace GameMapStorageWebSite.Entities
         public GameMapStorageContext(DbContextOptions<GameMapStorageContext> options)
             : base(options)
         {
+        }
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.Properties<DateTime?>().HaveConversion<DateTimeAssumeUniversal>();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
