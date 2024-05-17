@@ -8,7 +8,7 @@
         public ProxyStorageService(ILocalStorageService localStorage, IHttpClientFactory clientFactory)
         {
             this.localStorage = localStorage;
-            client = clientFactory.CreateClient("ProxyClient");
+            client = clientFactory.CreateClient("Proxy");
         }
 
         public Task Delete(string path)

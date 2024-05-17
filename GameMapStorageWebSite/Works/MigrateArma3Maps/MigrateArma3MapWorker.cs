@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Net;
 using System.Text.RegularExpressions;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
@@ -30,7 +29,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
             this.imageLayerService = imageLayerService;
             this.httpClientFactory = httpClientFactory;
             this.logger = logger;
-            this.client = httpClientFactory.CreateClient("CDN");
+            this.client = httpClientFactory.CreateClient("Arma3Map");
         }
 
         public async Task Process(MigrateArma3MapWorkData taskData, BackgroundWork task)
@@ -147,8 +146,9 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 using var tileStream = await OpenStream(uri);
                 return await Image.LoadAsync(tileStream);
             }
-            catch(HttpIOException)
+            catch(HttpIOException io)
             {
+                logger.LogWarning(io, "ReadImageAsync Error '{Uri}': {Message}", uri, io.Message);
                 if (attempt >= 10)
                 {
                     throw;
@@ -167,7 +167,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
         {
             await Task.Delay(Random.Shared.Next(2000, 10000));
             client.Dispose();
-            client = httpClientFactory.CreateClient("CDN");
+            client = httpClientFactory.CreateClient("Arma3Map");
         }
 
         private static GameMapLayer PrepareLayer(MigrateArma3MapWorkData task, GameMap map)
@@ -241,14 +241,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 }
                 catch(Exception ex)
                 {
-                    logger.LogWarning("Fetching '{File}' failed: {Message}", jsLocation, ex.Message);
-                    if (ex is HttpRequestException http 
-                        && http.StatusCode != null 
-                        && http.StatusCode != HttpStatusCode.TooManyRequests
-                        && http.StatusCode != HttpStatusCode.ServiceUnavailable)
-                    {
-                        throw;
-                    }
+                    logger.LogWarning(ex, "OpenStream Error '{Uri}': {Message}", jsLocation, ex.Message);
                     if (attempt > 10)
                     {
                         throw;

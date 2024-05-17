@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
@@ -12,6 +13,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Http.Resilience;
+using Polly;
+using Polly.Timeout;
 
 namespace GameMapStorageWebSite
 {
@@ -38,15 +42,12 @@ namespace GameMapStorageWebSite
         /// <param name="builder"></param>
         private static void AddServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddHttpClient("CDN", client =>
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0");
-            });
+            AddHttpClients(services);
 
             services.AddAuthentication(options =>
-                {
-                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                })
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Home/SignInUser";
@@ -64,7 +65,7 @@ namespace GameMapStorageWebSite
             services.AddControllersWithViews()
                 .AddJsonOptions(jsonOptions =>
                 {
-                    jsonOptions.JsonSerializerOptions.Converters.Add( new JsonStringEnumConverter());
+                    jsonOptions.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
             services.AddDbContext<GameMapStorageContext>(options =>
@@ -91,10 +92,11 @@ namespace GameMapStorageWebSite
 
                 services.AddScoped<IStorageService, ProxyStorageService>();
 
-                services.AddHttpClient("ProxyClient", client =>
-                {
-                    client.BaseAddress = new Uri("https://atlas.plan-ops.fr/data/");
-                });
+                services.AddHttpClient("Proxy", client =>
+                    {
+                        client.BaseAddress = new Uri("https://atlas.plan-ops.fr/data/");
+                    })
+                    .AddStandardResilienceHandler(); ;
             }
             else
             {
@@ -105,11 +107,54 @@ namespace GameMapStorageWebSite
 
             services.AddResponseCaching();
 
-            services.AddScoped<IWorker<MigrateArma3MapWorkData>,MigrateArma3MapWorker>();
+            services.AddScoped<IWorker<MigrateArma3MapWorkData>, MigrateArma3MapWorker>();
             services.AddScoped<IWorker<ProcessLayerWorkData>, ProcessLayerWorker>();
             services.AddScoped<IWorker<MirrorLayerWorkData>, MirrorLayerWorker>();
             services.AddScoped<BackgroundWorker>();
             services.AddHostedService<BackgroundWorkerHostedService>();
+        }
+
+        private static void AddHttpClients(IServiceCollection services)
+        {
+            services
+                .AddHttpClient("Arma3Map", client =>
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0");
+                })
+                .AddResilienceHandler("retry", ConfigureBackgroundRetryHandler);
+
+            services
+                .AddHttpClient("Mirror")
+                .AddResilienceHandler("retry", ConfigureBackgroundRetryHandler);
+
+            services
+                .AddHttpClient("External", client =>
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0");
+                });
+        }
+
+        private static void ConfigureBackgroundRetryHandler(ResiliencePipelineBuilder<HttpResponseMessage> builder)
+        {
+            builder
+                .AddRetry(new HttpRetryStrategyOptions()
+                {
+                    BackoffType = DelayBackoffType.Linear,
+                    UseJitter = true,
+                    Delay = TimeSpan.FromMilliseconds(500),
+                    MaxRetryAttempts = 20,
+                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<TimeoutRejectedException>()
+                        .Handle<HttpRequestException>()
+                        .HandleResult(response =>
+                            response.StatusCode == HttpStatusCode.ServiceUnavailable
+                            || response.StatusCode == HttpStatusCode.TooManyRequests
+                            || response.StatusCode >= HttpStatusCode.InternalServerError)
+                })
+                .AddTimeout(new HttpTimeoutStrategyOptions()
+                {
+                    Timeout = TimeSpan.FromMinutes(10)
+                });
         }
 
         /// <summary>

@@ -14,7 +14,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
         public MigrateArma3MapFactory(IConfiguration configuration, GameMapStorageContext context, IHttpClientFactory httpClientFactory)
         {
             this.baseUri = configuration["Arma3MapEndpoint"] ?? @"https://mapsdata.plan-ops.fr";
-            this.client = httpClientFactory.CreateClient("CDN");
+            this.client = httpClientFactory.CreateClient("Arma3Map");
             this.context = context;
         }
 
