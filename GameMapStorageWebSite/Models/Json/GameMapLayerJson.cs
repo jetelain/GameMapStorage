@@ -1,4 +1,5 @@
-﻿using GameMapStorageWebSite.Entities;
+﻿using System.Text.Json.Serialization;
+using GameMapStorageWebSite.Entities;
 using SixLabors.ImageSharp.Drawing.Processing;
 
 namespace GameMapStorageWebSite.Models.Json
@@ -28,8 +29,14 @@ namespace GameMapStorageWebSite.Models.Json
             var map = gameMapLayer.GameMap!;
 
             DownloadUri = basePath + $"/data/{map.GameId}/maps/{map.GameMapId}/{gameMapLayer.GameMapLayerId}.zip";
-            PatternPng = basePath + ImagePathHelper.GetLayerPattern(false, gameMapLayer);
-            PatternWebp = basePath + ImagePathHelper.GetLayerPattern(true, gameMapLayer);
+            if (Format == LayerFormat.PngAndWebp || Format == LayerFormat.PngOnly)
+            {
+                PatternPng = basePath + ImagePathHelper.GetLayerPattern(false, gameMapLayer);
+            }
+            if (Format == LayerFormat.PngAndWebp || Format == LayerFormat.SvgAndWebp || Format == LayerFormat.WebpOnly)
+            {
+                PatternWebp = basePath + ImagePathHelper.GetLayerPattern(true, gameMapLayer);
+            }
             Pattern = basePath + ImagePathHelper.GetLayerPattern(useWebp, gameMapLayer);
         }
 
@@ -59,10 +66,13 @@ namespace GameMapStorageWebSite.Models.Json
 
         public string? DownloadUri { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? PatternPng { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? PatternWebp { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Pattern { get; set; }
     }
 }

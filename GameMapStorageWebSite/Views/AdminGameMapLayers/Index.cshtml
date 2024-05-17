@@ -7,12 +7,15 @@
 <h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
-    <a asp-action="CreateFromPackage">Create From Package</a>
+    @* <a asp-action="Create">Create New</a> *@
+    <a asp-action="CreateFromPackage" class="btn btn-secondary">Create From Package</a>
 </p>
 <table class="table">
     <thead>
         <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.GameMap)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Type)
             </th>
@@ -49,9 +52,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.LastChangeUtc)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.GameMap)
-            </th>
             <th></th>
         </tr>
     </thead>
@@ -59,7 +59,10 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.GameMapLayerId">@Html.DisplayFor(modelItem => item.Type)</a>
+                <a asp-action="Details" asp-route-id="@item.GameMapLayerId">@Html.DisplayFor(modelItem => item.GameMap!.EnglishTitle)</a>
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.GameMapLayerId">@Html.DisplayFor(modelItem => item.Type)</a>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Format)
@@ -93,9 +96,6 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastChangeUtc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GameMap!.EnglishTitle)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.GameMapLayerId">Edit</a> |

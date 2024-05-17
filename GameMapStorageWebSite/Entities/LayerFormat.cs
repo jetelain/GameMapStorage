@@ -6,7 +6,7 @@
         PngAndWebp,
         SvgOnly,
         SvgAndWebp,
-        MapToolkitDataCell,
+        WebpOnly,
         SinglePDF,
         BookletPDF
     }

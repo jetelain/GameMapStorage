@@ -36,6 +36,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
 
             var gameMapLayer = await _context.GameMapLayers
                 .Include(g => g.GameMap)
+                .Include(g => g.GameMap!.Game)
                 .FirstOrDefaultAsync(m => m.GameMapLayerId == id);
             if (gameMapLayer == null)
             {
