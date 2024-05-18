@@ -43,6 +43,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
 
             var backgroundWork = await _context.Works
                 .Include(b => b.GameMapLayer)
+                .Include(b => b.GameMapLayer!.GameMap)
                 .FirstOrDefaultAsync(m => m.BackgroundWorkId == id);
             if (backgroundWork == null)
             {

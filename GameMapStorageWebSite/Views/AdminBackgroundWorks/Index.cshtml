@@ -13,7 +13,8 @@
         <button class="btn btn-secondary spinner-on-click">
             <i class="fa-solid fa-rotate"></i>
             <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-            Update Mirror</button>
+            Update Mirror
+        </button>
     </form>
 }
 else
@@ -26,6 +27,9 @@ else
 <table class="table">
     <thead>
         <tr>
+            <th>
+                #
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Type)
             </th>
@@ -48,32 +52,35 @@ else
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Type)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.State)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedUtc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartedUtc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FinishedUtc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.GameMapLayerId)
-            </td>
-            <td>
-                <a asp-action="Details" asp-route-id="@item.BackgroundWorkId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.BackgroundWorkId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.BackgroundWorkId">Task #@item.BackgroundWorkId</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.State)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedUtc)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartedUtc)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FinishedUtc)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.GameMapLayerId)
+                </td>
+                <td>
+                    <a asp-action="Delete" asp-route-id="@item.BackgroundWorkId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 

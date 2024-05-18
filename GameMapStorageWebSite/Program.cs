@@ -198,7 +198,7 @@ namespace GameMapStorageWebSite
 
             app.UseResponseCaching();
 
-            app.UseRequestLocalization("en-US");
+            app.UseRequestLocalization("en-GB");
 
             app.MapControllerRoute(
                 name: "default",

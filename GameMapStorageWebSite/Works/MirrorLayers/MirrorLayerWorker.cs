@@ -69,7 +69,7 @@ namespace GameMapStorageWebSite.Works.MirrorLayers
                 request.Headers.IfModifiedSince = new DateTimeOffset(layer.DataLastChangeUtc.Value, TimeSpan.Zero);
             }
 
-            using var response = await client.SendAsync(request);
+            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             if (response.StatusCode == HttpStatusCode.NotModified)
             {
                 return false;

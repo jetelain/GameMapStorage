@@ -22,44 +22,51 @@
 
 <h2 class="h4">Informations</h2>
 <hr />
-<dl class="row">
-    <dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.EnglishTitle)
-    </dt>
-    <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.EnglishTitle)
-    </dd>
-    <dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.Name)
-    </dt>
-    <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.Name)
-    </dd>
-    <dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.Attribution)
-    </dt>
-    <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.Attribution)
-    </dd>
-    <dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.OfficialSiteUri)
-    </dt>
-    <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.OfficialSiteUri)
-    </dd>
-    <dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.SteamAppId)
-    </dt>
-    <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.SteamAppId)
-    </dd>
-    <dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.LastChangeUtc)
-    </dt>
-    <dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.LastChangeUtc)
-    </dd>
-</dl>
+<div class="row">
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.EnglishTitle)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.EnglishTitle)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Attribution)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Attribution)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.OfficialSiteUri)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.OfficialSiteUri)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.SteamAppId)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.SteamAppId)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.LastChangeUtc)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.LastChangeUtc)
+            </dd>
+        </dl>
+    </div>
+    <div class="col-md-4">
+        <img src="@ImagePathHelper.GetLogo(false, Model!)" class="mw-100" />
+    </div>
+</div>
 
 <h2 class="h4 mt-4">Maps</h2>
 <hr />
@@ -78,7 +85,7 @@
             </th>
             @if (canEdit)
             {
-            <th></th>
+                <th></th>
             }
         </tr>
     </thead>

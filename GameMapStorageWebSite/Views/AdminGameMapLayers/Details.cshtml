@@ -104,7 +104,7 @@
             @Html.DisplayNameFor(model => model.GameMap)
         </dt>
         <dd class = "col-sm-10">
-            <a asp-controller="AdminGameMaps" asp-action="Details" asp-route-id="@Model.GameMapId">@Html.DisplayFor(model => model.GameMap!.EnglishTitle)</a>
+            <a asp-controller="AdminGameMaps" asp-action="Details" asp-route-id="@Model!.GameMapId">@Html.DisplayFor(model => model.GameMap!.EnglishTitle)</a>
         </dd>
     </dl>
 </div>
