@@ -71,6 +71,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         //    return View(gameMapLayer);
         //}
 
+        [Authorize("AdminEdit")]
         public IActionResult CreateFromPackage()
         {
             return View();
@@ -80,6 +81,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [ValidateAntiForgeryToken]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> CreateFromPackage(IFormFile package)
         {
             using var stream = package.OpenReadStream();
@@ -96,6 +98,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         }
 
         // GET: AdminGameMapLayers/Edit/5
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -116,6 +119,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Edit(int id, [Bind("GameMapLayerId,Type,Format,State,MinZoom,MaxZoom,DefaultZoom,IsDefault,TileSize,FactorX,FactorY,Culture")] GameMapLayer gameMapLayer)
         {
             if (id != gameMapLayer.GameMapLayerId)
@@ -143,6 +147,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         }
 
         // GET: AdminGameMapLayers/Delete/5
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -164,6 +169,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // POST: AdminGameMapLayers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var gameMapLayer = await _context.GameMapLayers.FindAsync(id);

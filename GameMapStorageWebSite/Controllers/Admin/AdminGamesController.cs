@@ -24,7 +24,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // GET: Admin/Games
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Games.ToListAsync());
+            return View(await _context.Games.OrderBy(m => m.EnglishTitle).ToListAsync());
         }
 
         // GET: Admin/Games/Details/5
@@ -41,11 +41,12 @@ namespace GameMapStorageWebSite.Controllers.Admin
             {
                 return NotFound();
             }
-
+            game.Maps = await _context.GameMaps.Where(m => m.GameId == id).OrderBy(m => m.EnglishTitle).ToListAsync();
             return View(game);
         }
 
         // GET: Admin/Games/Create
+        [Authorize("AdminEdit")]
         public IActionResult Create()
         {
             return View();
@@ -56,6 +57,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Create([Bind("GameId,EnglishTitle,Name,Attribution,OfficialSiteUri,SteamAppId")] Game game)
         {
             if (ModelState.IsValid)
@@ -69,6 +71,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         }
 
         // GET: Admin/Games/Edit/5
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -89,6 +92,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Edit(int id, [Bind("GameId,EnglishTitle,Name,Attribution,OfficialSiteUri,SteamAppId")] Game game)
         {
             if (id != game.GameId)
@@ -122,6 +126,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> SetLogo(int id, [FromForm] int gameId, [FromForm] string imageUri)
         {
             if (id != gameId)
@@ -152,6 +157,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         }
 
         // GET: Admin/Games/Delete/5
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -172,6 +178,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // POST: Admin/Games/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var game = await _context.Games.FindAsync(id);

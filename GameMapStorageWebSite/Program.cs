@@ -11,6 +11,7 @@ using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -63,7 +64,12 @@ namespace GameMapStorageWebSite
             {
                 var admins = configuration.GetSection("Admins").Get<string[]>() ?? Array.Empty<string>();
                 options.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.NameIdentifier, admins));
+                options.AddPolicy("AdminEdit", policy => policy
+                    .RequireClaim(ClaimTypes.NameIdentifier, admins)
+                    .AddRequirements(new DataModeRequirement(DataMode.Syndicated, DataMode.Primary, DataMode.Proxy)));
             });
+
+            services.AddSingleton<IAuthorizationHandler>(new DataModeRequirementHandler(config));
 
             services.AddControllersWithViews()
                 .AddJsonOptions(jsonOptions =>

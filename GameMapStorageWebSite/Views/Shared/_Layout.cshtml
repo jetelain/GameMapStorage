@@ -1,5 +1,4 @@
-﻿@using Microsoft.AspNetCore.Authorization
-@inject IAuthorizationService authorizationService
+﻿@inject IAuthorizationService authorizationService
 @{
     var isAdmin = (await authorizationService.AuthorizeAsync(User, "Admin")).Succeeded;
     var isFullSize = ViewData["IsFullSize"] as bool? ?? false;
