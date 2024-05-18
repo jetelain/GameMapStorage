@@ -41,35 +41,9 @@ namespace GameMapStorageWebSite.Controllers.Admin
             {
                 return NotFound();
             }
-
+            gameMapLayer.Works = await _context.Works.Where(w => w.GameMapLayerId == id).ToListAsync();
             return View(gameMapLayer);
         }
-
-        //// GET: AdminGameMapLayers/Create
-        //public IActionResult Create()
-        //{
-        //    ViewData["GameMapId"] = new SelectList(_context.GameMaps, "GameMapId", "EnglishTitle");
-        //    return View();
-        //}
-
-        //// POST: AdminGameMapLayers/Create
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("GameMapLayerId,Type,Format,MinZoom,MaxZoom,DefaultZoom,IsDefault,TileSize,FactorX,FactorY,Culture,GameMapId")] GameMapLayer gameMapLayer)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        gameMapLayer.LastChangeUtc = DateTime.UtcNow;
-        //        gameMapLayer.GameMapLayerGuid = Guid.NewGuid();
-        //        _context.Add(gameMapLayer);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["GameMapId"] = new SelectList(_context.GameMaps, "GameMapId", "EnglishTitle", gameMapLayer.GameMapId);
-        //    return View(gameMapLayer);
-        //}
 
         [Authorize("AdminEdit")]
         public IActionResult CreateFromPackage()

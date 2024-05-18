@@ -1,78 +1,157 @@
 ﻿@model GameMapStorageWebSite.Entities.GameMap
+@inject IAuthorizationService authorizationService
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.EnglishTitle;
+    var canEdit = (await authorizationService.AuthorizeAsync(User, "AdminEdit")).Succeeded;
+
 }
 
-<h1>Details</h1>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="AdminGames" asp-action="Details" asp-route-id="@Model.GameId">@Model.Game!.EnglishTitle</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Html.DisplayFor(model => model.EnglishTitle)</li>
+    </ol>
+</nav>
+
+<h1>@Html.DisplayFor(model => model.EnglishTitle)</h1>
+<p>
+    <a class="btn btn-secondary" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game!.Name" asp-route-mapName="@Model.Name">View</a>
+</p>
+
+<h2 class="h4">Informations</h2>
+<hr />
+<dl class="row">
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.EnglishTitle)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.EnglishTitle)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.AppendAttribution)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.AppendAttribution)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.SteamWorkshopId)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.SteamWorkshopId)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.OfficialSiteUri)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.OfficialSiteUri)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.SizeInMeters)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.SizeInMeters)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.CitiesCount)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.CitiesCount)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.Name)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.Name)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.Aliases)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.Aliases)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.LastChangeUtc)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.LastChangeUtc)
+    </dd>
+    <dt class = "col-sm-2">
+        @Html.DisplayNameFor(model => model.Game)
+    </dt>
+    <dd class = "col-sm-10">
+        @Html.DisplayFor(model => model.Game!.EnglishTitle)
+    </dd>
+</dl>
 
 <div>
-    <h4>GameMap</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EnglishTitle)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EnglishTitle)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AppendAttribution)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AppendAttribution)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SteamWorkshopId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SteamWorkshopId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OfficialSiteUri)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OfficialSiteUri)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SizeInMeters)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SizeInMeters)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CitiesCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CitiesCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Aliases)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Aliases)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastChangeUtc)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastChangeUtc)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Game)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Game.EnglishTitle)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.GameMapId">Edit</a> |
+    @if (canEdit)
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.GameMapId" class="btn btn-sm btn-secondary">Edit</a>
+    }
     <a asp-action="Index">Back to List</a>
 </div>
+
+<h2 class="mt-4 h4">Layers</h2>
+<hr />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Layers![0].Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Layers![0].Format)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Layers![0].State)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Layers![0].IsDefault)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Layers![0].Culture)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Layers![0].LastChangeUtc)
+            </th>
+            @if (canEdit)
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model!.Layers!)
+        {
+            <tr>
+                <td>
+                    <a asp-controller="AdminGameMapLayers" asp-action="Details" asp-route-id="@item.GameMapLayerId">@Html.DisplayFor(modelItem => item.Type)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Format)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.State)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsDefault)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Culture)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastChangeUtc)
+                </td>
+                @if (canEdit)
+                {
+                    <td>
+                        <a asp-controller="AdminGameMapLayers" asp-action="Edit" asp-route-id="@item.GameMapLayerId">Edit</a> |
+                        <a asp-controller="AdminGameMapLayers" asp-action="Delete" asp-route-id="@item.GameMapLayerId">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

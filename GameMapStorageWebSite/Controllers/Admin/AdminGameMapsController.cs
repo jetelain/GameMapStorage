@@ -44,11 +44,12 @@ namespace GameMapStorageWebSite.Controllers.Admin
             {
                 return NotFound();
             }
-
+            gameMap.Layers = await _context.GameMapLayers.Where(l => l.GameMapId == id).ToListAsync();
             return View(gameMap);
         }
 
         // GET: Admin/GameMaps/Create
+        [Authorize("AdminEdit")]
         public IActionResult Create()
         {
             ViewData["GameId"] = new SelectList(_context.Games, "GameId", "EnglishTitle");

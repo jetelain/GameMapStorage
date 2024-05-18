@@ -1,15 +1,18 @@
 ﻿@model IEnumerable<GameMapStorageWebSite.Entities.GameMapLayer>
+@inject IAuthorizationService authorizationService
 
 @{
     ViewData["Title"] = "Index";
+    var canEdit = (await authorizationService.AuthorizeAsync(User, "AdminEdit")).Succeeded;
 }
 
-<h1>Index</h1>
-
-<p>
-    @* <a asp-action="Create">Create New</a> *@
-    <a asp-action="CreateFromPackage" class="btn btn-secondary">Create From Package</a>
-</p>
+<h1>Layers</h1>
+@if (canEdit)
+{
+    <p>
+        <a asp-action="CreateFromPackage" class="btn btn-secondary">Create From Package</a>
+    </p>
+}
 <table class="table">
     <thead>
         <tr>
@@ -25,34 +28,19 @@
             <th>
                 @Html.DisplayNameFor(model => model.State)
             </th>
-@*             <th>
-                @Html.DisplayNameFor(model => model.MinZoom)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MaxZoom)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DefaultZoom)
-            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.IsDefault)
             </th>
-@*            <th>
-                 @Html.DisplayNameFor(model => model.TileSize)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FactorX)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FactorY)
-            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.Culture)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.LastChangeUtc)
             </th>
+@if (canEdit)
+{
             <th></th>
+}
         </tr>
     </thead>
     <tbody>
@@ -70,38 +58,22 @@
             <td>
                 @Html.DisplayFor(modelItem => item.State)
             </td>
-            @* <td>
-                @Html.DisplayFor(modelItem => item.MinZoom)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MaxZoom)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DefaultZoom)
-            </td> *@
             <td>
                 @Html.DisplayFor(modelItem => item.IsDefault)
             </td>
-            @* <td>
-                @Html.DisplayFor(modelItem => item.TileSize)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FactorX)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FactorY)
-            </td> *@
             <td>
                 @Html.DisplayFor(modelItem => item.Culture)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastChangeUtc)
             </td>
+                @if (canEdit)
+                {
             <td>
                 <a asp-action="Edit" asp-route-id="@item.GameMapLayerId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.GameMapLayerId">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.GameMapLayerId">Delete</a>
             </td>
+                }
         </tr>
 }
     </tbody>
