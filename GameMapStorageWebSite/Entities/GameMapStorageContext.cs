@@ -73,35 +73,6 @@ namespace GameMapStorageWebSite.Entities
                 Games.AddRange(initialData);
                 await SaveChangesAsync();
             }
-
-            var layersToUpdate = await GameMapLayers.Where(l => l.GameMapLayerGuid == null || (l.DataLastChangeUtc == null && l.LastChangeUtc != null)).ToListAsync();
-            if (layersToUpdate.Count> 0)
-            {
-                foreach(var layer in layersToUpdate)
-                {
-                    if (layer.GameMapLayerGuid == null)
-                    {
-                        layer.GameMapLayerGuid = Guid.NewGuid();
-                    }
-                    if (layer.DataLastChangeUtc == null)
-                    {
-                        layer.DataLastChangeUtc = layer.LastChangeUtc;
-                    }
-                    Update(layer);
-                }
-                await SaveChangesAsync();
-            }
-
-            var locationsToUpdate = await GameMapLocations.Where(l => l.GameMapLocationGuid == null).ToListAsync();
-            if (locationsToUpdate.Count > 0)
-            {
-                foreach (var location in locationsToUpdate)
-                {
-                    location.GameMapLocationGuid = Guid.NewGuid();
-                    Update(location);
-                }
-                await SaveChangesAsync();
-            }
         }
     }
 }
