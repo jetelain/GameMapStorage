@@ -11,7 +11,14 @@
 </nav>
 
 <h1>@Html.DisplayFor(model => model.EnglishTitle)</h1>
-<hr />
+<p>
+    <a class="btn btn-sm btn-secondary" asp-action="Index"><i class="fa-solid fa-arrow-left"></i> All Games List</a>
+    <a class="btn btn-sm btn-secondary" asp-controller="Home" asp-action="Game" asp-route-gameName="@Model.Name"><i class="fa-solid fa-map"></i> View</a>
+    @if (canEdit)
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.GameId" class="btn btn-sm btn-secondary"><i class="fa-solid fa-pen"></i> Edit Informations</a>
+    }
+</p>
 
 <h2 class="h4">Informations</h2>
 <hr />
@@ -53,14 +60,6 @@
         @Html.DisplayFor(model => model.LastChangeUtc)
     </dd>
 </dl>
-
-<div>
-    @if (canEdit)
-    {
-        <a asp-action="Edit" asp-route-id="@Model?.GameId" class="btn btn-sm btn-secondary">Edit</a>
-    }
-    <a asp-action="Index">Back to List</a>
-</div>
 
 <h2 class="h4 mt-4">Maps</h2>
 <hr />

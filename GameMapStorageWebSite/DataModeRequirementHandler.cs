@@ -14,7 +14,11 @@ namespace GameMapStorageWebSite
 
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, DataModeRequirement requirement)
         {
-            if (!requirement.Requires.Contains(config.Mode))
+            if (requirement.Requires.Contains(config.Mode))
+            {
+                context.Succeed(requirement);
+            }
+            else
             {
                 context.Fail();
             }
