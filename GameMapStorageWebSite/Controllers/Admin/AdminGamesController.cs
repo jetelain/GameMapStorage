@@ -137,7 +137,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
             {
                 try
                 {
-                    using var stream = await _factory.CreateClient("CDN").GetStreamAsync(imageUri);
+                    using var stream = await _factory.CreateClient("External").GetStreamAsync(imageUri);
                     using var image = await Image.LoadAsync(stream);
                     await _thumbnailService.SetGameLogo(game, image);
                 }

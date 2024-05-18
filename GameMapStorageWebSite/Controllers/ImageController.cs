@@ -1,12 +1,13 @@
 ﻿using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
+using GameMapStorageWebSite.Services.Storages;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Webp;
 
 namespace GameMapStorageWebSite.Controllers
 {
-    public class ImageController : Controller
+    public sealed class ImageController : DownloadControllerBase
     {
         public const int CacheDuractionInSeconds = 4 * 60 * 60; // 4 hours
 
@@ -22,56 +23,66 @@ namespace GameMapStorageWebSite.Controllers
             this.thumbnailService = thumbnailService;
         }
 
+        private Task<IResult> ToResultWebp(IStorageFile? file)
+        {
+            return ToResult(file, WebpContentType);
+        }
+
+        private Task<IResult> ToResultPng(IStorageFile? file)
+        {
+            return ToResult(file, PngContentType);
+        }
+
         [Route("data/{gameId}/maps/{gameMapId}/{gameMapLayerId}/{z}/{x}/{y}.png")]
         [ResponseCache(Duration = CacheDuractionInSeconds, Location = ResponseCacheLocation.Any)]
-        public IResult GetPngTile(int gameId, int gameMapId, int gameMapLayerId, int z, int x, int y)
+        public async Task<IResult> GetTilePng(int gameId, int gameMapId, int gameMapLayerId, int z, int x, int y)
         {
             var count = MapUtils.GetTileRowCount(z);
             if (x < 0 || x >= count || y < 0 || y >= count)
             {
                 return Results.NotFound();
             }
-            return Results.Stream(target => layerService.ReadTilePng(new GameMapLayerIdentifier(gameId, gameMapId, gameMapLayerId), z, x, y, source => source.CopyToAsync(target)), PngContentType);
+            return await ToResultPng(await layerService.ReadTilePng(new GameMapLayerIdentifier(gameId, gameMapId, gameMapLayerId), z, x, y));
         }
 
         [Route("data/{gameId}/maps/{gameMapId}/{gameMapLayerId}/{z}/{x}/{y}.webp")]
         [ResponseCache(Duration = CacheDuractionInSeconds, Location = ResponseCacheLocation.Any)]
-        public IResult GetWebpTile(int gameId, int gameMapId, int gameMapLayerId, int z, int x, int y)
+        public async Task<IResult> GetTileWebp(int gameId, int gameMapId, int gameMapLayerId, int z, int x, int y)
         {
             var count = MapUtils.GetTileRowCount(z);
             if (x < 0 || x >= count || y < 0 || y >= count)
             {
                 return Results.NotFound();
             }
-            return Results.Stream(target => layerService.ReadTileWebp(new GameMapLayerIdentifier(gameId, gameMapId, gameMapLayerId), z, x, y, source => source.CopyToAsync(target)), WebpContentType);
+            return await ToResultWebp(await layerService.ReadTileWebp(new GameMapLayerIdentifier(gameId, gameMapId, gameMapLayerId), z, x, y));
         }
 
         [Route("data/{gameId}/logo.png")]
         [ResponseCache(Duration = CacheDuractionInSeconds, Location = ResponseCacheLocation.Any)]
-        public IResult GetGameLogoPng(int gameId)
+        public async Task<IResult> GetGameLogoPng(int gameId)
         {
-            return Results.Stream(target => thumbnailService.ReadGameLogoPng(new GameIdentifier(gameId), source => source.CopyToAsync(target)), PngContentType);
+            return await ToResultPng(await thumbnailService.ReadGameLogoPng(new GameIdentifier(gameId)));
         }
 
         [Route("data/{gameId}/logo.webp")]
         [ResponseCache(Duration = CacheDuractionInSeconds, Location = ResponseCacheLocation.Any)]
-        public IResult GetGameLogoWebp(int gameId)
+        public async Task<IResult> GetGameLogoWebp(int gameId)
         {
-            return Results.Stream(target => thumbnailService.ReadGameLogoWebp(new GameIdentifier(gameId), source => source.CopyToAsync(target)), WebpContentType);
+            return await ToResultWebp(await thumbnailService.ReadGameLogoWebp(new GameIdentifier(gameId)));
         }
 
         [Route("data/{gameId}/maps/{gameMapId}/thumbnail.png")]
         [ResponseCache(Duration = CacheDuractionInSeconds, Location = ResponseCacheLocation.Any)]
-        public IResult GetGameMapThumbnailPng(int gameId, int gameMapId)
+        public async Task<IResult> GetGameMapThumbnailPng(int gameId, int gameMapId)
         {
-            return Results.Stream(target => thumbnailService.ReadMapThumbnailPng(new GameMapIdentifier(gameId, gameMapId), source => source.CopyToAsync(target)), PngContentType);
+            return await ToResultPng(await thumbnailService.ReadMapThumbnailPng(new GameMapIdentifier(gameId, gameMapId)));
         }
 
         [Route("data/{gameId}/maps/{gameMapId}/thumbnail.webp")]
         [ResponseCache(Duration = CacheDuractionInSeconds, Location = ResponseCacheLocation.Any)]
-        public IResult GetGameMapThumbnailWebp(int gameId, int gameMapId)
+        public async Task<IResult> GetGameMapThumbnailWebp(int gameId, int gameMapId)
         {
-            return Results.Stream(target => thumbnailService.ReadMapThumbnailWebp(new GameMapIdentifier(gameId, gameMapId), source => source.CopyToAsync(target)), WebpContentType);
+            return await ToResultWebp(await thumbnailService.ReadMapThumbnailWebp(new GameMapIdentifier(gameId, gameMapId)));
         }
     }
 }

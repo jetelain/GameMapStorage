@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
+using System.IO.Compression;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -117,21 +119,88 @@ namespace GameMapStorageWebSite.Services
             return MapUtils.GetTileRowCount(zoom) * layer.TileSize;
         }
 
-        public async Task ReadTilePng(IGameMapLayerIdentifier layer, int zoom, int x, int y, Func<Stream, Task> read)
+        public async Task<IStorageFile> ReadTilePng(IGameMapLayerIdentifier layer, int zoom, int x, int y)
         {
-            if (!await storageService.TryReadAsync(GetBasePath(layer, zoom, x, y) + ".png", read))
+            return (await storageService.GetAsync(GetBasePath(layer, zoom, x, y) + ".png"))
+                ?? new LocalStorageFile("wwwroot/img/missing/tile.png");
+        }
+
+        public async Task<IStorageFile> ReadTileWebp(IGameMapLayerIdentifier layer, int zoom, int x, int y)
+        {
+            return (await storageService.GetAsync(GetBasePath(layer, zoom, x, y) + ".webp")) 
+                ?? new LocalStorageFile("wwwroot/img/missing/tile.webp");
+        }
+
+        public async Task WriteArchiveTo(GameMapLayer layer, Stream target)
+        {
+            ValidateLayer(layer);
+            using var zip = new ZipArchive(target, ZipArchiveMode.Create);
+            // Add a JSON with metadata ?
+            for(int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                using var source = File.OpenRead("wwwroot/img/missing/tile.png");
-                await read(source);
+                await CreateEntry(zip, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                var count = MapUtils.GetTileRowCount(zoom);
+                for (int x = 0; x < count; x++)
+                {
+                    for (int y = 0; y < count; y++)
+                    {
+                        await CreateEntry(zip, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png"); 
+                        if (layer.Format == LayerFormat.PngAndWebp)
+                        {
+                            await CreateEntry(zip, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
+                        }
+                    }
+                }
             }
         }
 
-        public async Task ReadTileWebp(IGameMapLayerIdentifier layer, int zoom, int x, int y, Func<Stream, Task> read)
+        private async Task CreateEntry(ZipArchive zip, string entryName, string storageFile)
         {
-            if (!await storageService.TryReadAsync(GetBasePath(layer, zoom, x, y) + ".webp", read))
+            var file = await storageService.GetAsync(storageFile);
+            if (file != null)
             {
-                using var source = File.OpenRead("wwwroot/img/missing/tile.webp");
-                await read(source);
+                var entry = zip.CreateEntry(entryName, CompressionLevel.NoCompression);
+                using var targetStream = entry.Open();
+                using var sourceStream = await file.OpenRead();
+                await sourceStream.CopyToAsync(targetStream);
+            }
+        }
+
+        public Task<IStorageFile> GetArchive(GameMapLayer layer)
+        {
+            ValidateLayer(layer);
+            // TODO: Create a cache option to avoid re-creating the zip each time
+            return Task.FromResult<IStorageFile>(new MemoryStorageFile(s => WriteArchiveTo(layer, s), layer.LastChangeUtc));
+        }
+
+        public async Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive)
+        {
+            ValidateLayer(layer);
+            for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
+            {
+                await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                var count = MapUtils.GetTileRowCount(zoom);
+                for (int x = 0; x < count; x++)
+                {
+                    for (int y = 0; y < count; y++)
+                    {
+                        await UnPack(archive, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
+                        if (layer.Format == LayerFormat.PngAndWebp)
+                        {
+                            await UnPack(archive, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task UnPack(ZipArchive zip, string entryName, string storageFile)
+        {
+            var entry = zip.GetEntry(entryName);
+            if ( entry != null)
+            {
+                using var source = entry.Open();
+                await storageService.StoreAsync(storageFile, source.CopyToAsync);
             }
         }
     }

@@ -2,7 +2,7 @@
 
 namespace GameMapStorageWebSite.Entities
 {
-    public class Game : IGameIdentifier
+    public class Game : IGameIdentifier, IWithTimestamp
     {
         public int GameId { get; set; }
 
@@ -25,7 +25,7 @@ namespace GameMapStorageWebSite.Entities
 
         public List<GameColor>? Colors { get; set; }
 
-        public List<GameMarker>? GameMarkers { get; set; }
+        public List<GameMarker>? Markers { get; set; }
 
         public List<GameMap>? Maps { get; set; }
     }

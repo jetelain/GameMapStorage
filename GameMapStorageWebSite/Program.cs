@@ -1,14 +1,22 @@
+using System.Net;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
+using GameMapStorageWebSite.Services.Mirroring;
+using GameMapStorageWebSite.Services.Storages;
 using GameMapStorageWebSite.Works;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
+using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Http.Resilience;
+using Polly;
+using Polly.Timeout;
 
 namespace GameMapStorageWebSite
 {
@@ -35,15 +43,14 @@ namespace GameMapStorageWebSite
         /// <param name="builder"></param>
         private static void AddServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddHttpClient("CDN", client =>
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0");
-            });
+            var config = new DataConfigurationService(configuration.GetSection("Data").Get<DataConfiguration>());
+
+            AddHttpClients(services);
 
             services.AddAuthentication(options =>
-                {
-                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                })
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Home/SignInUser";
@@ -58,7 +65,11 @@ namespace GameMapStorageWebSite
                 options.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.NameIdentifier, admins));
             });
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                .AddJsonOptions(jsonOptions =>
+                {
+                    jsonOptions.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             services.AddDbContext<GameMapStorageContext>(options =>
                 options.UseSqlite(
@@ -77,31 +88,81 @@ namespace GameMapStorageWebSite
             services.AddScoped<IImageLayerService, ImageLayerService>();
             services.AddScoped<IThumbnailService, ThumbnailService>();
             services.AddScoped<IPackageService, PackageService>();
+            services.AddSingleton<ILocalStorageService, LocalStorageService>();
 
-            if (configuration["StorageMode"] == "Proxy")
-            {
-                services.AddSingleton<ILocalStorageService, LocalStorageService>();
-
-                services.AddScoped<IStorageService, ProxyStorageService>();
-
-                services.AddHttpClient("ProxyClient", client =>
-                {
-                    client.BaseAddress = new Uri("https://atlas.plan-ops.fr/data/");
-                });
-            }
-            else
-            {
-                services.AddSingleton<IStorageService, LocalStorageService>();
-            }
+            SetupDataMode(services, config);
 
             services.AddSingleton<IWorkspaceService, WorkspaceService>();
 
             services.AddResponseCaching();
 
-            services.AddScoped<IWorker<MigrateArma3MapWorkData>,MigrateArma3MapWorker>();
+            services.AddScoped<IWorker<MigrateArma3MapWorkData>, MigrateArma3MapWorker>();
             services.AddScoped<IWorker<ProcessLayerWorkData>, ProcessLayerWorker>();
+            services.AddScoped<IWorker<MirrorLayerWorkData>, MirrorLayerWorker>();
             services.AddScoped<BackgroundWorker>();
             services.AddHostedService<BackgroundWorkerHostedService>();
+            services.AddSingleton<IDataConfigurationService>(config);
+
+            services.AddScoped<IMirrorService, MirrorService>();
+        }
+
+        private static void SetupDataMode(IServiceCollection services, DataConfigurationService config)
+        {
+            if (config.Mode == DataMode.Proxy)
+            {
+                services.AddScoped<IStorageService, ProxyStorageService>();
+                services.AddHttpClient("Proxy", client => { client.BaseAddress = config.ProxyUri!; })
+                    .AddStandardResilienceHandler();
+            }
+            else if (config.Mode == DataMode.Mirror)
+            {
+                services.AddSingleton<IStorageService, LocalStorageService>();
+                services.AddHttpClient("Mirror", client => { client.BaseAddress = config.MirrorUri!; })
+                    .AddResilienceHandler("retry", ConfigureBackgroundRetryHandler);
+            }
+            else
+            {
+                services.AddSingleton<IStorageService, LocalStorageService>();
+            }
+        }
+
+        private static void AddHttpClients(IServiceCollection services)
+        {
+            services
+                .AddHttpClient("Arma3Map", client =>
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0");
+                })
+                .AddResilienceHandler("retry", ConfigureBackgroundRetryHandler);
+
+            services
+                .AddHttpClient("External", client =>
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0");
+                });
+        }
+
+        private static void ConfigureBackgroundRetryHandler(ResiliencePipelineBuilder<HttpResponseMessage> builder)
+        {
+            builder
+                .AddRetry(new HttpRetryStrategyOptions()
+                {
+                    BackoffType = DelayBackoffType.Linear,
+                    UseJitter = true,
+                    Delay = TimeSpan.FromMilliseconds(500),
+                    MaxRetryAttempts = 20,
+                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
+                        .Handle<TimeoutRejectedException>()
+                        .Handle<HttpRequestException>()
+                        .HandleResult(response =>
+                            response.StatusCode == HttpStatusCode.ServiceUnavailable
+                            || response.StatusCode == HttpStatusCode.TooManyRequests
+                            || response.StatusCode >= HttpStatusCode.InternalServerError)
+                })
+                .AddTimeout(new HttpTimeoutStrategyOptions()
+                {
+                    Timeout = TimeSpan.FromMinutes(10)
+                });
         }
 
         /// <summary>
@@ -136,11 +197,6 @@ namespace GameMapStorageWebSite
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-
-            app.MapControllerRoute(
-                name: "areas",
-                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-              );
         }
 
 
@@ -153,16 +209,7 @@ namespace GameMapStorageWebSite
                 {
                     var context = services.GetRequiredService<GameMapStorageContext>();
                     await context.Database.MigrateAsync();
-                    context.InitData();
-
-                    if (app.Configuration.GetValue<bool?>("AutoMigrateArma3Map") ?? false)
-                    {
-                        if (await context.Works.Where(t => t.Type == BackgroundWorkType.MigrateArma3Map).CountAsync() == 0
-                            && await context.GameMaps.CountAsync() == 0)
-                        {
-                            await services.GetRequiredService<IMigrateArma3MapFactory>().InitialWorkLoad();
-                        }
-                    }
+                    await context.InitData();
                 }
                 catch (Exception ex)
                 {

@@ -1,0 +1,61 @@
+﻿@model SyncMirrorViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+<h1>Mirror Synchronization</h1>
+
+<p>Done in @Model.Report.Elapsed, @Model.Report.Works.Count new tasks has been scheduled.</p>
+
+<p><a asp-controller="AdminBackgroundWorks" asp-action="Index">@Model.PendingCount mirroring tasks are pending</a>, it should takes @Model.EstimatedTime to process.</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Entity</th>
+            <th>Added</th>
+            <th>Updated</th>
+            <th>Up to date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>
+                    @if (item.Added > 0)
+                    {
+                        <span class="badge bg-success">@item.Added</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">0</span>
+                    }
+                </td>
+                <td>
+                    @if (item.Updated > 0)
+                    {
+                        <span class="badge bg-success">@item.Updated</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">0</span>
+                    }
+                </td>
+                <td>
+                    @if (item.UpToDate > 0)
+                    {
+                        <span class="badge bg-primary">@item.UpToDate</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">0</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

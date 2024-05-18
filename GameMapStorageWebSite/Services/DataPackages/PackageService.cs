@@ -68,7 +68,8 @@ namespace GameMapStorageWebSite.Services.DataPackages
                 TileSize = indexContent.TileSize,
                 MaxZoom = indexContent.Images.Max(i => i.MaxZoom),
                 MinZoom = indexContent.Images.Min(i => i.MinZoom),
-                LastChangeUtc = DateTime.UtcNow
+                LastChangeUtc = DateTime.UtcNow,
+                GameMapLayerGuid = Guid.NewGuid()
             };
             context.GameMapLayers.Add(layer);
             await context.SaveChangesAsync(); // we need GameMapLayerId to continue
@@ -101,7 +102,7 @@ namespace GameMapStorageWebSite.Services.DataPackages
                     GameId = game.GameId,
                     LastChangeUtc = DateTime.UtcNow,
                     SizeInMeters = indexContent.SizeInMeters,
-                    Locations = indexContent.Locations.Select(l => new GameMapLocation() { EnglishTitle = l.EnglishTitle, Type = l.Type, X = l.X, Y = l.Y }).ToList(),
+                    Locations = indexContent.Locations.Select(l => new GameMapLocation() { EnglishTitle = l.EnglishTitle, Type = l.Type, X = l.X, Y = l.Y, GameMapLocationGuid = Guid.NewGuid() }).ToList(),
                     CitiesCount = indexContent.Locations.Count(l => l.Type == LocationType.City)
                 };
                 context.GameMaps.Add(map);

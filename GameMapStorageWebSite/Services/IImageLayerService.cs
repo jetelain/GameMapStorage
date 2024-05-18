@@ -1,4 +1,6 @@
-﻿using GameMapStorageWebSite.Entities;
+﻿using System.IO.Compression;
+using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 
 namespace GameMapStorageWebSite.Services
@@ -9,10 +11,13 @@ namespace GameMapStorageWebSite.Services
 
         Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage);
 
-        Task ReadTilePng(IGameMapLayerIdentifier layer, int zoom, int x, int y, Func<Stream, Task> read);
+        Task<IStorageFile> ReadTilePng(IGameMapLayerIdentifier layer, int zoom, int x, int y);
 
-        Task ReadTileWebp(IGameMapLayerIdentifier layer, int zoom, int x, int y, Func<Stream, Task> read);
+        Task<IStorageFile> ReadTileWebp(IGameMapLayerIdentifier layer, int zoom, int x, int y);
 
         int GetSizeAtZoom(GameMapLayer layer, int zoom);
+
+        Task<IStorageFile> GetArchive(GameMapLayer layer);
+        Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive);
     }
 }

@@ -15,7 +15,7 @@ namespace GameMapStorageWebSite.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
 
             modelBuilder.Entity("GameMapStorageWebSite.Entities.BackgroundWork", b =>
                 {
@@ -171,6 +171,9 @@ namespace GameMapStorageWebSite.Migrations
                     b.Property<string>("Culture")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DataLastChangeUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("DefaultZoom")
                         .HasColumnType("INTEGER");
 
@@ -185,6 +188,9 @@ namespace GameMapStorageWebSite.Migrations
 
                     b.Property<int>("GameMapId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("GameMapLayerGuid")
+                        .HasColumnType("BLOB");
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
@@ -226,6 +232,9 @@ namespace GameMapStorageWebSite.Migrations
 
                     b.Property<int>("GameMapId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("GameMapLocationGuid")
+                        .HasColumnType("BLOB");
 
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
@@ -326,7 +335,7 @@ namespace GameMapStorageWebSite.Migrations
             modelBuilder.Entity("GameMapStorageWebSite.Entities.GameMarker", b =>
                 {
                     b.HasOne("GameMapStorageWebSite.Entities.Game", "Game")
-                        .WithMany("GameMarkers")
+                        .WithMany("Markers")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -338,9 +347,9 @@ namespace GameMapStorageWebSite.Migrations
                 {
                     b.Navigation("Colors");
 
-                    b.Navigation("GameMarkers");
-
                     b.Navigation("Maps");
+
+                    b.Navigation("Markers");
                 });
 
             modelBuilder.Entity("GameMapStorageWebSite.Entities.GameMap", b =>

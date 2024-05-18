@@ -14,7 +14,12 @@ namespace GameMapStorageWebSite
 
         public static string GetLayerPattern(HttpRequest request, IGameMapLayerIdentifier layer)
         {
-            if (AcceptWebp(request))
+            return GetLayerPattern(AcceptWebp(request), layer);
+        }
+
+        public static string GetLayerPattern(bool useWebp, IGameMapLayerIdentifier layer)
+        {
+            if (useWebp)
             {
                 return FormattableString.Invariant($"/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/{{z}}/{{x}}/{{y}}.webp");
             }

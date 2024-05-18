@@ -1,11 +1,10 @@
-﻿
-namespace GameMapStorageWebSite.Services
+﻿namespace GameMapStorageWebSite.Services.Storages
 {
     public class LocalStorageService : IStorageService, ILocalStorageService
     {
         private readonly string basePath;
 
-        public LocalStorageService(IConfiguration configuration): this(
+        public LocalStorageService(IConfiguration configuration) : this(
                 configuration["LocalStoragePath"] ??
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GameMapStorage", "data"))
         {
@@ -27,11 +26,14 @@ namespace GameMapStorageWebSite.Services
             return Task.CompletedTask;
         }
 
-        public async Task ReadAsync(string path, Func<Stream, Task> read)
+        public Task<IStorageFile?> GetAsync(string path)
         {
             var target = Path.Combine(basePath, path);
-            using var stream = File.OpenRead(target);
-            await read(stream);
+            if (File.Exists(target))
+            {
+                return Task.FromResult<IStorageFile?>(new LocalStorageFile(target));
+            }
+            return Task.FromResult<IStorageFile?>(null);
         }
 
         public async Task StoreAsync(string path, Func<Stream, Task> write)
@@ -40,18 +42,6 @@ namespace GameMapStorageWebSite.Services
             Directory.CreateDirectory(Path.GetDirectoryName(target)!);
             using var stream = File.Create(target);
             await write(stream);
-        }
-
-        public async Task<bool> TryReadAsync(string path, Func<Stream, Task> read)
-        {
-            var target = Path.Combine(basePath, path);
-            if (File.Exists(target))
-            {
-                using var stream = File.OpenRead(target);
-                await read(stream);
-                return true;
-            }
-            return false;
         }
     }
 }

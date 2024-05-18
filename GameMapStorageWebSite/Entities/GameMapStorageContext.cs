@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GameMapStorageWebSite.Entities.Converters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GameMapStorageWebSite.Entities
 {
@@ -23,6 +25,12 @@ namespace GameMapStorageWebSite.Entities
         {
         }
 
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.Properties<DateTime?>().HaveConversion<DateTimeAssumeUniversal>();
+            configurationBuilder.Properties<Guid?>().HaveConversion<GuidToBytesConverter>();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Game>().ToTable("Game");
@@ -34,7 +42,7 @@ namespace GameMapStorageWebSite.Entities
             modelBuilder.Entity<BackgroundWork>().ToTable("BackgroundWork");
         }
 
-        internal void InitData()
+        internal async Task InitData()
         {
             if (Games.Count() == 0)
             {
@@ -63,7 +71,7 @@ namespace GameMapStorageWebSite.Entities
                     }
                 };
                 Games.AddRange(initialData);
-                SaveChanges();
+                await SaveChangesAsync();
             }
         }
     }

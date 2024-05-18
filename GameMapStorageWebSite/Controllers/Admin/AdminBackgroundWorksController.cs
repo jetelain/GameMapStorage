@@ -1,4 +1,7 @@
 ﻿using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Models;
+using GameMapStorageWebSite.Services;
+using GameMapStorageWebSite.Services.Mirroring;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,17 +14,22 @@ namespace GameMapStorageWebSite.Controllers.Admin
     {
         private readonly GameMapStorageContext _context;
         private readonly IMigrateArma3MapFactory _migrateArma3MapFactory;
+        private readonly IDataConfigurationService _dataConfiguration;
+        private readonly IMirrorService _mirrorService;
 
-        public AdminBackgroundWorksController(GameMapStorageContext context, IMigrateArma3MapFactory migrateArma3MapFactory)
+        public AdminBackgroundWorksController(GameMapStorageContext context, IMigrateArma3MapFactory migrateArma3MapFactory, IDataConfigurationService dataConfiguration, IMirrorService mirrorService)
         {
             _context = context;
             _migrateArma3MapFactory = migrateArma3MapFactory;
+            _dataConfiguration = dataConfiguration;
+            _mirrorService = mirrorService;
         }
 
         // GET: AdminBackgroundWorks
         public async Task<IActionResult> Index()
         {
             var gameMapStorageContext = _context.Works.Include(b => b.GameMapLayer);
+            ViewBag.DataMode = _dataConfiguration.Mode;
             return View(await gameMapStorageContext.ToListAsync());
         }
 
@@ -48,8 +56,26 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SyncArma3Map()
         {
+            if (_dataConfiguration.Mode == DataMode.Mirror)
+            {
+                return Forbid();
+            }
             await _migrateArma3MapFactory.IncrementalWorkLoad();
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SyncMirror()
+        {
+            if (_dataConfiguration.Mode != DataMode.Mirror)
+            {
+                return Forbid();
+            }
+            var report = await _mirrorService.UpdateMirror();
+            var vm = new SyncMirrorViewModel(report);
+            vm.PendingCount = await _context.Works.CountAsync(w => w.State == BackgroundWorkState.Pending && w.Type == BackgroundWorkType.MirrorLayer);
+            return View(vm);
         }
 
         [HttpPost]

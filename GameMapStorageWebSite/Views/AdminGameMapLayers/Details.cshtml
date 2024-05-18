@@ -4,11 +4,17 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="AdminGames" asp-action="Details" asp-route-id="@Model.GameMap!.GameId">@Model.GameMap!.Game!.EnglishTitle</a></li>
+        <li class="breadcrumb-item"><a asp-controller="AdminGameMaps" asp-action="Details" asp-route-id="@Model.GameMapId">@Model.GameMap!.EnglishTitle</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Html.DisplayFor(model => model.Type)</li>
+    </ol>
+</nav>
+
+<h1>@Html.DisplayFor(model => model.Type)</h1>
 
 <div>
-    <h4>GameMapLayer</h4>
-    <hr />
     <dl class="row">
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Type)

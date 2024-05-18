@@ -4,6 +4,8 @@
     {
         MigrateArma3Map,
 
-        ProcessLayer
+        ProcessLayer,
+
+        MirrorLayer
     }
 }

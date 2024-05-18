@@ -1,4 +1,4 @@
-﻿namespace GameMapStorageWebSite.Services
+﻿namespace GameMapStorageWebSite.Services.Storages
 {
     public interface ILocalStorageService : IStorageService
     {

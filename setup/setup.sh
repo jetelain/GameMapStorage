@@ -30,8 +30,8 @@ fi
 cd ~/build/GameMapStorage
 
 echo "Update git"
-git pull
 git checkout main
+git pull
 
 echo "Check config"
 if [ ! -f /opt/GameMapStorage/appsettings.Production.json ]; then
@@ -49,13 +49,14 @@ if [ ! -f /etc/systemd/system/kestrel-gms.service ]; then
 fi
 
 echo "Build"
+rm -rf dotnet-webapp
 dotnet publish -c Release -o dotnet-webapp -r linux-x64 --self-contained false GameMapStorageWebSite/GameMapStorageWebSite.csproj
 
 echo "Stop Service"
 sudo systemctl stop kestrel-gms
 
 echo "Copy files"
-rsync -avu "dotnet-webapp/" "/opt/GameMapStorage"
+cp -ar "dotnet-webapp/." "/opt/GameMapStorage"
 
 echo "Start Service"
 sudo systemctl start kestrel-gms

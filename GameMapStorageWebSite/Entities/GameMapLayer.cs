@@ -1,6 +1,6 @@
 ﻿namespace GameMapStorageWebSite.Entities
 {
-    public class GameMapLayer : IGameMapLayerIdentifier
+    public class GameMapLayer : IGameMapLayerIdentifier, IWithTimestamp
     {
         public int GameMapLayerId { get; set; }
 
@@ -26,6 +26,10 @@
         public string? Culture { get; set; }
 
         public DateTime? LastChangeUtc { get; set; }
+
+        public DateTime? DataLastChangeUtc { get; set; }
+
+        public Guid? GameMapLayerGuid {  get; set; }
 
         // FK to GameMap
         public int GameMapId { get; set; }
