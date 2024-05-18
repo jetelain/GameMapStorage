@@ -14,7 +14,7 @@ namespace GameMapStorageWebSite.Works
         {
             this.logger = logger;
             this.services = services;
-            this.timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+            this.timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
         }
 
         public Task StartAsync(CancellationToken stoppingToken)
