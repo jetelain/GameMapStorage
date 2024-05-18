@@ -184,7 +184,8 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
                 LastChangeUtc = DateTime.UtcNow,
                 State = LayerState.Processing,
                 Type = LayerType.Topographic,
-                TileSize = task.MapInfos.tileSize
+                TileSize = task.MapInfos.tileSize,
+                GameMapLayerGuid = Guid.NewGuid()
             };
             map.Layers = new List<GameMapLayer>() { layer };
             return layer;
@@ -206,7 +207,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
             };
             if (task.MapInfos.cities != null)
             {
-                map.Locations = task.MapInfos.cities.Select(c => new GameMapLocation() { EnglishTitle = c.name ?? "(unknown)", X = c.x, Y = c.y, Type = LocationType.City, GameMap = map }).ToList();
+                map.Locations = task.MapInfos.cities.Select(c => new GameMapLocation() { EnglishTitle = c.name ?? "(unknown)", X = c.x, Y = c.y, Type = LocationType.City, GameMapLocationGuid = Guid.NewGuid(), GameMap = map }).ToList();
                 map.CitiesCount = task.MapInfos.cities.Count;
             }
             return map;

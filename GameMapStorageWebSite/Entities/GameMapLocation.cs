@@ -12,6 +12,7 @@
 
         public double Y { get; set; }
 
+        public Guid? GameMapLocationGuid { get; set; }
 
         // FK to GameMap
         public int GameMapId { get; set; }

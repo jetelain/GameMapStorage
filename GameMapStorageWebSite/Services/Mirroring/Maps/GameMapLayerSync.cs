@@ -6,15 +6,26 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
 {
     internal sealed class GameMapLayerSync : SyncBase<GameMapLayerJson, GameMapLayer>
     {
-        public GameMapLayerSync(SyncReport report, DbSet<GameMapLayer> dbset, bool keepId)
+        private readonly List<int> alreadyScheduled;
+
+        public GameMapLayerSync(SyncReport report, DbSet<GameMapLayer> dbset, List<int> alreadyScheduled, bool keepId)
             : base(report, dbset, keepId)
         {
+            this.alreadyScheduled = alreadyScheduled;
         }
 
         public List<(GameMapLayer, GameMapLayerJson)> LayersToDownload { get; } = new List<(GameMapLayer, GameMapLayerJson)>();
 
         protected override bool Copy(GameMapLayerJson source, GameMapLayer target)
         {
+            if (!alreadyScheduled.Contains(target.GameMapLayerId))
+            {
+                if ((target.DataLastChangeUtc == null) || target.DataLastChangeUtc.Value < (source.DataLastChangeUtc ?? source.LastChangeUtc)!.Value)
+                {
+                    LayersToDownload.Add((target, source));
+                }
+            }
+
             if (target.LastChangeUtc == source.LastChangeUtc)
             {
                 return false;
@@ -29,9 +40,8 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             target.FactorX = source.FactorX;
             target.FactorY = source.FactorY;
             target.Culture = source.Culture;
+            target.GameMapLayerGuid = source.GameMapLayerGuid;
             target.LastChangeUtc = source.LastChangeUtc;
-
-            LayersToDownload.Add((target, source)); // TODO: Should create a DataLastChangeUtc column to avoid full download if a metadata changed
             return true;
         }
 
@@ -41,8 +51,11 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             {
                 return source.GameMapLayerId == target.GameMapLayerId;
             }
-            throw new NotImplementedException();
-            // TODO: Should create a GameMapLayerGuid to match across syndicated sources
+            if (source.GameMapLayerGuid == null)
+            {
+                throw new InvalidOperationException($"GameMapLocationGuid is missing on GameMapLayerId={source.GameMapLayerId}");
+            }
+            return source.GameMapLayerGuid == target.GameMapLayerGuid;
         }
 
         protected override GameMapLayer ToEntity(GameMapLayerJson source)
@@ -61,7 +74,8 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
                 FactorX = source.FactorX,
                 FactorY = source.FactorY,
                 Culture = source.Culture,
-                LastChangeUtc = source.LastChangeUtc
+                LastChangeUtc = source.LastChangeUtc,
+                GameMapLayerGuid = source.GameMapLayerGuid
             };
             LayersToDownload.Add((layer, source));
             return layer;

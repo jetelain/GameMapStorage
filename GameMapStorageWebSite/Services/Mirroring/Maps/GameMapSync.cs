@@ -3,6 +3,7 @@ using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Models.Json;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
 
 namespace GameMapStorageWebSite.Services.Mirroring.Maps
 {
@@ -14,12 +15,12 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
         private readonly Game targetGame;
         private readonly GameJson sourceGame;
 
-        public GameMapSync(SyncReport report, GameMapStorageContext context, Game targetGame, GameJson sourceGame, bool keepId)
+        public GameMapSync(SyncReport report, GameMapStorageContext context, Game targetGame, GameJson sourceGame, List<int> alreadyScheduled, bool keepId)
             : base(report, context.GameMaps, keepId)
         {
             this.context = context;
             locations = new GameMapLocationSync(report, context.GameMapLocations, keepId);
-            layers = new GameMapLayerSync(report, context.GameMapLayers, keepId);
+            layers = new GameMapLayerSync(report, context.GameMapLayers, alreadyScheduled, keepId);
             this.targetGame = targetGame;
             this.sourceGame = sourceGame;
         }
@@ -38,7 +39,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             target.Layers = layers.UpdateOrCreateEntities(source.Layers!, target.Layers!);
             target.Locations = locations.UpdateOrCreateEntities(source.Locations!, target.Locations!);
 
-            target.CitiesCount = target.Locations.Count(l => l.Type == LocationType.City);
+            target.UpdateCitiesCount();
             return true;
         }
 
@@ -55,24 +56,24 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             return source.Name == target.Name;
         }
 
-        protected override async Task ItemDone(GameMap target)
+        protected override async Task ItemDone(GameMap target, HttpClient client)
         {
             await context.SaveChangesAsync();
 
             if (layers.LayersToDownload.Count > 0)
             {
-                await ScheduleLayerDataDownload();
+                await ScheduleLayerDataDownload(client.BaseAddress);
             }
         }
 
-        private async Task ScheduleLayerDataDownload()
+        private async Task ScheduleLayerDataDownload(Uri? baseAddress)
         {
             foreach (var (layer, infos) in layers.LayersToDownload)
             {
                 var work = new BackgroundWork()
                 {
                     CreatedUtc = DateTime.UtcNow,
-                    Data = JsonSerializer.Serialize(new MirrorLayerWorkData(layer.GameMapLayerId, infos.DownloadUri!)),
+                    Data = JsonSerializer.Serialize(new MirrorLayerWorkData(layer.GameMapLayerId, GetAbsoluteUri(baseAddress, infos.DownloadUri!))),
                     Type = BackgroundWorkType.MirrorLayer,
                     GameMapLayerId = layer.GameMapLayerId,
                     GameMapLayer = layer,
@@ -85,10 +86,18 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             await context.SaveChangesAsync();
         }
 
+        private static string GetAbsoluteUri(Uri? baseAddress, string relativeUri)
+        {
+            if (baseAddress == null)
+            {
+                return relativeUri;
+            }
+            return new Uri(baseAddress, relativeUri).AbsoluteUri;
+        }
+
         protected override GameMap ToEntity(GameMapJson source)
         {
-            var locationsEntities = locations.CreateEntities(source.Locations);
-            return new GameMap()
+            var gameMap = new GameMap()
             {
                 GameMapId = keepId ? source.GameMapId : default,
 
@@ -102,13 +111,13 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
                 Aliases = source.Aliases,
 
                 Layers = layers.CreateEntities(source.Layers),
-                Locations = locationsEntities,
+                Locations = locations.CreateEntities(source.Locations),
 
                 Game = targetGame,
-                GameId = targetGame.GameId,
-
-                CitiesCount = locationsEntities?.Count(l => l.Type == LocationType.City) ?? 0
+                GameId = targetGame.GameId
             };
+            gameMap.UpdateCitiesCount();
+            return gameMap;
         }
 
         protected override void UpdateLight(GameMapJson sourceLight, GameMap target)
@@ -121,6 +130,16 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             var localMaps = await context.GameMaps.Where(m => m.GameId == targetGame.GameId).ToListAsync();
             await context.GameMapLayers.Where(m => m.GameMap!.GameId == targetGame.GameId).ToListAsync();
             return localMaps;
+        }
+
+        protected override async Task DownloadImage(GameMap target, GameMapJson source, HttpClient client, IThumbnailService thumbnailService)
+        {
+            if (!string.IsNullOrEmpty(source.ThumbnailPng) )
+            {
+                var bytes = await client.GetByteArrayAsync(source.ThumbnailPng);
+                using var image = Image.Load(new MemoryStream(bytes));
+                await thumbnailService.SetMapThumbnail(target, image);
+            }
         }
     }
 }

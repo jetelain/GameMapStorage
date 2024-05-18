@@ -1,6 +1,7 @@
 ﻿using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Models.Json;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
 
 namespace GameMapStorageWebSite.Services.Mirroring.Games
 {
@@ -53,7 +54,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
             return source.Name == target.Name;
         }
 
-        protected override Task ItemDone(Game target)
+        protected override Task ItemDone(Game target, HttpClient client)
         {
             return context.SaveChangesAsync();
         }
@@ -79,6 +80,16 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
         protected override void UpdateLight(GameJson sourceLight, Game target)
         {
             // Nothing to do
+        }
+
+        protected override async Task DownloadImage(Game target, GameJson source, HttpClient client, IThumbnailService thumbnailService)
+        {
+            if (!string.IsNullOrEmpty(source.LogoPng))
+            {
+                var bytes = await client.GetByteArrayAsync(source.LogoPng);
+                using var image = Image.Load(new MemoryStream(bytes));
+                await thumbnailService.SetGameLogo(target, image);
+            }
         }
     }
 }

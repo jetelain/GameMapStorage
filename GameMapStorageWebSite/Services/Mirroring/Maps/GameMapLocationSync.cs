@@ -17,6 +17,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             target.Type = source.Type;
             target.X = source.X;
             target.Y = source.Y;
+            target.GameMapLocationGuid = source.GameMapLocationGuid;
             return true;
         }
 
@@ -26,7 +27,11 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             {
                 return source.GameMapLocationId == target.GameMapLocationId;
             }
-            return source.X == target.X && source.Y == target.Y; // TODO: Should use a GameMapLocationGuid
+            if (source.GameMapLocationGuid == null)
+            {
+                throw new InvalidOperationException($"GameMapLocationGuid is missing on GameMapLocationId={source.GameMapLocationId}");
+            }
+            return source.GameMapLocationGuid == target.GameMapLocationGuid;
         }
 
         protected override GameMapLocation ToEntity(GameMapLocationJson source)
@@ -38,7 +43,8 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
                 EnglishTitle = source.EnglishTitle!,
                 Type = source.Type,
                 X = source.X,
-                Y = source.Y
+                Y = source.Y,
+                GameMapLocationGuid = source.GameMapLocationGuid
             };
         }
     }

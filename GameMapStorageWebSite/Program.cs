@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
+using GameMapStorageWebSite.Services.Mirroring;
 using GameMapStorageWebSite.Services.Storages;
 using GameMapStorageWebSite.Works;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
@@ -101,6 +102,8 @@ namespace GameMapStorageWebSite
             services.AddScoped<BackgroundWorker>();
             services.AddHostedService<BackgroundWorkerHostedService>();
             services.AddSingleton<IDataConfigurationService>(config);
+
+            services.AddScoped<IMirrorService, MirrorService>();
         }
 
         private static void SetupDataMode(IServiceCollection services, DataConfigurationService config)
@@ -206,7 +209,7 @@ namespace GameMapStorageWebSite
                 {
                     var context = services.GetRequiredService<GameMapStorageContext>();
                     await context.Database.MigrateAsync();
-                    context.InitData();
+                    await context.InitData();
                 }
                 catch (Exception ex)
                 {

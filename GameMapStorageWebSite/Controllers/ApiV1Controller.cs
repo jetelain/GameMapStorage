@@ -77,7 +77,7 @@ namespace GameMapStorageWebSite.Controllers
                 return NotFound();
             }
             var maps = await context.GameMaps.Where(c => c.GameId == game.GameId).ToListAsync();
-            await context.GameMapLayers.Where(l => l.GameMap!.GameId == game.GameId).ToListAsync();
+            await context.GameMapLayers.Where(l => l.GameMap!.GameId == game.GameId && l.State == LayerState.Ready).ToListAsync();
             var basePath = GetBasePath();
             var useWebp = ImagePathHelper.AcceptWebp(Request);
             return Json(maps.Select(m => new GameMapJson(m, basePath, useWebp) { Layers = GetLayers(m.Layers!, basePath, useWebp) }).ToList());
@@ -105,7 +105,7 @@ namespace GameMapStorageWebSite.Controllers
             var basePath = GetBasePath();
             var useWebp = ImagePathHelper.AcceptWebp(Request);
             var mapJson = new GameMapJson(map, basePath, useWebp);
-            mapJson.Layers = GetLayers(await context.GameMapLayers.Where(l => l.GameMapId == map.GameMapId).ToListAsync(), basePath, useWebp);
+            mapJson.Layers = GetLayers(await context.GameMapLayers.Where(l => l.GameMapId == map.GameMapId && l.State == LayerState.Ready).ToListAsync(), basePath, useWebp);
             mapJson.Locations = (await context.GameMapLocations.Where(l => l.GameMapId == map.GameMapId).ToListAsync()).Select(l => new GameMapLocationJson(l)).ToList();
             return Json(mapJson);
         }

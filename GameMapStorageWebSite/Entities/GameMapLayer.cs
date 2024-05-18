@@ -27,6 +27,10 @@
 
         public DateTime? LastChangeUtc { get; set; }
 
+        public DateTime? DataLastChangeUtc { get; set; }
+
+        public Guid? GameMapLayerGuid {  get; set; }
+
         // FK to GameMap
         public int GameMapId { get; set; }
 

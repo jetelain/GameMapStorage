@@ -24,6 +24,8 @@ namespace GameMapStorageWebSite.Models.Json
             FactorY = gameMapLayer.FactorY;
             Culture = gameMapLayer.Culture;
             LastChangeUtc = gameMapLayer.LastChangeUtc;
+            DataLastChangeUtc = gameMapLayer.DataLastChangeUtc;
+            GameMapLayerGuid = gameMapLayer.GameMapLayerGuid;
 
             var map = gameMapLayer.GameMap!;
 
@@ -62,6 +64,10 @@ namespace GameMapStorageWebSite.Models.Json
         public string? Culture { get; set; }
 
         public DateTime? LastChangeUtc { get; set; }
+
+        public DateTime? DataLastChangeUtc { get; set; }
+
+        public Guid? GameMapLayerGuid { get; set; }
 
         public string? DownloadUri { get; set; }
 

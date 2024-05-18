@@ -40,6 +40,9 @@ namespace GameMapStorageWebSite.Entities
         public List<GameMapLayer>? Layers { get; set; }
         public List<GameMapLocation>? Locations { get; set; }
 
-
+        internal void UpdateCitiesCount()
+        {
+            CitiesCount = Locations?.Count(l => l.Type == LocationType.City) ?? 0;
+        }
     }
 }

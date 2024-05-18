@@ -21,7 +21,7 @@ namespace GameMapStorageWebSite.Works
         {
             await context.Entry(layer).ReloadAsync();
             layer.State = LayerState.Ready;
-            layer.LastChangeUtc = DateTime.UtcNow;
+            layer.DataLastChangeUtc = DateTime.UtcNow;
             context.Update(layer);
             await context.SaveChangesAsync();
         }

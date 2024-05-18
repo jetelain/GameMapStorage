@@ -16,6 +16,7 @@ namespace GameMapStorageWebSite.Models.Json
             Type = gameMapLocation.Type;
             X = gameMapLocation.X;
             Y = gameMapLocation.Y;
+            GameMapLocationGuid = gameMapLocation.GameMapLocationGuid;
         }
 
         public int GameMapLocationId { get; set; }
@@ -27,5 +28,7 @@ namespace GameMapStorageWebSite.Models.Json
         public double X { get; set; }
 
         public double Y { get; set; }
+
+        public Guid? GameMapLocationGuid { get; set; }
     }
 }

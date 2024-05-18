@@ -1,14 +1,27 @@
 ﻿@model IEnumerable<GameMapStorageWebSite.Entities.BackgroundWork>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Tasks";
+    var dataMode = (ViewBag.DataMode as Services.DataMode?) ?? Services.DataMode.Primary;
 }
 
-<h1>Index</h1>
+<h1>Tasks</h1>
 
-<form asp-action="SyncArma3Map">
-    <button class="btn btn-secondary">Sync with Arma3Map</button>
-</form>
+@if (dataMode == Services.DataMode.Mirror)
+{
+    <form asp-action="SyncMirror">
+        <button class="btn btn-secondary spinner-on-click">
+            <i class="fa-solid fa-rotate"></i>
+            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            Update Mirror</button>
+    </form>
+}
+else
+{
+    <form asp-action="SyncArma3Map">
+        <button class="btn btn-secondary"><i class="fa-solid fa-rotate"></i> Sync with Arma3Map</button>
+    </form>
+}
 
 <table class="table">
     <thead>
@@ -63,3 +76,12 @@
 }
     </tbody>
 </table>
+
+<script type="text/javascript">
+    for (const button of document.querySelectorAll("button.spinner-on-click")) {
+        button.addEventListener("click", (event) => {
+            button.querySelector("i").classList.add("d-none");
+            button.querySelector("span").classList.remove("d-none");
+        });
+    }
+</script>

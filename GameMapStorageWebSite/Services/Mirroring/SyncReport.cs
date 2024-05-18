@@ -1,9 +1,17 @@
-﻿using GameMapStorageWebSite.Entities;
+﻿using System.Diagnostics;
+using GameMapStorageWebSite.Entities;
 
 namespace GameMapStorageWebSite.Services.Mirroring
 {
     public class SyncReport
     {
+        private readonly Stopwatch sw;
+
+        public SyncReport()
+        {
+            sw = Stopwatch.StartNew();
+        }
+
         public List<object> Added { get; } = new List<object>();
 
         public List<object> Updated { get; } = new List<object>();
@@ -36,6 +44,13 @@ namespace GameMapStorageWebSite.Services.Mirroring
             where TEntity : class
         {
             UpToDate.Add(target);
+        }
+
+        public TimeSpan Elapsed => sw.Elapsed;
+
+        internal void Done()
+        {
+            sw.Stop();
         }
     }
 }
