@@ -101,8 +101,6 @@ namespace GameMapStorageWebSite
 
             services.AddSingleton<IWorkspaceService, WorkspaceService>();
 
-            services.AddResponseCaching();
-
             services.AddScoped<IWorker<MigrateArma3MapWorkData>, MigrateArma3MapWorker>();
             services.AddScoped<IWorker<ProcessLayerWorkData>, ProcessLayerWorker>();
             services.AddScoped<IWorker<MirrorLayerWorkData>, MirrorLayerWorker>();
@@ -196,8 +194,6 @@ namespace GameMapStorageWebSite
             app.UseRouting();
 
             app.UseAuthorization();
-
-            app.UseResponseCaching();
 
             app.UseRequestLocalization("en-GB");
 
