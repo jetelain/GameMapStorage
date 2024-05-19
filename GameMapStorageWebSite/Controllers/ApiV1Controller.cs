@@ -80,11 +80,15 @@ namespace GameMapStorageWebSite.Controllers
             await context.GameMapLayers.Where(l => l.GameMap!.GameId == game.GameId && l.State == LayerState.Ready).ToListAsync();
             var basePath = GetBasePath();
             var useWebp = ImagePathHelper.AcceptWebp(Request);
-            return Json(maps.Select(m => new GameMapJson(m, basePath, useWebp) { Layers = GetLayers(m.Layers!, basePath, useWebp) }).ToList());
+            return Json(maps.Select(m => new GameMapJson(m, basePath, useWebp) { Layers = GetLayers(m.Layers, basePath, useWebp) }).ToList());
         }
 
-        private List<GameMapLayerJson> GetLayers(IEnumerable<GameMapLayer> layers, string basePath, bool useWebp)
+        private List<GameMapLayerJson> GetLayers(IEnumerable<GameMapLayer>? layers, string basePath, bool useWebp)
         {
+            if (layers == null)
+            {
+                return new List<GameMapLayerJson>();
+            }
             return layers.Select(l => new GameMapLayerJson(l, basePath, useWebp)).ToList();
         }
 

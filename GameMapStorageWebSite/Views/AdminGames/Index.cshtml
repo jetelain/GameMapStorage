@@ -1,14 +1,18 @@
 ﻿@model IEnumerable<GameMapStorageWebSite.Entities.Game>
+@inject IAuthorizationService authorizationService
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Games";
+    var canEdit = (await authorizationService.AuthorizeAsync(User, "AdminEdit")).Succeeded;
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<h1>Games</h1>
+@if(canEdit)
+{
+    <p>
+        <a asp-action="Create" class="btn btn-secondary">Create New</a>
+    </p>
+}
 <table class="table">
     <thead>
         <tr>
@@ -37,7 +41,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.GameId">@Html.DisplayFor(modelItem => item.EnglishTitle)</a>
+                <a asp-action="Details" asp-route-id="@item.GameId">@Html.DisplayFor(modelItem => item.EnglishTitle)</a>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
@@ -54,11 +58,13 @@
             <td>
                 @Html.DisplayFor(modelItem => item.LastChangeUtc)
             </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.GameId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.GameId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.GameId">Delete</a>
-            </td>
+            @if (canEdit)
+            {
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.GameId">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.GameId">Delete</a>
+                </td>
+            }
         </tr>
 }
     </tbody>

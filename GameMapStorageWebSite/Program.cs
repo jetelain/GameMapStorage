@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Security;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Mirroring;
@@ -11,6 +12,7 @@ using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -48,9 +50,9 @@ namespace GameMapStorageWebSite
             AddHttpClients(services);
 
             services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            })
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Home/SignInUser";
@@ -63,7 +65,12 @@ namespace GameMapStorageWebSite
             {
                 var admins = configuration.GetSection("Admins").Get<string[]>() ?? Array.Empty<string>();
                 options.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.NameIdentifier, admins));
+                options.AddPolicy("AdminEdit", policy => policy
+                    .RequireClaim(ClaimTypes.NameIdentifier, admins)
+                    .AddRequirements(new DataModeRequirement(DataMode.Syndicated, DataMode.Primary, DataMode.Proxy)));
             });
+
+            services.AddSingleton<IAuthorizationHandler>(new DataModeRequirementHandler(config));
 
             services.AddControllersWithViews()
                 .AddJsonOptions(jsonOptions =>
@@ -192,7 +199,7 @@ namespace GameMapStorageWebSite
 
             app.UseResponseCaching();
 
-            app.UseRequestLocalization("en-US");
+            app.UseRequestLocalization("en-GB");
 
             app.MapControllerRoute(
                 name: "default",

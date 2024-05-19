@@ -64,12 +64,12 @@ namespace GameMapStorageWebSite.Works.MirrorLayers
         private async Task<bool> DownloadArchiveIfChanged(MirrorLayerWorkData workData, GameMapLayer layer, string archivePath)
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, workData.DownloadUri);
-            if (layer.DataLastChangeUtc != null && layer.State != LayerState.Created)
+            if (layer.DataLastChangeUtc != null && layer.State == LayerState.Ready)
             {
                 request.Headers.IfModifiedSince = new DateTimeOffset(layer.DataLastChangeUtc.Value, TimeSpan.Zero);
             }
 
-            using var response = await client.SendAsync(request);
+            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             if (response.StatusCode == HttpStatusCode.NotModified)
             {
                 return false;

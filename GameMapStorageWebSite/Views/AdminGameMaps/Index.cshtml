@@ -1,13 +1,17 @@
 ﻿@model IEnumerable<GameMapStorageWebSite.Entities.GameMap>
+@inject IAuthorizationService authorizationService
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Maps";
+    var canEdit = (await authorizationService.AuthorizeAsync(User, "AdminEdit")).Succeeded;
 }
 
-<h1>Index</h1>
-
+<h1>Maps</h1>
 <p>
-    <a asp-action="Create">Create New</a>
+    @if (canEdit)
+    {
+        <a asp-action="Create" class="btn btn-secondary">Create New</a>
+    }
 </p>
 <table class="table">
     <thead>
@@ -21,12 +25,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.AppendAttribution)
             </th>
-@*             <th>
-                @Html.DisplayNameFor(model => model.SteamWorkshopId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.OfficialSiteUri)
-            </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.SizeInMeters)
             </th>
@@ -34,56 +32,44 @@
                 @Html.DisplayNameFor(model => model.CitiesCount)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-@*             <th>
-                @Html.DisplayNameFor(model => model.Aliases)
-            </th> *@
-            <th>
                 @Html.DisplayNameFor(model => model.LastChangeUtc)
             </th>
-            <th></th>
+            @if (canEdit)
+            {
+                <th></th>
+            }
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Game!.EnglishTitle)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.GameMapId">@Html.DisplayFor(modelItem => item.EnglishTitle)</a>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AppendAttribution)
-            </td>
-@*             <td>
-                @Html.DisplayFor(modelItem => item.SteamWorkshopId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OfficialSiteUri)
-            </td> *@
-            <td>
-                @Html.DisplayFor(modelItem => item.SizeInMeters)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CitiesCount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-@*             <td>
-                @Html.DisplayFor(modelItem => item.Aliases)
-            </td> *@
-            <td>
-                @Html.DisplayFor(modelItem => item.LastChangeUtc)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.GameMapId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.GameMapId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.GameMapId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Game!.EnglishTitle)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.GameMapId">@Html.DisplayFor(modelItem => item.EnglishTitle)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AppendAttribution)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SizeInMeters)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CitiesCount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastChangeUtc)
+                </td>
+                @if (canEdit)
+                {
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.GameMapId">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@item.GameMapId">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
     </tbody>
 </table>

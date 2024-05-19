@@ -44,11 +44,12 @@ namespace GameMapStorageWebSite.Controllers.Admin
             {
                 return NotFound();
             }
-
+            gameMap.Layers = await _context.GameMapLayers.Where(l => l.GameMapId == id).ToListAsync();
             return View(gameMap);
         }
 
         // GET: Admin/GameMaps/Create
+        [Authorize("AdminEdit")]
         public IActionResult Create()
         {
             ViewData["GameId"] = new SelectList(_context.Games, "GameId", "EnglishTitle");
@@ -60,6 +61,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Create([Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,Name,GameId")] GameMap gameMap, string? aliases)
         {
             if (ModelState.IsValid)
@@ -75,6 +77,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         }
 
         // GET: Admin/GameMaps/Edit/5
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -95,6 +98,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Edit(int id, [Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,Name")] GameMap gameMap, string? aliases)
         {
             if (id != gameMap.GameMapId)
@@ -135,6 +139,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> SetThumbnail(int id, [FromForm] int gameMapId, [FromForm] string imageUri)
         {
             if (id != gameMapId)
@@ -165,6 +170,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         }
 
         // GET: Admin/GameMaps/Delete/5
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -186,6 +192,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         // POST: Admin/GameMaps/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var gameMap = await _context.GameMaps.FindAsync(id);

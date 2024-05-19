@@ -36,6 +36,8 @@
 
         public GameMap? GameMap { get; set; }
 
+        public List<BackgroundWork>? Works { get; set; }
+
         int IGameIdentifier.GameId => GameMap!.GameId;
     }
 }
