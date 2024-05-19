@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Security;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Mirroring;
@@ -49,9 +50,9 @@ namespace GameMapStorageWebSite
             AddHttpClients(services);
 
             services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            })
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Home/SignInUser";

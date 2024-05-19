@@ -1,7 +1,7 @@
 ﻿using GameMapStorageWebSite.Services;
 using Microsoft.AspNetCore.Authorization;
 
-namespace GameMapStorageWebSite
+namespace GameMapStorageWebSite.Security
 {
     internal class DataModeRequirementHandler : AuthorizationHandler<DataModeRequirement>
     {
