@@ -16,15 +16,15 @@ fi
 
 if [ ! -d /var/www/GameMapStorage ]; then
 	sudo mkdir /var/www/GameMapStorage
-	sudo chown www-data:www-data /var/GameMapStorage
+	sudo chown www-data:www-data /var/www/GameMapStorage
 	
 	sudo mkdir /var/www/GameMapStorage/storage
-	sudo chown www-data:www-data /var/GameMapStorage/storage
+	sudo chown www-data:www-data /var/www/GameMapStorage/storage
 fi
 
 if [ ! -d /var/www/aspnet-keys ]; then
 	sudo mkdir /var/www/aspnet-keys
-	sudo chown www-data:www-data /var/aspnet-keys
+	sudo chown www-data:www-data /var/www/aspnet-keys
 fi
 
 cd ~/build/GameMapStorage
