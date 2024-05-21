@@ -14,16 +14,16 @@ if [ ! -d /opt/GameMapStorage ]; then
 	sudo chown $USER:$USER /opt/GameMapStorage
 fi
 
-if [ ! -d /var/GameMapStorage ]; then
-	sudo mkdir /var/GameMapStorage
+if [ ! -d /var/www/GameMapStorage ]; then
+	sudo mkdir /var/www/GameMapStorage
 	sudo chown www-data:www-data /var/GameMapStorage
 	
-	sudo mkdir /var/GameMapStorage/storage
+	sudo mkdir /var/www/GameMapStorage/storage
 	sudo chown www-data:www-data /var/GameMapStorage/storage
 fi
 
-if [ ! -d /var/aspnet-keys ]; then
-	sudo mkdir /var/aspnet-keys
+if [ ! -d /var/www/aspnet-keys ]; then
+	sudo mkdir /var/www/aspnet-keys
 	sudo chown www-data:www-data /var/aspnet-keys
 fi
 
