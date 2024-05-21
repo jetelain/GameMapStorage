@@ -86,7 +86,7 @@ namespace GameMapStorageWebSite
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 services.AddDataProtection()
-                    .PersistKeysToFileSystem(new DirectoryInfo("/var/aspnet-keys"))
+                    .PersistKeysToFileSystem(new DirectoryInfo("/var/www/aspnet-keys"))
                     .SetApplicationName("gms");
             }
 
