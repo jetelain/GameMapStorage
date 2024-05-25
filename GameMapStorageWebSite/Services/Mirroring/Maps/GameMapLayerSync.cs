@@ -81,5 +81,10 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             return layer;
         }
 
+        protected override void Remove(GameMapLayer entity)
+        {
+            entity.State = LayerState.Obsolete;
+            dbset.Update(entity);
+        }
     }
 }

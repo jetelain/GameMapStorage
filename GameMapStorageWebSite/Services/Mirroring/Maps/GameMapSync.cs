@@ -122,7 +122,10 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
 
         protected override void UpdateLight(GameMapJson sourceLight, GameMap target)
         {
-            layers.UpdateOrCreateEntities(sourceLight.Layers!, target.Layers!);
+            foreach( var layer in layers.UpdateOrCreateEntities(sourceLight.Layers!, target.Layers!))
+            {
+                layer.GameMap = target;
+            }
         }
 
         protected override async Task<List<GameMap>> GetTargetEntities()
