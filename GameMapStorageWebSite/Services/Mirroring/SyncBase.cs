@@ -6,7 +6,7 @@ namespace GameMapStorageWebSite.Services.Mirroring
         where TEntity : class
         where TJson : class
     {
-        private readonly DbSet<TEntity> dbset;
+        protected readonly DbSet<TEntity> dbset;
         protected readonly SyncReport report;
         protected readonly bool keepId;
 
@@ -19,7 +19,12 @@ namespace GameMapStorageWebSite.Services.Mirroring
 
         public List<TEntity> UpdateOrCreateEntities(List<TJson> sourceList, List<TEntity> targetList)
         {
-            return sourceList.Select(source => UpdateOrCreateEntity(source, targetList)).ToList();
+            var newList = sourceList.Select(source => UpdateOrCreateEntity(source, targetList)).ToList();
+            foreach(var removed in targetList.Except(newList))
+            {
+                Remove(removed);
+            }
+            return newList;
         }
 
         public TEntity UpdateOrCreateEntity(TJson source, List<TEntity> targetList)
@@ -64,5 +69,10 @@ namespace GameMapStorageWebSite.Services.Mirroring
         protected abstract bool Copy(TJson source, TEntity target);
 
         protected abstract TEntity ToEntity(TJson source);
+
+        protected virtual void Remove(TEntity entity)
+        {
+            // Do not remove anything by default
+        }
     }
 }
