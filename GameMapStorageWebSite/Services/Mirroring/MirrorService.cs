@@ -20,7 +20,7 @@ namespace GameMapStorageWebSite.Services.Mirroring
             this.thumbnailService = thumbnailService;
         }
 
-        public async Task<SyncReport> UpdateMirror()
+        public async Task<SyncReport> UpdateMirror(IProgress<string>? progress = null)
         {
             if (dataConfiguration.Mode != DataMode.Mirror)
             {
@@ -32,13 +32,20 @@ namespace GameMapStorageWebSite.Services.Mirroring
 
             var alreadyScheduled = await context.Works.Where(w => w.State == BackgroundWorkState.Pending && w.Type == BackgroundWorkType.MirrorLayer && w.GameMapLayerId != null).Select(w => w.GameMapLayerId!.Value).ToListAsync();
 
+            progress?.Report($"Mirror from '{client.BaseAddress}'");
             var gamesSync = new GameSync(report, context, true);
             var results = await gamesSync.Do(client);
+
+            progress?.Report($"Store logos ({gamesSync.ImagesToDownload.Count})");
             await gamesSync.DownloadImages(client, thumbnailService);
+
             foreach (var (targetGame, sourceGame) in results)
             {
+                progress?.Report($"Process '{targetGame.EnglishTitle}'");
                 var mapsSync = new GameMapSync(report, context, targetGame, sourceGame, alreadyScheduled, true);
                 await mapsSync.Do(client);
+
+                progress?.Report($"Store thumbnails ({mapsSync.ImagesToDownload.Count})");
                 await mapsSync.DownloadImages(client, thumbnailService);
             }
             report.Done();

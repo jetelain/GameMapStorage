@@ -4,6 +4,6 @@ namespace GameMapStorageWebSite.Works
 {
     public interface IWorker<TWorkData> : IDisposable
     {
-        Task Process(TWorkData workData, BackgroundWork work);
+        Task Process(TWorkData workData, BackgroundWork work, IProgress<string>? progress);
     }
 }

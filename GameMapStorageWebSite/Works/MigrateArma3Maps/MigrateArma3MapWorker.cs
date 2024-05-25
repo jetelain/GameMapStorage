@@ -32,7 +32,7 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
             this.client = httpClientFactory.CreateClient("Arma3Map");
         }
 
-        public async Task Process(MigrateArma3MapWorkData taskData, BackgroundWork task)
+        public async Task Process(MigrateArma3MapWorkData taskData, BackgroundWork task, IProgress<string>? progress)
         {
             var game = await context.Games.FirstOrDefaultAsync(g => g.Name == "arma3");
             if (game == null)

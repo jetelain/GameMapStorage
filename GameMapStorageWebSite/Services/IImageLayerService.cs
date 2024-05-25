@@ -17,7 +17,7 @@ namespace GameMapStorageWebSite.Services
 
         int GetSizeAtZoom(GameMapLayer layer, int zoom);
 
-        Task<IStorageFile> GetArchive(GameMapLayer layer);
+        Task<IStorageFile> GetArchive(GameMapLayer layer, LayerStorageMode mode = LayerStorageMode.Full);
         Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive);
     }
 }
