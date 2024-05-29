@@ -14,10 +14,10 @@ namespace GameMapStoreStaticMirrorBuilder
         private readonly HashSet<string> createdDirectories = new HashSet<string>();
         private readonly HashSet<string> preExistingDirectories = new HashSet<string>();
 
-        public FtpStorageService(string basePath, string hostNameOrAddress, NetworkCredential credentials)
+        public FtpStorageService(string basePath, string hostNameOrAddress, NetworkCredential? credentials)
         {
             this.basePath = basePath.TrimEnd('/') + "/";
-            client = new AsyncFtpClient(hostNameOrAddress, credentials);
+            client = credentials != null ? new AsyncFtpClient(hostNameOrAddress, credentials) : new AsyncFtpClient(hostNameOrAddress);
         }
 
         public async Task<FtpProfile> Connect()
@@ -46,7 +46,7 @@ namespace GameMapStoreStaticMirrorBuilder
             var fullPath = GetFullRemotePath(path);
             if (await client.FileExists(fullPath))
             {
-                return new FtpFile(client, fullPath);
+                return new FtpStorageFile(client, fullPath);
             }
             return null;
         }

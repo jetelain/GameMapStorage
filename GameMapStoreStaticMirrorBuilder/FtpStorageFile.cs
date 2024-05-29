@@ -3,12 +3,12 @@ using GameMapStorageWebSite.Services.Storages;
 
 namespace GameMapStoreStaticMirrorBuilder
 {
-    internal class FtpFile : IStorageFile
+    internal class FtpStorageFile : IStorageFile
     {
         private readonly AsyncFtpClient client;
         private readonly string fullPath;
 
-        public FtpFile(AsyncFtpClient client, string fullPath)
+        public FtpStorageFile(AsyncFtpClient client, string fullPath)
         {
             this.client = client;
             this.fullPath = fullPath;
