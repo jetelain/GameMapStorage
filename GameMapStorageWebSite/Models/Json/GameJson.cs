@@ -10,7 +10,7 @@ namespace GameMapStorageWebSite.Models.Json
 
         }
 
-        public GameJson(Game game, string basePath, bool useWebp)
+        public GameJson(Game game, IDataPathBuilder pathBuilder)
         {
             GameId = game.GameId;
             EnglishTitle = game.EnglishTitle;
@@ -19,9 +19,9 @@ namespace GameMapStorageWebSite.Models.Json
             OfficialSiteUri = game.OfficialSiteUri;
             SteamAppId = game.SteamAppId;
             LastChangeUtc = game.LastChangeUtc;
-            Logo = basePath + ImagePathHelper.GetLogo(useWebp, game);
-            LogoWebp = basePath + ImagePathHelper.GetLogo(true, game);
-            LogoPng = basePath + ImagePathHelper.GetLogo(false, game);
+            Logo = pathBuilder.GetLogo(game);
+            LogoWebp = pathBuilder.GetLogo(true, game);
+            LogoPng = pathBuilder.GetLogo(false, game);
         }
 
         public int GameId { get; set; }

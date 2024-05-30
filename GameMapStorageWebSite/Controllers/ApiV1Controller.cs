@@ -18,9 +18,9 @@ namespace GameMapStorageWebSite.Controllers
             this.context = context;
         }
 
-        private string GetBasePath()
+        private WebPathBuilder GetPathBuilder()
         {
-            return new Uri(new Uri(Request.GetEncodedUrl()), "/").AbsoluteUri.TrimEnd('/');
+            return new WebPathBuilder(new Uri(new Uri(Request.GetEncodedUrl()), "/").AbsoluteUri.TrimEnd('/'), ImagePathHelper.AcceptWebp(Request));
         }
 
         private async Task<Game?> FindGame(string gameNameOrId)
@@ -45,9 +45,8 @@ namespace GameMapStorageWebSite.Controllers
         [Route("games")]
         public async Task<IActionResult> GetGames()
         {
-            var basePath = GetBasePath();
-            var useWebp = ImagePathHelper.AcceptWebp(Request);
-            return Json((await context.Games.ToListAsync()).Select(g => new GameJson(g, basePath, useWebp)).ToList());
+            var pathBuilder = GetPathBuilder();
+            return Json((await context.Games.ToListAsync()).Select(g => new GameJson(g, pathBuilder)).ToList());
         }
 
         [HttpGet]
@@ -59,9 +58,8 @@ namespace GameMapStorageWebSite.Controllers
             {
                 return NotFound();
             }
-            var basePath = GetBasePath();
-            var useWebp = ImagePathHelper.AcceptWebp(Request);
-            var gameJson = new GameJson(game, basePath, useWebp);
+            var pathBuilder = GetPathBuilder();
+            var gameJson = new GameJson(game, pathBuilder);
             gameJson.Colors = (await context.GameColors.Where(c => c.GameId == game.GameId).ToListAsync()).Select(c => new GameColorJson(c)).ToList();
             gameJson.Markers = (await context.GameMarkers.Where(c => c.GameId == game.GameId).ToListAsync()).Select(c => new GameMarkerJson(c)).ToList();
             return Json(gameJson);
@@ -78,19 +76,11 @@ namespace GameMapStorageWebSite.Controllers
             }
             var maps = await context.GameMaps.Where(c => c.GameId == game.GameId).ToListAsync();
             await context.GameMapLayers.Where(l => l.GameMap!.GameId == game.GameId && l.State == LayerState.Ready).ToListAsync();
-            var basePath = GetBasePath();
+            var pathBuilder = GetPathBuilder();
             var useWebp = ImagePathHelper.AcceptWebp(Request);
-            return Json(maps.Select(m => new GameMapJson(m, basePath, useWebp) { Layers = GetLayers(m.Layers, basePath, useWebp) }).ToList());
+            return Json(maps.Select(m => new GameMapJson(m, pathBuilder) { Layers = GameMapLayerJson.CreateList(m.Layers, pathBuilder) }).ToList());
         }
 
-        private List<GameMapLayerJson> GetLayers(IEnumerable<GameMapLayer>? layers, string basePath, bool useWebp)
-        {
-            if (layers == null)
-            {
-                return new List<GameMapLayerJson>();
-            }
-            return layers.Select(l => new GameMapLayerJson(l, basePath, useWebp)).ToList();
-        }
 
         [HttpGet]
         [Route("games/{gameNameOrId}/maps/{mapNameOrId}")]
@@ -106,10 +96,10 @@ namespace GameMapStorageWebSite.Controllers
             {
                 return NotFound();
             }
-            var basePath = GetBasePath();
+            var pathBuilder = GetPathBuilder();
             var useWebp = ImagePathHelper.AcceptWebp(Request);
-            var mapJson = new GameMapJson(map, basePath, useWebp);
-            mapJson.Layers = GetLayers(await context.GameMapLayers.Where(l => l.GameMapId == map.GameMapId && l.State == LayerState.Ready).ToListAsync(), basePath, useWebp);
+            var mapJson = new GameMapJson(map, pathBuilder);
+            mapJson.Layers = GameMapLayerJson.CreateList(await context.GameMapLayers.Where(l => l.GameMapId == map.GameMapId && l.State == LayerState.Ready).ToListAsync(), pathBuilder);
             mapJson.Locations = (await context.GameMapLocations.Where(l => l.GameMapId == map.GameMapId).ToListAsync()).Select(l => new GameMapLocationJson(l)).ToList();
             return Json(mapJson);
         }
