@@ -10,7 +10,7 @@ namespace GameMapStorageWebSite.Models.Json
 
         }
 
-        public GameMapJson(GameMap gameMap, string basePath, bool useWebp)
+        public GameMapJson(GameMap gameMap, IDataPathBuilder pathBuilder)
         {
             GameMapId = gameMap.GameMapId;
             EnglishTitle = gameMap.EnglishTitle;
@@ -22,9 +22,9 @@ namespace GameMapStorageWebSite.Models.Json
             Aliases = gameMap.Aliases;
             LastChangeUtc = gameMap.LastChangeUtc;
 
-            Thumbnail = basePath + ImagePathHelper.GetThumbnail(useWebp, gameMap);
-            ThumbnailWebp = basePath + ImagePathHelper.GetThumbnail(true, gameMap);
-            ThumbnailPng = basePath + ImagePathHelper.GetThumbnail(false, gameMap);
+            Thumbnail = pathBuilder.GetThumbnail(gameMap);
+            ThumbnailWebp = pathBuilder.GetThumbnail(true, gameMap);
+            ThumbnailPng = pathBuilder.GetThumbnail(false, gameMap);
         }
 
         public int GameMapId { get; set; }

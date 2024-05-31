@@ -1,7 +1,5 @@
 ﻿using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
-using GameMapStorageWebSite.Services.Storages;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +19,7 @@ namespace GameMapStorageWebSite.Controllers
 
         [Route("data/{gameId}/maps/{gameMapId}/{gameMapLayerId}.zip")]
         // TODO: Rate limiting ? Authentication ?
-        public async Task<IResult> GetLayerArchive(int gameId, int gameMapId, int gameMapLayerId)
+        public async Task<IResult> GetLayerArchive(int gameId, int gameMapId, int gameMapLayerId, LayerStorageMode content = LayerStorageMode.Full)
         {
             var layer = await context.GameMapLayers
                 .Include(l => l.GameMap)
@@ -31,7 +29,7 @@ namespace GameMapStorageWebSite.Controllers
             {
                  return Results.NotFound();
             }
-            var file = await layerService.GetArchive(layer);
+            var file = await layerService.GetArchive(layer, content);
             return await ToResult(file, "application/zip");
         }
     }

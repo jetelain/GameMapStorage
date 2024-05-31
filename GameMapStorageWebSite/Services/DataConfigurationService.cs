@@ -29,5 +29,6 @@
 
         public Uri? MirrorUri { get; }
 
+        public LayerStorageMode LayerStorage => LayerStorageMode.Full;
     }
 }

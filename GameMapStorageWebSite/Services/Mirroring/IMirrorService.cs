@@ -2,6 +2,6 @@
 {
     public interface IMirrorService
     {
-        Task<SyncReport> UpdateMirror();
+        Task<SyncReport> UpdateMirror(IProgress<string>? progress = null);
     }
 }

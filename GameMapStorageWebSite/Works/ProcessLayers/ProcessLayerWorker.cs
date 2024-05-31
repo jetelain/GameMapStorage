@@ -22,7 +22,7 @@ namespace GameMapStorageWebSite.Works.ProcessLayers
             // Nothing to do
         }
 
-        public async Task Process(ProcessLayerWorkData workData, BackgroundWork work)
+        public async Task Process(ProcessLayerWorkData workData, BackgroundWork work, IProgress<string>? progress)
         {
             if (work.GameMapLayerId != workData.GameMapLayerId)
             {

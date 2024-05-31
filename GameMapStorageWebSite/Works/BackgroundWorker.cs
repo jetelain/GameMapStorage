@@ -4,6 +4,7 @@ using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Works
 {
@@ -20,18 +21,18 @@ namespace GameMapStorageWebSite.Works
             this.logger = logger;
         }
 
-        internal async Task<bool> DoOnePendingWork()
+        internal async Task<bool> DoOnePendingWork(IProgress<string>? progress = null)
         {
-            var nextTask = context.Works.FirstOrDefault(t => t.State == BackgroundWorkState.Pending || t.State == BackgroundWorkState.Running);
+            var nextTask = await context.Works.FirstOrDefaultAsync(t => t.State == BackgroundWorkState.Pending || t.State == BackgroundWorkState.Running);
             if (nextTask != null)
             {
-                await DoWork(nextTask);
+                await DoWork(nextTask, progress);
                 return true;
             }
             return false;
         }
 
-        private async Task DoWork(BackgroundWork work)
+        private async Task DoWork(BackgroundWork work, IProgress<string>? progress)
         {
             logger.LogInformation("Start work '{Id}' of type '{Type}'.", work.BackgroundWorkId, work.Type);
 
@@ -41,7 +42,7 @@ namespace GameMapStorageWebSite.Works
             await context.SaveChangesAsync();
             try
             {
-                await CallWorker(work);
+                await CallWorker(work, progress);
                 work.State = BackgroundWorkState.Success;
                 work.Error = null;
             }
@@ -58,28 +59,28 @@ namespace GameMapStorageWebSite.Works
             logger.LogInformation("Work '{Id}' done.", work.BackgroundWorkId);
         }
 
-        private Task CallWorker(BackgroundWork work)
+        private Task CallWorker(BackgroundWork work, IProgress<string>? progress)
         {
             switch(work.Type)
             {
                 case BackgroundWorkType.MigrateArma3Map:
-                    return CallWorker<MigrateArma3MapWorkData>(work);
+                    return CallWorker<MigrateArma3MapWorkData>(work, progress);
 
                 case BackgroundWorkType.ProcessLayer:
-                    return CallWorker<ProcessLayerWorkData>(work);
+                    return CallWorker<ProcessLayerWorkData>(work, progress);
 
                 case BackgroundWorkType.MirrorLayer:
-                    return CallWorker<MirrorLayerWorkData>(work);
+                    return CallWorker<MirrorLayerWorkData>(work, progress);
             }
             return Task.CompletedTask;
         }
 
-        private async Task CallWorker<T>(BackgroundWork work)
+        private async Task CallWorker<T>(BackgroundWork work, IProgress<string>? progress)
         {
             var data = JsonSerializer.Deserialize<T>(work.Data);
             if (data != null)
             {
-                await services.GetRequiredService<IWorker<T>>().Process(data, work);
+                await services.GetRequiredService<IWorker<T>>().Process(data, work, progress);
             }
         }
     }

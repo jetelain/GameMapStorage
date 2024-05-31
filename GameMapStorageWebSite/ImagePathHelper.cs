@@ -54,11 +54,6 @@ namespace GameMapStorageWebSite
             return FormattableString.Invariant($"/data/{gameMap.GameId}/maps/{gameMap.GameMapId}/thumbnail.png");
         }
 
-        public static string GetLogo(HttpRequest request, IGameIdentifier game)
-        {
-            return GetLogo(AcceptWebp(request), game);
-        }
-
         public static string GetLogo(bool useWebp, IGameIdentifier game)
         {
             if (useWebp)

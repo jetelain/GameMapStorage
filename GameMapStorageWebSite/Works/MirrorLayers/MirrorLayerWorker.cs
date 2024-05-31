@@ -11,13 +11,15 @@ namespace GameMapStorageWebSite.Works.MirrorLayers
         private readonly HttpClient client;
         private readonly IWorkspaceService workspaceService;
         private readonly IImageLayerService imageLayerService;
+        private readonly IDataConfigurationService dataConfiguration;
 
-        public MirrorLayerWorker(GameMapStorageContext context, IImageLayerService imageLayerService, IWorkspaceService workspaceService, IHttpClientFactory httpClientFactory)
+        public MirrorLayerWorker(GameMapStorageContext context, IImageLayerService imageLayerService, IWorkspaceService workspaceService, IHttpClientFactory httpClientFactory, IDataConfigurationService dataConfiguration)
             : base(context)
         {
             this.client = httpClientFactory.CreateClient("Mirror");
             this.workspaceService = workspaceService;
             this.imageLayerService = imageLayerService;
+            this.dataConfiguration = dataConfiguration;
         }
 
         public void Dispose()
@@ -25,7 +27,7 @@ namespace GameMapStorageWebSite.Works.MirrorLayers
 
         }
 
-        public async Task Process(MirrorLayerWorkData workData, BackgroundWork work)
+        public async Task Process(MirrorLayerWorkData workData, BackgroundWork work, IProgress<string>? progress)
         {
             if (work.GameMapLayerId != workData.GameMapLayerId)
             {
@@ -43,9 +45,11 @@ namespace GameMapStorageWebSite.Works.MirrorLayers
 
             var archivePath = Path.Combine(workspaceService.GetLayerWorkspace(layer.GameMapLayerId), "mirror.zip");
 
-            if (await DownloadArchiveIfChanged(workData, layer, archivePath))
+            if (await DownloadArchiveIfChanged(workData, layer, archivePath, progress))
             {
                 await MarkLayerAsProcessing(layer);
+
+                progress?.Report("Store tiles");
 
                 using (var archiveStream = File.OpenRead(archivePath))
                 {
@@ -61,9 +65,11 @@ namespace GameMapStorageWebSite.Works.MirrorLayers
             }
         }
 
-        private async Task<bool> DownloadArchiveIfChanged(MirrorLayerWorkData workData, GameMapLayer layer, string archivePath)
+        private async Task<bool> DownloadArchiveIfChanged(MirrorLayerWorkData workData, GameMapLayer layer, string archivePath, IProgress<string>? progress)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Get, workData.DownloadUri);
+            var uri = $"{workData.DownloadUri}?content={dataConfiguration.LayerStorage}";
+            progress?.Report($"Download {uri}");
+            using var request = new HttpRequestMessage(HttpMethod.Get, uri);
             if (layer.DataLastChangeUtc != null && layer.State == LayerState.Ready)
             {
                 request.Headers.IfModifiedSince = new DateTimeOffset(layer.DataLastChangeUtc.Value, TimeSpan.Zero);
@@ -77,7 +83,7 @@ namespace GameMapStorageWebSite.Works.MirrorLayers
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                throw new ApplicationException($"{workData.DownloadUri} replied with status code {response.StatusCode}");
+                throw new ApplicationException($"{uri} replied with status code {response.StatusCode}");
             }
 
             using var targetStream = File.Create(archivePath);

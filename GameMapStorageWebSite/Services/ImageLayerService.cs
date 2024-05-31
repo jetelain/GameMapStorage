@@ -131,21 +131,29 @@ namespace GameMapStorageWebSite.Services
                 ?? new LocalStorageFile("wwwroot/img/missing/tile.webp");
         }
 
-        public async Task WriteArchiveTo(GameMapLayer layer, Stream target)
+        public async Task WriteArchiveTo(GameMapLayer layer, Stream target, LayerStorageMode mode)
         {
+            var packPng = mode.HasFlag(LayerStorageMode.PngTiles) && layer.Format.HasPng();
+            var packWebp = mode.HasFlag(LayerStorageMode.WebpTiles) && layer.Format.HasWebp();
             ValidateLayer(layer);
             using var zip = new ZipArchive(target, ZipArchiveMode.Create);
             // Add a JSON with metadata ?
             for(int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                await CreateEntry(zip, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                if (mode.HasFlag(LayerStorageMode.SourcePng))
+                {
+                    await CreateEntry(zip, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                }
                 var count = MapUtils.GetTileRowCount(zoom);
                 for (int x = 0; x < count; x++)
                 {
                     for (int y = 0; y < count; y++)
                     {
-                        await CreateEntry(zip, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png"); 
-                        if (layer.Format == LayerFormat.PngAndWebp)
+                        if (packPng)
+                        {
+                            await CreateEntry(zip, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
+                        }
+                        if (packWebp)
                         {
                             await CreateEntry(zip, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
                         }
@@ -166,11 +174,11 @@ namespace GameMapStorageWebSite.Services
             }
         }
 
-        public Task<IStorageFile> GetArchive(GameMapLayer layer)
+        public Task<IStorageFile> GetArchive(GameMapLayer layer, LayerStorageMode mode = LayerStorageMode.Full)
         {
             ValidateLayer(layer);
             // TODO: Create a cache option to avoid re-creating the zip each time
-            return Task.FromResult<IStorageFile>(new MemoryStorageFile(s => WriteArchiveTo(layer, s), layer.LastChangeUtc));
+            return Task.FromResult<IStorageFile>(new MemoryStorageFile(s => WriteArchiveTo(layer, s, mode), layer.LastChangeUtc));
         }
 
         public async Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive)

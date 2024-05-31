@@ -5,12 +5,21 @@ namespace GameMapStorageWebSite.Models.Json
 {
     public class GameMapLayerJson : IWithTimestamp
     {
+        public static List<GameMapLayerJson> CreateList(IEnumerable<GameMapLayer>? layers, IDataPathBuilder pathBuilder)
+        {
+            if (layers == null)
+            {
+                return new List<GameMapLayerJson>();
+            }
+            return layers.Where(l => l.State == LayerState.Ready).Select(l => new GameMapLayerJson(l, pathBuilder)).ToList();
+        }
+
         public GameMapLayerJson()
         {
 
         }
 
-        public GameMapLayerJson(GameMapLayer gameMapLayer, string basePath, bool useWebp)
+        public GameMapLayerJson(GameMapLayer gameMapLayer, IDataPathBuilder pathBuilder)
         {
             GameMapLayerId = gameMapLayer.GameMapLayerId;
             Type = gameMapLayer.Type;
@@ -27,18 +36,16 @@ namespace GameMapStorageWebSite.Models.Json
             DataLastChangeUtc = gameMapLayer.DataLastChangeUtc;
             GameMapLayerGuid = gameMapLayer.GameMapLayerGuid;
 
-            var map = gameMapLayer.GameMap!;
-
-            DownloadUri = basePath + $"/data/{map.GameId}/maps/{map.GameMapId}/{gameMapLayer.GameMapLayerId}.zip";
-            if (Format == LayerFormat.PngAndWebp || Format == LayerFormat.PngOnly)
+            DownloadUri = pathBuilder.GetDownloadUri(gameMapLayer);
+            if (Format.HasPng())
             {
-                PatternPng = basePath + ImagePathHelper.GetLayerPattern(false, gameMapLayer);
+                PatternPng = pathBuilder.GetLayerPattern(false, gameMapLayer);
             }
-            if (Format == LayerFormat.PngAndWebp || Format == LayerFormat.SvgAndWebp || Format == LayerFormat.WebpOnly)
+            if (Format.HasWebp())
             {
-                PatternWebp = basePath + ImagePathHelper.GetLayerPattern(true, gameMapLayer);
+                PatternWebp = pathBuilder.GetLayerPattern(true, gameMapLayer);
             }
-            Pattern = basePath + ImagePathHelper.GetLayerPattern(useWebp, gameMapLayer);
+            Pattern = pathBuilder.GetLayerPattern(gameMapLayer);
         }
 
         public int GameMapLayerId { get; set; }
@@ -69,6 +76,7 @@ namespace GameMapStorageWebSite.Models.Json
 
         public Guid? GameMapLayerGuid { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? DownloadUri { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
