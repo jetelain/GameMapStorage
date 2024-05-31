@@ -401,4 +401,4 @@ FodyWeavers.xsd
 *.db-shm
 *.db-wal
 appsettings.Development.json
-/GameMapStoreStaticMirrorBuilder/Properties/launchSettings.json
+launchSettings.json

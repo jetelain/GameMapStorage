@@ -1,6 +1,6 @@
 ﻿using GameMapStorageWebSite.Services;
 
-namespace GameMapStoreStaticMirrorBuilder
+namespace GameMapStorageStaticMirrorBuilder
 {
     internal class StaticDataConfiguration : IDataConfigurationService
     {

@@ -8,7 +8,7 @@ using GameMapStorageWebSite.Works;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using Microsoft.EntityFrameworkCore;
 
-namespace GameMapStoreStaticMirrorBuilder
+namespace GameMapStorageStaticMirrorBuilder
 {
     internal class StaticMirrorWorker : IProgress<string>
     {

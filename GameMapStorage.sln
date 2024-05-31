@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{4F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgImageGenerator", "SvgImageGenerator\SvgImageGenerator.csproj", "{F0218E62-9D7F-47E9-AD56-ADD61B1B1819}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameMapStoreStaticMirrorBuilder", "GameMapStoreStaticMirrorBuilder\GameMapStoreStaticMirrorBuilder.csproj", "{E6F24405-BF1E-464C-BE06-54B84FC280A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameMapStorageStaticMirrorBuilder", "GameMapStorageStaticMirrorBuilder\GameMapStorageStaticMirrorBuilder.csproj", "{E6F24405-BF1E-464C-BE06-54B84FC280A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

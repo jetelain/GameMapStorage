@@ -1,7 +1,7 @@
 ﻿using FluentFTP;
 using GameMapStorageWebSite.Services.Storages;
 
-namespace GameMapStoreStaticMirrorBuilder
+namespace GameMapStorageStaticMirrorBuilder
 {
     internal class FtpStorageFile : IStorageFile
     {

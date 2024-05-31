@@ -2,7 +2,7 @@
 using GameMapStorageWebSite.Services.Storages;
 using Renci.SshNet;
 
-namespace GameMapStoreStaticMirrorBuilder
+namespace GameMapStorageStaticMirrorBuilder
 {
     internal class SftpStorageService : IStorageService, IAsyncDisposable
     {

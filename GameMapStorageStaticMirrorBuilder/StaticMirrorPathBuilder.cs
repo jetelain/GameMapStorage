@@ -1,11 +1,11 @@
 ﻿using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Models.Json;
 
-namespace GameMapStoreStaticMirrorBuilder
+namespace GameMapStorageStaticMirrorBuilder
 {
     internal class StaticMirrorPathBuilder : IDataPathBuilder
     {
-        private readonly bool defaultUseWebp;
+        private readonly bool defaultUseWebp = false;
         private readonly string basePath = string.Empty;
 
         public string? GetDownloadUri(IGameMapLayerIdentifier layer)
