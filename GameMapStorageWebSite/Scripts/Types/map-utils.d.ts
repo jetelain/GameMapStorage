@@ -71,7 +71,6 @@ declare namespace GameMapUtils {
         baseClassName: string;
         className: string;
         content: string;
-        click?: (this: HTMLElement, ev: MouseEvent) => any;
     }
     /**
      * Display a bootstrap button on map
@@ -84,6 +83,7 @@ declare namespace GameMapUtils {
         _previousClass: string;
         constructor(options?: OverlayButtonOptions);
         onAdd(map: any): HTMLElement;
+        on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any): this;
         onRemove(map: any): void;
         setClass(name: any): void;
     }
@@ -104,13 +104,52 @@ declare namespace GameMapUtils {
         onRemove(map: any): void;
     }
     function overlayDiv(options: any): OverlayDiv;
+    class ToggleButtonGroup {
+        _buttons: ToggleButton[];
+        add(btn: ToggleButton): void;
+        remove(btn: ToggleButton): void;
+        setActive(btn: ToggleButton): void;
+        getActive(): ToggleButton | undefined;
+    }
+    function toggleButtonGroup(): ToggleButtonGroup;
+    interface ToggleButtonOptions extends L.ControlOptions {
+        baseClassName: string;
+        offClassName: string;
+        onClassName: string;
+        content: string;
+        group?: ToggleButtonGroup;
+    }
+    abstract class ToggleButton extends L.Control {
+        options: ToggleButtonOptions;
+        _map: L.Map;
+        _container: HTMLElement;
+        _isActive: boolean;
+        constructor(options?: ToggleButtonOptions);
+        onAdd(map: L.Map): HTMLElement;
+        onRemove(map: L.Map): void;
+        abstract onDisable(map: L.Map): any;
+        abstract onEnable(map: L.Map): any;
+        _setActive(_isActive: boolean): void;
+        _clickHandler(e: any): void;
+    }
 }
 declare namespace GameMapUtils {
     function toCoord(num: number, precision: number): string;
     function toGrid(latlng: L.LatLng, precision: number, map: L.Map): string;
     function bearing(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils?: boolean): number;
     function CRS(factorx: number, factory: number, tileSize: number): L.CRS;
-    function basicInit(mapInfos: any, mapDivId?: string): L.Map;
+    interface MapInfos {
+        minZoom: number;
+        maxZoom: number;
+        factorx: number;
+        factory: number;
+        tileSize: number;
+        attribution: string;
+        tilePattern: string;
+        defaultPosition: [number, number];
+        defaultZoom: number;
+    }
+    function basicInit(mapInfos: MapInfos, mapDivId?: string | HTMLElement): L.Map;
 }
 declare namespace GameMapUtils {
     interface MapToolBaseOptions extends L.LayerOptions {
@@ -199,25 +238,15 @@ declare namespace GameMapUtils {
         _createRotateMarker(): L.Marker<any>;
     }
     function ruler(latLng: any): Ruler;
-}
-declare namespace GameMapUtils {
-    interface ToggleToolButtonOptions extends L.ControlOptions {
-        baseClassName: string;
-        offClassName: string;
-        onClassName: string;
+    interface ToggleToolButtonOptions extends ToggleButtonOptions {
         tool: (pos: L.LatLng) => L.Layer;
-        content: string;
     }
-    class ToggleToolButton extends L.Control {
+    class ToggleToolButton extends ToggleButton {
         options: ToggleToolButtonOptions;
-        _map: L.Map;
-        _container: HTMLElement;
         _toolInstance?: L.Layer;
-        _toolActive: boolean;
         constructor(options?: ToggleToolButtonOptions);
-        onAdd(map: any): HTMLElement;
-        onRemove(map: any): void;
-        _toggleTool(e: any): void;
+        onDisable(map: L.Map): void;
+        onEnable(map: L.Map): void;
     }
     function toggleToolButton(options: any): ToggleToolButton;
 }

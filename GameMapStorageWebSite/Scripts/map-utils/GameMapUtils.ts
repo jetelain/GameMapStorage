@@ -4,18 +4,17 @@
 
 namespace GameMapUtils {
 
-    export function toCoord (num: number, precision: number) {
+    export function toCoord(num: number, precision: number): string {
         if (precision === undefined || precision > 5) {
             precision = 4;
         }
         if (num <= 0) {
             return '0'.repeat(precision);
         }
-        var numText = "00000" + num.toFixed(0);
-        return numText.substr(numText.length - 5, precision);
+        return (num % 100000).toFixed(0).padStart(5, "0").substring(5 - precision);
     }
 
-    export function toGrid (latlng: L.LatLng, precision: number, map: L.Map) {
+    export function toGrid (latlng: L.LatLng, precision: number, map: L.Map): string {
         return GameMapUtils.toCoord(latlng.lng, precision) + " - " + GameMapUtils.toCoord(latlng.lat, precision);
     }
 
@@ -45,7 +44,19 @@ namespace GameMapUtils {
         });
     }
 
-    export function basicInit (mapInfos, mapDivId = 'map') {
+    export interface MapInfos {
+        minZoom: number;
+        maxZoom: number;
+        factorx: number;
+        factory: number;
+        tileSize: number;
+        attribution: string;
+        tilePattern: string;
+        defaultPosition: [number, number];
+        defaultZoom: number;
+    }
+
+    export function basicInit(mapInfos: MapInfos, mapDivId: string | HTMLElement = 'map'): L.Map {
 
         var map = L.map(mapDivId, {
             minZoom: mapInfos.minZoom,

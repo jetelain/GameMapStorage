@@ -28,8 +28,7 @@ namespace GameMapUtils {
             this._map = map;
             L.DomEvent.disableClickPropagation(this._container);
             map.on('mousemove', this._onMouseMove, this);
-            var placeHolder = '0'.repeat(this.options.precision);
-            this._container.innerHTML = placeHolder + ' - ' + placeHolder;
+            this._container.innerHTML = GameMapUtils.toGrid(L.latLng(0, 0), this.options.precision, this._map);
             return this._container;
         }
 
@@ -52,7 +51,6 @@ namespace GameMapUtils {
         baseClassName: string;
         className: string;
         content: string;
-        click?: (this: HTMLElement, ev: MouseEvent) => any;
     }
 
     /**
@@ -71,8 +69,7 @@ namespace GameMapUtils {
                 position: 'bottomright',
                 baseClassName: 'btn',
                 className: 'btn-outline-secondary',
-                content: '',
-                click: null
+                content: ''
             }, options));
         }
 
@@ -81,10 +78,12 @@ namespace GameMapUtils {
             this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.className);
             L.DomEvent.disableClickPropagation(this._container);
             this._container.innerHTML = this.options.content;
-            if (this.options.click) {
-                this._container.addEventListener('click', this.options.click);
-            }
             return this._container;
+        }
+
+        on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any): this {
+            this._container.addEventListener(type, listener);
+            return this;
         }
 
         onRemove (map) {
@@ -145,4 +144,113 @@ namespace GameMapUtils {
     export function overlayDiv (options) {
         return new GameMapUtils.OverlayDiv(options);
     };
+
+    export class ToggleButtonGroup {
+
+        _buttons: ToggleButton[];
+
+        add(btn: ToggleButton) {
+            this._buttons.push(btn);
+        }
+
+        remove(btn: ToggleButton) {
+            const index = this._buttons.indexOf(btn);
+            if (index != -1) {
+                this._buttons.splice(index, 1);
+            }
+        }
+
+        setActive(btn: ToggleButton) {
+            this._buttons.forEach((item) => {
+                if (item != btn) {
+                    item._setActive(false);
+                }
+            });
+            btn._setActive(true);
+        }
+
+        getActive(): ToggleButton | undefined {
+            return this._buttons.find(item => item._isActive);
+        }
+    }
+
+    export function toggleButtonGroup() {
+        return new GameMapUtils.ToggleButtonGroup();
+    };
+
+    export interface ToggleButtonOptions extends L.ControlOptions {
+        baseClassName: string;
+        offClassName: string;
+        onClassName: string;
+        content: string;
+        group?: ToggleButtonGroup;
+    }
+
+    export abstract class ToggleButton extends L.Control {
+        options: ToggleButtonOptions;
+        _map: L.Map;
+        _container: HTMLElement;
+        _isActive: boolean;
+
+        constructor(options?: ToggleButtonOptions) {
+            super(L.extend({
+                position: 'topleft',
+                baseClassName: 'btn btn-sm',
+                offClassName: 'btn-outline-secondary',
+                onClassName: 'btn-primary',
+                content: ''
+            }, options));
+        }
+
+        override onAdd(map: L.Map) {
+            this._map = map;
+            this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.offClassName);
+            L.DomEvent.disableClickPropagation(this._container);
+            this._container.innerHTML = this.options.content;
+            L.DomEvent.on(this._container, 'click', this._clickHandler, this);
+            if (this.options.group) {
+                this.options.group.add(this);
+            }
+            return this._container;
+        }
+
+        override onRemove(map: L.Map) {
+            if (this._isActive) {
+                this.onDisable(this._map);
+            }
+            if (this.options.group) {
+                this.options.group.remove(this);
+            }
+        }
+
+        abstract onDisable(map: L.Map);
+
+        abstract onEnable(map: L.Map);
+
+        _setActive(_isActive: boolean) {
+            if (this._isActive == _isActive) {
+                return;
+            }
+            this._isActive = _isActive;
+            if (this._isActive) {
+                this.onEnable(this._map);
+                this._container.classList.remove(this.options.offClassName);
+                this._container.classList.add(this.options.onClassName);
+            } else {
+                this.onDisable(this._map);
+                this._container.classList.remove(this.options.onClassName);
+                this._container.classList.add(this.options.offClassName);
+            }
+        }
+
+        _clickHandler(e) {
+            if (this.options.group) {
+                this.options.group.setActive(this);
+            }
+            else {
+                this._setActive(!this._isActive);
+            }
+        }
+    }
+
 };

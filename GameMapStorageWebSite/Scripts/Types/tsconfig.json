@@ -5,10 +5,10 @@
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": false,
-    "target": "es2015",
+    "target": "es2017",
     "outFile": "map-utils.js",
     "emitDeclarationOnly": true,
     "declaration": true
   },
-  "files": [ "../map-utils/GameMapUtils.ts", "../map-utils/MapTools.ts", "../map-utils/Overlays.ts", "../map-utils/ToggleToolButton.ts" ]
+  "files": [ "../map-utils/GameMapUtils.ts", "../map-utils/LatLngGraticule.ts", "../map-utils/Overlays.ts", "../map-utils/MapTools.ts" ]
 }

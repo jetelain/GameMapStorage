@@ -306,8 +306,7 @@ var GameMapUtils;
             this._map = map;
             L.DomEvent.disableClickPropagation(this._container);
             map.on('mousemove', this._onMouseMove, this);
-            var placeHolder = '0'.repeat(this.options.precision);
-            this._container.innerHTML = placeHolder + ' - ' + placeHolder;
+            this._container.innerHTML = GameMapUtils.toGrid(L.latLng(0, 0), this.options.precision, this._map);
             return this._container;
         }
         onRemove(map) {
@@ -335,8 +334,7 @@ var GameMapUtils;
                 position: 'bottomright',
                 baseClassName: 'btn',
                 className: 'btn-outline-secondary',
-                content: '',
-                click: null
+                content: ''
             }, options));
             this._previousClass = '';
         }
@@ -345,10 +343,11 @@ var GameMapUtils;
             this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.className);
             L.DomEvent.disableClickPropagation(this._container);
             this._container.innerHTML = this.options.content;
-            if (this.options.click) {
-                this._container.addEventListener('click', this.options.click);
-            }
             return this._container;
+        }
+        on(type, listener) {
+            this._container.addEventListener(type, listener);
+            return this;
         }
         onRemove(map) {
         }
@@ -398,6 +397,89 @@ var GameMapUtils;
     }
     GameMapUtils.overlayDiv = overlayDiv;
     ;
+    class ToggleButtonGroup {
+        add(btn) {
+            this._buttons.push(btn);
+        }
+        remove(btn) {
+            const index = this._buttons.indexOf(btn);
+            if (index != -1) {
+                this._buttons.splice(index, 1);
+            }
+        }
+        setActive(btn) {
+            this._buttons.forEach((item) => {
+                if (item != btn) {
+                    item._setActive(false);
+                }
+            });
+            btn._setActive(true);
+        }
+        getActive() {
+            return this._buttons.find(item => item._isActive);
+        }
+    }
+    GameMapUtils.ToggleButtonGroup = ToggleButtonGroup;
+    function toggleButtonGroup() {
+        return new GameMapUtils.ToggleButtonGroup();
+    }
+    GameMapUtils.toggleButtonGroup = toggleButtonGroup;
+    ;
+    class ToggleButton extends L.Control {
+        constructor(options) {
+            super(L.extend({
+                position: 'topleft',
+                baseClassName: 'btn btn-sm',
+                offClassName: 'btn-outline-secondary',
+                onClassName: 'btn-primary',
+                content: ''
+            }, options));
+        }
+        onAdd(map) {
+            this._map = map;
+            this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.offClassName);
+            L.DomEvent.disableClickPropagation(this._container);
+            this._container.innerHTML = this.options.content;
+            L.DomEvent.on(this._container, 'click', this._clickHandler, this);
+            if (this.options.group) {
+                this.options.group.add(this);
+            }
+            return this._container;
+        }
+        onRemove(map) {
+            if (this._isActive) {
+                this.onDisable(this._map);
+            }
+            if (this.options.group) {
+                this.options.group.remove(this);
+            }
+        }
+        _setActive(_isActive) {
+            if (this._isActive == _isActive) {
+                return;
+            }
+            this._isActive = _isActive;
+            if (this._isActive) {
+                this.onEnable(this._map);
+                this._container.classList.remove(this.options.offClassName);
+                this._container.classList.add(this.options.onClassName);
+            }
+            else {
+                this.onDisable(this._map);
+                this._container.classList.remove(this.options.onClassName);
+                this._container.classList.add(this.options.offClassName);
+            }
+        }
+        _clickHandler(e) {
+            if (this.options.group) {
+                this.options.group.setActive(this);
+            }
+            else {
+                this._setActive(!this._isActive);
+            }
+        }
+    }
+    GameMapUtils.ToggleButton = ToggleButton;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
 /// <reference path="../types/leaflet.d.ts" />
@@ -412,8 +494,7 @@ var GameMapUtils;
         if (num <= 0) {
             return '0'.repeat(precision);
         }
-        var numText = "00000" + num.toFixed(0);
-        return numText.substr(numText.length - 5, precision);
+        return (num % 100000).toFixed(0).padStart(5, "0").substring(5 - precision);
     }
     GameMapUtils.toCoord = toCoord;
     function toGrid(latlng, precision, map) {
@@ -466,8 +547,9 @@ var GameMapUtils;
     GameMapUtils.basicInit = basicInit;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
-/// <reference path="../types/leaflet.d.ts" /> 
-/// <reference path="GameMapUtils.ts" /> 
+/// <reference path="../types/leaflet.d.ts" />
+/// <reference path="GameMapUtils.ts" />
+/// <reference path="Overlays.ts" /> 
 var GameMapUtils;
 (function (GameMapUtils) {
     ;
@@ -775,55 +857,24 @@ var GameMapUtils;
         return new GameMapUtils.Ruler(latLng);
     }
     GameMapUtils.ruler = ruler;
-})(GameMapUtils || (GameMapUtils = {}));
-;
-/// <reference path="../types/leaflet.d.ts" /> 
-/// <reference path="MapTools.ts" /> 
-var GameMapUtils;
-(function (GameMapUtils) {
-    class ToggleToolButton extends L.Control {
+    class ToggleToolButton extends GameMapUtils.ToggleButton {
         constructor(options) {
             super(L.extend({
-                position: 'topleft',
-                baseClassName: 'btn btn-sm',
-                offClassName: 'btn-outline-secondary',
-                onClassName: 'btn-primary',
                 tool: GameMapUtils.ruler,
                 content: 'Ruler'
             }, options));
             this._toolInstance = null;
-            this._toolActive = false;
         }
-        onAdd(map) {
-            this._map = map;
-            this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.offClassName);
-            L.DomEvent.disableClickPropagation(this._container);
-            this._container.innerHTML = this.options.content;
-            L.DomEvent.on(this._container, 'click', this._toggleTool, this);
-            return this._container;
-        }
-        onRemove(map) {
-            if (this._toolActive) {
-                this._toolInstance.removeFrom(this._map);
+        onDisable(map) {
+            if (this._toolInstance) {
+                this._toolInstance.removeFrom(map);
             }
         }
-        _toggleTool(e) {
-            this._toolActive = !this._toolActive;
-            if (this._toolActive) {
-                if (!this._toolInstance) {
-                    this._toolInstance = this.options.tool(this._map.getCenter());
-                }
-                this._toolInstance.addTo(this._map);
-                this._container.classList.remove(this.options.offClassName);
-                this._container.classList.add(this.options.onClassName);
+        onEnable(map) {
+            if (!this._toolInstance) {
+                this._toolInstance = this.options.tool(map.getCenter());
             }
-            else {
-                if (this._toolInstance) {
-                    this._toolInstance.removeFrom(this._map);
-                }
-                this._container.classList.remove(this.options.onClassName);
-                this._container.classList.add(this.options.offClassName);
-            }
+            this._toolInstance.addTo(map);
         }
     }
     GameMapUtils.ToggleToolButton = ToggleToolButton;

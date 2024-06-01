@@ -1,5 +1,6 @@
-﻿/// <reference path="../types/leaflet.d.ts" /> 
-/// <reference path="GameMapUtils.ts" /> 
+﻿/// <reference path="../types/leaflet.d.ts" />
+/// <reference path="GameMapUtils.ts" />
+/// <reference path="Overlays.ts" /> 
 
 namespace GameMapUtils {
 
@@ -381,4 +382,37 @@ namespace GameMapUtils {
         return new GameMapUtils.Ruler(latLng);
     }
 
+    export interface ToggleToolButtonOptions extends ToggleButtonOptions {
+        tool: (pos: L.LatLng) => L.Layer;
+    }
+
+    export class ToggleToolButton extends ToggleButton {
+
+        options: ToggleToolButtonOptions;
+        _toolInstance?: L.Layer = null;
+
+        constructor(options?: ToggleToolButtonOptions) {
+            super(L.extend({
+                tool: GameMapUtils.ruler,
+                content: 'Ruler'
+            }, options));
+        }
+
+        onDisable(map: L.Map) {
+            if (this._toolInstance) {
+                this._toolInstance.removeFrom(map);
+            }
+        }
+
+        onEnable(map: L.Map) {
+            if (!this._toolInstance) {
+                this._toolInstance = this.options.tool(map.getCenter());
+            }
+            this._toolInstance.addTo(map);
+        }
+    }
+
+    export function toggleToolButton(options) {
+        return new GameMapUtils.ToggleToolButton(options);
+    };
 };

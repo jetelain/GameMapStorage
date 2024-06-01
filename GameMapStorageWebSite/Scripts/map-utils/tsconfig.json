@@ -5,8 +5,8 @@
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": false,
-    "target": "es2015",
+    "target": "es2017",
     "outFile": "../../wwwroot/js/map-utils.js"
   },
-  "files": [ "GameMapUtils.ts", "MapTools.ts", "Overlays.ts", "ToggleToolButton.ts" ]
+  "files": [ "GameMapUtils.ts", "LatLngGraticule.ts", "Overlays.ts", "MapTools.ts" ]
 }
