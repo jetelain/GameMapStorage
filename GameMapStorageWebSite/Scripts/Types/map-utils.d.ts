@@ -132,6 +132,20 @@ declare namespace GameMapUtils {
         _setActive(_isActive: boolean): void;
         _clickHandler(e: any): void;
     }
+    interface ButtonGroupOptions extends L.ControlOptions {
+        className?: string;
+    }
+    class ButtonGroupBlock extends L.Control {
+        options: ButtonGroupOptions;
+        _container: HTMLElement;
+        _buttons: L.Control[];
+        _map: L.Map;
+        constructor(options?: ButtonGroupOptions);
+        onAdd(map: any): HTMLElement;
+        onRemove(map: any): void;
+        add(...btns: L.Control[]): this;
+    }
+    function buttonGroupBlock(options?: ButtonGroupOptions): ButtonGroupBlock;
 }
 declare namespace GameMapUtils {
     function toCoord(num: number, precision: number): string;
@@ -249,7 +263,9 @@ declare namespace GameMapUtils {
         onDisable(map: L.Map): void;
         onEnable(map: L.Map): void;
     }
-    function toggleToolButton(options: any): ToggleToolButton;
+    function rulerToolButton(options?: ToggleButtonOptions): ToggleToolButton;
+    function coordinateScaleToolButton(options?: ToggleButtonOptions): ToggleToolButton;
+    function protractorToolButton(options?: ToggleButtonOptions): ToggleToolButton;
 }
 declare namespace GameMapUtils {
     export const MapEditToolsGroup: ToggleButtonGroup;
