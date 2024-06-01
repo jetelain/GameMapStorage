@@ -33,3 +33,15 @@ img.thumbnail-640-360 {
     filter: invert(1);
     transition: filter 0.15s ease-in-out;
 }
+
+.leaflet-container .btn-outline-secondary:not(:hover) {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.leaflet-container .btn-outline-primary:not(:hover) {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.leaflet-container .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: none;
+}

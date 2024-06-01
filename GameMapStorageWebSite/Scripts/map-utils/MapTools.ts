@@ -140,6 +140,9 @@ namespace GameMapUtils {
                         })
                         .on('drag', this._positionChanged, this);
                 this._rotateMarker = this._createRotateMarker();
+            } else {
+                this._dragMarker.setIcon(this._createDragMarkerIcon());
+                this._updateRotateMarkerSize();
             }
 
             this._svgOverlay.addTo(map);
@@ -412,7 +415,22 @@ namespace GameMapUtils {
         }
     }
 
-    export function toggleToolButton(options) {
-        return new GameMapUtils.ToggleToolButton(options);
+    export function rulerToolButton(options?: ToggleButtonOptions) {
+        return new GameMapUtils.ToggleToolButton(L.extend({
+            tool: GameMapUtils.ruler,
+            content: '<img src="/img/ruler.svg" width="16" height="16" class="revertable"/>'
+        }, options));
+    };
+    export function coordinateScaleToolButton(options?: ToggleButtonOptions) {
+        return new GameMapUtils.ToggleToolButton(L.extend({
+            tool: GameMapUtils.coordinateScale,
+            content: '<img src="/img/grid.svg" width="16" height="16" class="revertable"/>'
+        }, options));
+    };
+    export function protractorToolButton(options?: ToggleButtonOptions) {
+        return new GameMapUtils.ToggleToolButton(L.extend({
+            tool: GameMapUtils.protractor,
+            content: '<img src="/img/protractor.svg" width="16" height="16" class="revertable"/>'
+        }, options));
     };
 };

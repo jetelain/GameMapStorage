@@ -3,18 +3,23 @@ function mapInit(mapInfos) {
 
     var map = GameMapUtils.basicInit(mapInfos);
 
-    GameMapUtils.handToolButton().addTo(map);
-
     let lastMeasure;
-    GameMapUtils.measurePathToolButton({ baseClassName: 'btn btn-sm mt-0' })
-        .on('added', ev => { lastMeasure = ev.marker; })
-        .on('started', ev => { if (lastMeasure) { lastMeasure.remove(); lastMeasure = null; } })
-        .addTo(map);
 
-    GameMapUtils.toggleToolButton({ tool: GameMapUtils.ruler, content: '<img src="/img/ruler.svg" width="16" height="16" class="revertable"/>' }).addTo(map);
-    GameMapUtils.toggleToolButton({ tool: GameMapUtils.coordinateScale, content: '<img src="/img/grid.svg" width="16" height="16" class="revertable"/>' }).addTo(map);
-    GameMapUtils.toggleToolButton({ tool: GameMapUtils.protractor, content: '<img src="/img/protractor.svg" width="16" height="16" class="revertable" />' }).addTo(map);
+    GameMapUtils.buttonGroupBlock().add(
 
+        GameMapUtils.handToolButton(),
+
+        GameMapUtils.measurePathToolButton()
+            .on('added', ev => { lastMeasure = ev.marker; })
+            .on('started', ev => { if (lastMeasure) { lastMeasure.remove(); lastMeasure = null; } })
+
+    ).addTo(map);
+
+    GameMapUtils.buttonGroupBlock().add(
+        GameMapUtils.rulerToolButton(),
+        GameMapUtils.coordinateScaleToolButton(),
+        GameMapUtils.protractorToolButton()
+    ).addTo(map);
 
     document.querySelectorAll(".location-link").forEach(element => {
         element.addEventListener("click", event => {

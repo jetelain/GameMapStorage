@@ -255,5 +255,44 @@ namespace GameMapUtils {
             }
         }
     }
+    export interface ButtonGroupOptions extends L.ControlOptions {
+        className?: string;
+    }
+    export class ButtonGroupBlock extends L.Control {
+        options: ButtonGroupOptions;
+        _container: HTMLElement;
+        _buttons: L.Control[];
+        _map: L.Map;
 
+        constructor(options?: ButtonGroupOptions) {
+            super(L.extend({
+                position: 'topleft',
+                className: 'btn-group-vertical'
+            }, options));
+            this._buttons = [];
+        }
+
+        onAdd(map) {
+            this._container = L.DomUtil.create('div', this.options.className);
+            L.DomEvent.disableClickPropagation(this._container);
+            this._buttons.forEach(btn => this._container.append(btn.onAdd(map)));
+            return this._container;
+        }
+
+        onRemove(map) {
+            this._buttons.forEach(btn => btn.onRemove(map));
+        }
+
+        add(...btns: L.Control[]): this {
+            this._buttons.push(...btns);
+            if (this._map) {
+                btns.forEach(btn => this._container.append(btn.onAdd(this._map)));
+            }
+            return this;
+        }
+    }
+
+    export function buttonGroupBlock(options?: ButtonGroupOptions) {
+        return new GameMapUtils.ButtonGroupBlock(options);
+    };
 };

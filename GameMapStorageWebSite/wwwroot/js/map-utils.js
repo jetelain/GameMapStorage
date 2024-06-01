@@ -486,6 +486,37 @@ var GameMapUtils;
         }
     }
     GameMapUtils.ToggleButton = ToggleButton;
+    class ButtonGroupBlock extends L.Control {
+        constructor(options) {
+            super(L.extend({
+                position: 'topleft',
+                className: 'btn-group-vertical'
+            }, options));
+            this._buttons = [];
+        }
+        onAdd(map) {
+            this._container = L.DomUtil.create('div', this.options.className);
+            L.DomEvent.disableClickPropagation(this._container);
+            this._buttons.forEach(btn => this._container.append(btn.onAdd(map)));
+            return this._container;
+        }
+        onRemove(map) {
+            this._buttons.forEach(btn => btn.onRemove(map));
+        }
+        add(...btns) {
+            this._buttons.push(...btns);
+            if (this._map) {
+                btns.forEach(btn => this._container.append(btn.onAdd(this._map)));
+            }
+            return this;
+        }
+    }
+    GameMapUtils.ButtonGroupBlock = ButtonGroupBlock;
+    function buttonGroupBlock(options) {
+        return new GameMapUtils.ButtonGroupBlock(options);
+    }
+    GameMapUtils.buttonGroupBlock = buttonGroupBlock;
+    ;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
 /// <reference path="../types/leaflet.d.ts" />
@@ -662,6 +693,10 @@ var GameMapUtils;
                     })
                         .on('drag', this._positionChanged, this);
                 this._rotateMarker = this._createRotateMarker();
+            }
+            else {
+                this._dragMarker.setIcon(this._createDragMarkerIcon());
+                this._updateRotateMarkerSize();
             }
             this._svgOverlay.addTo(map);
             this._dragMarker.addTo(map);
@@ -894,10 +929,29 @@ var GameMapUtils;
         }
     }
     GameMapUtils.ToggleToolButton = ToggleToolButton;
-    function toggleToolButton(options) {
-        return new GameMapUtils.ToggleToolButton(options);
+    function rulerToolButton(options) {
+        return new GameMapUtils.ToggleToolButton(L.extend({
+            tool: GameMapUtils.ruler,
+            content: '<img src="/img/ruler.svg" width="16" height="16" class="revertable"/>'
+        }, options));
     }
-    GameMapUtils.toggleToolButton = toggleToolButton;
+    GameMapUtils.rulerToolButton = rulerToolButton;
+    ;
+    function coordinateScaleToolButton(options) {
+        return new GameMapUtils.ToggleToolButton(L.extend({
+            tool: GameMapUtils.coordinateScale,
+            content: '<img src="/img/grid.svg" width="16" height="16" class="revertable"/>'
+        }, options));
+    }
+    GameMapUtils.coordinateScaleToolButton = coordinateScaleToolButton;
+    ;
+    function protractorToolButton(options) {
+        return new GameMapUtils.ToggleToolButton(L.extend({
+            tool: GameMapUtils.protractor,
+            content: '<img src="/img/protractor.svg" width="16" height="16" class="revertable"/>'
+        }, options));
+    }
+    GameMapUtils.protractorToolButton = protractorToolButton;
     ;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
