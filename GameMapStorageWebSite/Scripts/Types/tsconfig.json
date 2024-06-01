@@ -10,5 +10,5 @@
     "emitDeclarationOnly": true,
     "declaration": true
   },
-  "files": [ "../map-utils/GameMapUtils.ts", "../map-utils/LatLngGraticule.ts", "../map-utils/Overlays.ts", "../map-utils/MapTools.ts" ]
+  "files": [ "../map-utils/GameMapUtils.ts", "../map-utils/LatLngGraticule.ts", "../map-utils/Overlays.ts", "../map-utils/MapTools.ts", "../map-utils/MeasurePath.ts" ]
 }

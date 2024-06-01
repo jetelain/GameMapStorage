@@ -137,6 +137,7 @@ declare namespace GameMapUtils {
     function toCoord(num: number, precision: number): string;
     function toGrid(latlng: L.LatLng, precision: number, map: L.Map): string;
     function bearing(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils?: boolean): number;
+    function bearingWithUnit(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils?: boolean): string;
     function CRS(factorx: number, factory: number, tileSize: number): L.CRS;
     interface MapInfos {
         minZoom: number;
@@ -249,4 +250,51 @@ declare namespace GameMapUtils {
         onEnable(map: L.Map): void;
     }
     function toggleToolButton(options: any): ToggleToolButton;
+}
+declare namespace GameMapUtils {
+    export const MapEditToolsGroup: ToggleButtonGroup;
+    export function handToolButton(options: ToggleButtonOptions): ToggleButton;
+    interface MeasureMarkerOptions extends L.PolylineOptions {
+        useMils?: boolean;
+    }
+    class MeasureMarker extends L.Polyline {
+        options: MeasureMarkerOptions;
+        _toolTips: L.Tooltip[];
+        constructor(latlngs: L.LatLngExpression[], options?: MeasureMarkerOptions);
+        _updateMarkers(): void;
+        redraw(): this;
+        private _tooltipContent;
+    }
+    type MarkerCreatorEvents = 'added' | 'started';
+    interface MakerCreateEvent<TMarker> extends L.LeafletEvent {
+        marker: TMarker;
+    }
+    type MakerCreateHandlerFn<TMarker> = (event: MakerCreateEvent<TMarker>) => void;
+    class EventHolder extends L.Evented {
+    }
+    abstract class MarkerCreatorToggleButton<TMarker> extends ToggleButton {
+        holder: EventHolder;
+        constructor(options?: ToggleButtonOptions);
+        on(type: MarkerCreatorEvents, handler: MakerCreateHandlerFn<TMarker>, context: any): this;
+        off(type: MarkerCreatorEvents, handler: MakerCreateHandlerFn<TMarker>, context: any): this;
+        fire(type: MarkerCreatorEvents, data: {
+            marker: TMarker;
+        }): this;
+    }
+    interface MeasurePathToolButtonOptions extends ToggleButtonOptions {
+        useMils?: boolean;
+    }
+    class MeasurePathToolButton extends MarkerCreatorToggleButton<MeasureMarker> {
+        options: MeasurePathToolButtonOptions;
+        _current: MeasureMarker;
+        constructor(options?: MeasurePathToolButtonOptions);
+        onDisable(map: L.Map): void;
+        onEnable(map: L.Map): void;
+        _mapClickHandler(ev: L.LeafletMouseEvent): void;
+        _mapMouseMoveHandler(ev: L.LeafletMouseEvent): void;
+        _dismissAll(): void;
+        _dismissLast(): void;
+    }
+    export function measurePathToolButton(options: ToggleButtonOptions): MeasurePathToolButton;
+    export {};
 }

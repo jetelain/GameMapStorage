@@ -8,8 +8,11 @@ namespace GameMapUtils {
         if (precision === undefined || precision > 5) {
             precision = 4;
         }
-        if (num <= 0) {
-            return '0'.repeat(precision);
+        if (num == 0) {
+            return "0".repeat(precision);
+        }
+        if (num < 0) {
+            return (100000 + (num % 100000)).toFixed(0).padStart(5, "0").substring(5 - precision);
         }
         return (num % 100000).toFixed(0).padStart(5, "0").substring(5 - precision);
     }
@@ -23,6 +26,13 @@ namespace GameMapUtils {
             return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400;
         }
         return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360;
+    }
+
+    export function bearingWithUnit(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils: boolean = false): string {
+        if (useMils) {
+            return (((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400).toFixed() + ' mil';
+        }
+        return (((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360).toFixed(1) + '°';
     }
 
     export function CRS (factorx: number, factory: number, tileSize: number): L.CRS {

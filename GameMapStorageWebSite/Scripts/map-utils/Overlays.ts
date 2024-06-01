@@ -147,10 +147,13 @@ namespace GameMapUtils {
 
     export class ToggleButtonGroup {
 
-        _buttons: ToggleButton[];
+        _buttons: ToggleButton[] = new Array();
 
         add(btn: ToggleButton) {
             this._buttons.push(btn);
+            if (this._buttons.length == 1) {
+                btn._setActive(true);
+            }
         }
 
         remove(btn: ToggleButton) {

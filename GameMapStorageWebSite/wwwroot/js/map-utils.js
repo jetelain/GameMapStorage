@@ -398,8 +398,14 @@ var GameMapUtils;
     GameMapUtils.overlayDiv = overlayDiv;
     ;
     class ToggleButtonGroup {
+        constructor() {
+            this._buttons = new Array();
+        }
         add(btn) {
             this._buttons.push(btn);
+            if (this._buttons.length == 1) {
+                btn._setActive(true);
+            }
         }
         remove(btn) {
             const index = this._buttons.indexOf(btn);
@@ -491,8 +497,11 @@ var GameMapUtils;
         if (precision === undefined || precision > 5) {
             precision = 4;
         }
-        if (num <= 0) {
-            return '0'.repeat(precision);
+        if (num == 0) {
+            return "0".repeat(precision);
+        }
+        if (num < 0) {
+            return (100000 + (num % 100000)).toFixed(0).padStart(5, "0").substring(5 - precision);
         }
         return (num % 100000).toFixed(0).padStart(5, "0").substring(5 - precision);
     }
@@ -508,6 +517,13 @@ var GameMapUtils;
         return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360;
     }
     GameMapUtils.bearing = bearing;
+    function bearingWithUnit(p1, p2, map, useMils = false) {
+        if (useMils) {
+            return (((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400).toFixed() + ' mil';
+        }
+        return (((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360).toFixed(1) + '°';
+    }
+    GameMapUtils.bearingWithUnit = bearingWithUnit;
     function CRS(factorx, factory, tileSize) {
         return L.extend({}, L.CRS.Simple, {
             projection: L.Projection.LonLat,
@@ -885,3 +901,166 @@ var GameMapUtils;
     ;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
+/// <reference path="../types/leaflet.d.ts" />
+/// <reference path="GameMapUtils.ts" />
+/// <reference path="Overlays.ts" /> 
+var GameMapUtils;
+(function (GameMapUtils) {
+    GameMapUtils.MapEditToolsGroup = new GameMapUtils.ToggleButtonGroup();
+    class HandToolButton extends GameMapUtils.ToggleButton {
+        constructor(options) {
+            super(L.extend({
+                group: GameMapUtils.MapEditToolsGroup,
+                content: '<img src="/img/hand.svg" width="16" height="16" class="revertable" />'
+            }, options));
+        }
+        onDisable(map) {
+        }
+        onEnable(map) {
+        }
+    }
+    function handToolButton(options) {
+        return new HandToolButton(options);
+    }
+    GameMapUtils.handToolButton = handToolButton;
+    const intl = new Intl.NumberFormat();
+    class MeasureMarker extends L.Polyline {
+        constructor(latlngs, options) {
+            super(latlngs, L.extend({ color: '#000000', weight: 1.3, dashArray: '4', interactive: false }, options));
+            this._toolTips = [];
+            this.on('add', () => {
+                this._toolTips = [];
+                this._updateMarkers();
+            });
+            this.on('remove', () => {
+                this._toolTips.forEach(tp => tp.remove());
+                this._toolTips = [];
+            });
+        }
+        _updateMarkers() {
+            const posList = this.getLatLngs();
+            for (let i = 0; i < posList.length - 1; ++i) {
+                const formatedDistance = this._tooltipContent(posList[i], posList[i + 1]);
+                const center = new L.LatLngBounds(posList[i], posList[i + 1]).getCenter();
+                if (this._toolTips.length <= i) {
+                    const tooltip = new L.Tooltip(center, { content: formatedDistance, direction: 'center', permanent: true, interactive: this.options.interactive, opacity: 0.8 });
+                    tooltip.addTo(this._map);
+                    this._toolTips.push(tooltip);
+                }
+                else {
+                    const tooltip = this._toolTips[i];
+                    tooltip.setContent(formatedDistance);
+                    tooltip.setLatLng(center);
+                }
+            }
+            while (this._toolTips.length > posList.length - 1) {
+                this._toolTips.pop().remove();
+            }
+        }
+        redraw() {
+            if (this._map) {
+                this._updateMarkers();
+            }
+            return super.redraw();
+        }
+        _tooltipContent(a, b) {
+            return '<i class="fas fa-arrows-alt-h"></i> ' + intl.format(Math.round(this._map.distance(a, b))) + ' m<br/><i class="fas fa-compass"></i> '
+                + GameMapUtils.bearingWithUnit(a, b, this._map, this.options.useMils);
+        }
+    }
+    class EventHolder extends L.Evented {
+    }
+    ;
+    class MarkerCreatorToggleButton extends GameMapUtils.ToggleButton {
+        constructor(options) {
+            super(options);
+            this.holder = new EventHolder();
+        }
+        on(type, handler, context) {
+            this.holder.on(type, handler, context);
+            return this;
+        }
+        off(type, handler, context) {
+            this.holder.off(type, handler, context);
+            return this;
+        }
+        fire(type, data) {
+            this.holder.fire(type, data);
+            return this;
+        }
+    }
+    class MeasurePathToolButton extends MarkerCreatorToggleButton {
+        constructor(options) {
+            super(L.extend({
+                group: GameMapUtils.MapEditToolsGroup,
+                content: '<img src="/img/path.svg" width="16" height="16" class="revertable" />'
+            }, options));
+        }
+        onDisable(map) {
+            this._dismissAll();
+            map.off('click', this._mapClickHandler, this);
+            map.off('mousemove', this._mapMouseMoveHandler, this);
+            map.off('contextmenu', this._dismissLast, this);
+            map.getContainer().classList.remove('precision-cursor');
+        }
+        onEnable(map) {
+            map.on('click', this._mapClickHandler, this);
+            map.on('mousemove', this._mapMouseMoveHandler, this);
+            map.on('contextmenu', this._dismissLast, this);
+            map.getContainer().classList.add('precision-cursor');
+        }
+        _mapClickHandler(ev) {
+            if (this._current) {
+                const marker = this._current;
+                var posList = marker.getLatLngs();
+                posList[posList.length - 1] = ev.latlng;
+                if (ev.originalEvent.ctrlKey) {
+                    posList.push(ev.latlng);
+                    marker.setLatLngs(posList);
+                }
+                else {
+                    marker.setLatLngs(posList);
+                    this._current = null;
+                    this.fire('added', { marker: marker });
+                }
+            }
+            else {
+                this._current = new MeasureMarker([ev.latlng, ev.latlng], { color: '#000000', weight: 1.3, dashArray: '4', interactive: false, useMils: this.options.useMils });
+                this.fire('started', { marker: this._current });
+                this._current.addTo(this._map);
+            }
+        }
+        _mapMouseMoveHandler(ev) {
+            if (this._current) {
+                var posList = this._current.getLatLngs();
+                posList[posList.length - 1] = ev.latlng;
+                this._current.setLatLngs(posList);
+            }
+        }
+        _dismissAll() {
+            if (this._current) {
+                this._current.remove();
+                this._current = null;
+            }
+        }
+        _dismissLast() {
+            if (this._current) {
+                const marker = this._current;
+                this._current = null;
+                var posList = marker.getLatLngs();
+                if (posList.length == 2) {
+                    marker.remove();
+                }
+                else {
+                    posList.pop();
+                    marker.setLatLngs(posList);
+                    this.fire('added', { marker: marker });
+                }
+            }
+        }
+    }
+    function measurePathToolButton(options) {
+        return new MeasurePathToolButton(options);
+    }
+    GameMapUtils.measurePathToolButton = measurePathToolButton;
+})(GameMapUtils || (GameMapUtils = {}));

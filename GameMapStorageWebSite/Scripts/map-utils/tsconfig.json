@@ -8,5 +8,5 @@
     "target": "es2017",
     "outFile": "../../wwwroot/js/map-utils.js"
   },
-  "files": [ "GameMapUtils.ts", "LatLngGraticule.ts", "Overlays.ts", "MapTools.ts" ]
+  "files": [ "GameMapUtils.ts", "LatLngGraticule.ts", "Overlays.ts", "MapTools.ts", "MeasurePath.ts" ]
 }
