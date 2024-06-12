@@ -31,6 +31,9 @@ namespace GameMapStorageWebSite.Models.Json
 
         public string? EnglishTitle { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Attribution { get; set; }
+
         public string? AppendAttribution { get; set; }
 
         public string? SteamWorkshopId { get; set; }

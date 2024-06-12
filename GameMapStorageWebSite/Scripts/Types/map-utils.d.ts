@@ -153,18 +153,19 @@ declare namespace GameMapUtils {
     function bearing(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils?: boolean): number;
     function bearingWithUnit(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils?: boolean): string;
     function CRS(factorx: number, factory: number, tileSize: number): L.CRS;
-    interface MapInfos {
+    interface LayerDisplayOptions {
         minZoom: number;
         maxZoom: number;
-        factorx: number;
-        factory: number;
+        factorX: number;
+        factorY: number;
         tileSize: number;
         attribution: string;
         tilePattern: string;
         defaultPosition: [number, number];
         defaultZoom: number;
     }
-    function basicInit(mapInfos: MapInfos, mapDivId?: string | HTMLElement): L.Map;
+    function basicInit(mapInfos: LayerDisplayOptions, mapDivId?: string | HTMLElement): L.Map;
+    function basicInitFromAPI(gameName: string, mapName: string, mapDivId?: string | HTMLElement, apiBasePath?: string): Promise<L.Map>;
 }
 declare namespace GameMapUtils {
     interface MapToolBaseOptions extends L.LayerOptions {

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using GameMapStorageWebSite;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Models.Json;
 using GameMapStorageWebSite.Services.Mirroring;
@@ -77,6 +78,7 @@ namespace GameMapStorageStaticMirrorBuilder
             foreach (var map in await context.GameMaps.ToListAsync())
             {
                 var mapJson = new GameMapJson(map, pathBuilder);
+                mapJson.Attribution = MapUtils.CombineAttibutions(map.Game!.Attribution, map.AppendAttribution);
                 mapJson.Layers = GameMapLayerJson.CreateList(await context.GameMapLayers.Where(l => l.GameMapId == map.GameMapId && l.State == LayerState.Ready).ToListAsync(), pathBuilder);
                 mapJson.Locations = (await context.GameMapLocations.Where(l => l.GameMapId == map.GameMapId).ToListAsync()).Select(l => new GameMapLocationJson(l)).ToList();
 

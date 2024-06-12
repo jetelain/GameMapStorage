@@ -2,7 +2,7 @@
 
 namespace GameMapStorageWebSite.Models
 {
-    public class MapInfos
+    public class LayerDisplayOptions
     {
         [JsonPropertyName("minZoom")]
         public int MinZoom { get; set; }
@@ -10,10 +10,10 @@ namespace GameMapStorageWebSite.Models
         [JsonPropertyName("maxZoom")]
         public int MaxZoom { get; set; }
 
-        [JsonPropertyName("factorx")]
+        [JsonPropertyName("factorX")]
         public double FactorX { get; set; }
 
-        [JsonPropertyName("factory")]
+        [JsonPropertyName("factorY")]
         public double FactorY { get; set; }
 
         [JsonPropertyName("tileSize")]

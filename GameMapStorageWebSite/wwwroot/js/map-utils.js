@@ -577,7 +577,7 @@ var GameMapUtils;
         var map = L.map(mapDivId, {
             minZoom: mapInfos.minZoom,
             maxZoom: mapInfos.maxZoom,
-            crs: GameMapUtils.CRS(mapInfos.factorx, mapInfos.factory, mapInfos.tileSize),
+            crs: GameMapUtils.CRS(mapInfos.factorX, mapInfos.factorY, mapInfos.tileSize),
             zoomDelta: 0.5,
             zoomSnap: 0.25
         });
@@ -592,6 +592,23 @@ var GameMapUtils;
         return map;
     }
     GameMapUtils.basicInit = basicInit;
+    async function basicInitFromAPI(gameName, mapName, mapDivId = 'map', apiBasePath = "https://atlas.plan-ops.fr/api/v1/") {
+        const response = await fetch(`${apiBasePath}games/${encodeURIComponent(gameName)}/maps/${encodeURIComponent(mapName)}`);
+        const map = await response.json();
+        const layer = map.layers.find(l => l.isDefault);
+        return basicInit({
+            minZoom: layer.minZoom,
+            maxZoom: layer.maxZoom,
+            factorX: layer.factorX,
+            factorY: layer.factorY,
+            tileSize: layer.tileSize,
+            attribution: map.appendAttribution,
+            tilePattern: layer.pattern,
+            defaultPosition: [map.sizeInMeters / 2, map.sizeInMeters / 2],
+            defaultZoom: 2
+        }, mapDivId);
+    }
+    GameMapUtils.basicInitFromAPI = basicInitFromAPI;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
 /// <reference path="../types/leaflet.d.ts" />

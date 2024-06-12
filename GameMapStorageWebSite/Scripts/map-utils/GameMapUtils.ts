@@ -54,11 +54,11 @@ namespace GameMapUtils {
         });
     }
 
-    export interface MapInfos {
+    export interface LayerDisplayOptions {
         minZoom: number;
         maxZoom: number;
-        factorx: number;
-        factory: number;
+        factorX: number;
+        factorY: number;
         tileSize: number;
         attribution: string;
         tilePattern: string;
@@ -66,12 +66,12 @@ namespace GameMapUtils {
         defaultZoom: number;
     }
 
-    export function basicInit(mapInfos: MapInfos, mapDivId: string | HTMLElement = 'map'): L.Map {
+    export function basicInit(mapInfos: LayerDisplayOptions, mapDivId: string | HTMLElement = 'map'): L.Map {
 
         var map = L.map(mapDivId, {
             minZoom: mapInfos.minZoom,
             maxZoom: mapInfos.maxZoom,
-            crs: GameMapUtils.CRS(mapInfos.factorx, mapInfos.factory, mapInfos.tileSize),
+            crs: GameMapUtils.CRS(mapInfos.factorX, mapInfos.factorY, mapInfos.tileSize),
             zoomDelta: 0.5,
             zoomSnap: 0.25
         });
@@ -91,4 +91,42 @@ namespace GameMapUtils {
 
         return map;
     }
+
+    interface APILayerResponse {
+        isDefault: boolean;
+        tileSize: number;
+        factorX: number;
+        factorY: number;
+        minZoom: number;
+        maxZoom: number;
+        pattern: string;
+    }
+
+    interface APIMapResponse {
+        appendAttribution: string;
+        sizeInMeters: number;
+        layers: APILayerResponse[];
+    }
+
+    export async function basicInitFromAPI(gameName: string, mapName: string, mapDivId: string | HTMLElement = 'map', apiBasePath: string = "https://atlas.plan-ops.fr/api/v1/"): Promise<L.Map> {
+
+        const response = await fetch(`${apiBasePath}games/${encodeURIComponent(gameName)}/maps/${encodeURIComponent(mapName)}`);
+
+        const map = await response.json() as APIMapResponse;
+
+        const layer = map.layers.find(l => l.isDefault);
+
+        return basicInit({
+            minZoom: layer.minZoom,
+            maxZoom: layer.maxZoom,
+            factorX: layer.factorX,
+            factorY: layer.factorY,
+            tileSize: layer.tileSize,
+            attribution: map.appendAttribution,
+            tilePattern: layer.pattern,
+            defaultPosition: [map.sizeInMeters / 2, map.sizeInMeters / 2],
+            defaultZoom: 2
+        }, mapDivId);
+    }
+
 };

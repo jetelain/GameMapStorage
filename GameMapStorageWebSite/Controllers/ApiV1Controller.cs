@@ -99,6 +99,7 @@ namespace GameMapStorageWebSite.Controllers
             var pathBuilder = GetPathBuilder();
             var useWebp = ImagePathHelper.AcceptWebp(Request);
             var mapJson = new GameMapJson(map, pathBuilder);
+            mapJson.Attribution = MapUtils.CombineAttibutions(game.Attribution, map.AppendAttribution);
             mapJson.Layers = GameMapLayerJson.CreateList(await context.GameMapLayers.Where(l => l.GameMapId == map.GameMapId && l.State == LayerState.Ready).ToListAsync(), pathBuilder);
             mapJson.Locations = (await context.GameMapLocations.Where(l => l.GameMapId == map.GameMapId).ToListAsync()).Select(l => new GameMapLocationJson(l)).ToList();
             return Json(mapJson);

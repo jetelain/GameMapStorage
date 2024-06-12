@@ -86,7 +86,7 @@ namespace GameMapStorageWebSite.Controllers
                 Map = map, 
                 Layer = layer,
                 AcceptWebp = ImagePathHelper.AcceptWebp(Request),
-                MapInfos = new MapInfos()
+                MapInfos = new LayerDisplayOptions()
                 {
                     FactorX = layer.FactorX,
                     DefaultPosition = [y ?? (map.SizeInMeters  / 2), x ?? (map.SizeInMeters / 2)],
