@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class HomeController : Controller
     {
         private readonly GameMapStorageContext _context;

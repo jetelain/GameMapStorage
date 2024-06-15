@@ -43,14 +43,16 @@ namespace GameMapStorageWebSite.Controllers
 
         [HttpGet]
         [Route("games")]
+        [Produces<GameJsonBase[]>]
         public async Task<IActionResult> GetGames()
         {
             var pathBuilder = GetPathBuilder();
-            return Json((await context.Games.ToListAsync()).Select(g => new GameJson(g, pathBuilder)).ToList());
+            return Json((await context.Games.ToListAsync()).Select(g => new GameJsonBase(g, pathBuilder)).ToList());
         }
 
         [HttpGet]
         [Route("games/{gameNameOrId}")]
+        [Produces<GameJson>]
         public async Task<IActionResult> GetGame(string gameNameOrId)
         {
             var game = await FindGame(gameNameOrId);
@@ -67,6 +69,7 @@ namespace GameMapStorageWebSite.Controllers
 
         [HttpGet]
         [Route("games/{gameNameOrId}/maps")]
+        [Produces<GameMapJsonBase[]>]
         public async Task<IActionResult> GetMaps(string gameNameOrId)
         {
             var game = await FindGame(gameNameOrId);
@@ -78,12 +81,13 @@ namespace GameMapStorageWebSite.Controllers
             await context.GameMapLayers.Where(l => l.GameMap!.GameId == game.GameId && l.State == LayerState.Ready).ToListAsync();
             var pathBuilder = GetPathBuilder();
             var useWebp = ImagePathHelper.AcceptWebp(Request);
-            return Json(maps.Select(m => new GameMapJson(m, pathBuilder) { Layers = GameMapLayerJson.CreateList(m.Layers, pathBuilder) }).ToList());
+            return Json(maps.Select(m => new GameMapJsonBase(m, pathBuilder) { Layers = GameMapLayerJson.CreateList(m.Layers, pathBuilder) }).ToList());
         }
 
 
         [HttpGet]
         [Route("games/{gameNameOrId}/maps/{mapNameOrId}")]
+        [Produces<GameMapJson>]
         public async Task<IActionResult> GetMap(string gameNameOrId, string mapNameOrId)
         {
             var game = await FindGame(gameNameOrId);

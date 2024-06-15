@@ -13,6 +13,7 @@ namespace GameMapStorageWebSite.Controllers
     /// <summary>
     /// Allow existing instances of cTabIRL and Arma3TacMap to use our maps
     /// </summary>
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class LegacyController : Controller
     {
         private readonly GameMapStorageContext context;
