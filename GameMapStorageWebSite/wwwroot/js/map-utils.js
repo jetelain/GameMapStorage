@@ -306,7 +306,7 @@ var GameMapUtils;
             this._map = map;
             L.DomEvent.disableClickPropagation(this._container);
             map.on('mousemove', this._onMouseMove, this);
-            this._container.innerHTML = GameMapUtils.toGrid(L.latLng(0, 0), this.options.precision, this._map);
+            this._container.innerHTML = GameMapUtils.toGridCoordinates(L.latLng(0, 0), this.options.precision, this._map);
             return this._container;
         }
         onRemove(map) {
@@ -314,7 +314,7 @@ var GameMapUtils;
             map.off('mousemove', this._onMouseMove);
         }
         _onMouseMove(e) {
-            this._container.innerHTML = GameMapUtils.toGrid(e.latlng, this.options.precision, this._map);
+            this._container.innerHTML = GameMapUtils.toGridCoordinates(e.latlng, this.options.precision, this._map);
         }
     }
     GameMapUtils.GridMousePosition = GridMousePosition;
@@ -524,7 +524,7 @@ var GameMapUtils;
 /// <reference path="Overlays.ts" /> 
 var GameMapUtils;
 (function (GameMapUtils) {
-    function toCoord(num, precision) {
+    function formatCoordinate(num, precision) {
         if (precision === undefined || precision > 5) {
             precision = 4;
         }
@@ -536,25 +536,26 @@ var GameMapUtils;
         }
         return (num % 100000).toFixed(0).padStart(5, "0").substring(5 - precision);
     }
-    GameMapUtils.toCoord = toCoord;
-    function toGrid(latlng, precision, map) {
-        return GameMapUtils.toCoord(latlng.lng, precision) + " - " + GameMapUtils.toCoord(latlng.lat, precision);
+    GameMapUtils.formatCoordinate = formatCoordinate;
+    function toGridCoordinates(latlng, precision, map) {
+        return GameMapUtils.formatCoordinate(latlng.lng, precision) + " - " + GameMapUtils.formatCoordinate(latlng.lat, precision);
     }
-    GameMapUtils.toGrid = toGrid;
-    function bearing(p1, p2, map, useMils = false) {
-        if (useMils) {
-            return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400;
-        }
+    GameMapUtils.toGridCoordinates = toGridCoordinates;
+    function computeBearingMils(p1, p2, map) {
+        return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400;
+    }
+    GameMapUtils.computeBearingMils = computeBearingMils;
+    function computeBearingDegrees(p1, p2, map) {
         return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360;
     }
-    GameMapUtils.bearing = bearing;
-    function bearingWithUnit(p1, p2, map, useMils = false) {
+    GameMapUtils.computeBearingDegrees = computeBearingDegrees;
+    function computeAndFormatBearing(p1, p2, map, useMils = false) {
         if (useMils) {
-            return (((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400).toFixed() + ' mil';
+            return computeBearingMils(p1, p2, map).toFixed() + ' mil';
         }
-        return (((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360).toFixed(1) + '°';
+        return computeBearingDegrees(p1, p2, map).toFixed(1) + '°';
     }
-    GameMapUtils.bearingWithUnit = bearingWithUnit;
+    GameMapUtils.computeAndFormatBearing = computeAndFormatBearing;
     function CRS(factorx, factory, tileSize) {
         return L.extend({}, L.CRS.Simple, {
             projection: L.Projection.LonLat,
@@ -784,7 +785,7 @@ var GameMapUtils;
             this._rotateMarker.setIcon(this._createRotateMarkerIcon());
         }
         _onRotateMarkerDrag() {
-            this.setBearing(GameMapUtils.bearing(this._latlng, this._rotateMarker.getLatLng(), this._map));
+            this.setBearing(GameMapUtils.computeBearingDegrees(this._latlng, this._rotateMarker.getLatLng(), this._map));
         }
         _resetBearing() {
             this.setBearing(0);
@@ -890,7 +891,7 @@ var GameMapUtils;
             this._rotateMarker.setIcon(this._createRotateMarkerIcon());
         }
         _onRotateMarkerDrag() {
-            this.setBearing(GameMapUtils.bearing(this._latlng, this._rotateMarker.getLatLng(), this._map) - 90);
+            this.setBearing(GameMapUtils.computeBearingDegrees(this._latlng, this._rotateMarker.getLatLng(), this._map) - 90);
         }
         _updateDragMarkerIconTransform() {
             const icon = this._dragMarker._icon;
@@ -1036,7 +1037,7 @@ var GameMapUtils;
         }
         _tooltipContent(a, b) {
             return '<i class="fas fa-arrows-alt-h"></i> ' + intl.format(Math.round(this._map.distance(a, b))) + ' m<br/><i class="fas fa-compass"></i> '
-                + GameMapUtils.bearingWithUnit(a, b, this._map, this.options.useMils);
+                + GameMapUtils.computeAndFormatBearing(a, b, this._map, this.options.useMils);
         }
     }
     class EventHolder extends L.Evented {

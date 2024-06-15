@@ -4,7 +4,7 @@
 
 namespace GameMapUtils {
 
-    export function toCoord(num: number, precision: number): string {
+    export function formatCoordinate(num: number, precision: number): string {
         if (precision === undefined || precision > 5) {
             precision = 4;
         }
@@ -17,22 +17,23 @@ namespace GameMapUtils {
         return (num % 100000).toFixed(0).padStart(5, "0").substring(5 - precision);
     }
 
-    export function toGrid (latlng: L.LatLng, precision: number, map: L.Map): string {
-        return GameMapUtils.toCoord(latlng.lng, precision) + " - " + GameMapUtils.toCoord(latlng.lat, precision);
+    export function toGridCoordinates (latlng: L.LatLng, precision: number, map: L.Map): string {
+        return GameMapUtils.formatCoordinate(latlng.lng, precision) + " - " + GameMapUtils.formatCoordinate(latlng.lat, precision);
     }
 
-    export function bearing (p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils: boolean = false): number {
-        if (useMils) {
-            return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400;
-        }
+    export function computeBearingMils (p1: L.LatLng, p2: L.LatLng, map: L.Map): number {
+        return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400;
+    }
+
+    export function computeBearingDegrees(p1: L.LatLng, p2: L.LatLng, map: L.Map): number {
         return ((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360;
     }
 
-    export function bearingWithUnit(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils: boolean = false): string {
+    export function computeAndFormatBearing(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils: boolean = false): string {
         if (useMils) {
-            return (((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 3200 / Math.PI) + 6400) % 6400).toFixed() + ' mil';
+            return computeBearingMils(p1, p2 ,map).toFixed() + ' mil';
         }
-        return (((Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI) + 360) % 360).toFixed(1) + '°';
+        return computeBearingDegrees(p1, p2, map).toFixed(1) + '°';
     }
 
     export function CRS (factorx: number, factory: number, tileSize: number): L.CRS {

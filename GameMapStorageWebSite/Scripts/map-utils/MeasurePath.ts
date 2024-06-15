@@ -74,7 +74,7 @@ namespace GameMapUtils {
 
         private _tooltipContent(a: L.LatLng, b: L.LatLng) {
             return '<i class="fas fa-arrows-alt-h"></i> ' + intl.format(Math.round(this._map.distance(a, b))) + ' m<br/><i class="fas fa-compass"></i> '
-                + GameMapUtils.bearingWithUnit(a, b, this._map, this.options.useMils);
+                + GameMapUtils.computeAndFormatBearing(a, b, this._map, this.options.useMils);
         }
     }
 

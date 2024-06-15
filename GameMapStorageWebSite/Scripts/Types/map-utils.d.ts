@@ -148,10 +148,11 @@ declare namespace GameMapUtils {
     function buttonGroupBlock(options?: ButtonGroupOptions): ButtonGroupBlock;
 }
 declare namespace GameMapUtils {
-    function toCoord(num: number, precision: number): string;
-    function toGrid(latlng: L.LatLng, precision: number, map: L.Map): string;
-    function bearing(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils?: boolean): number;
-    function bearingWithUnit(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils?: boolean): string;
+    function formatCoordinate(num: number, precision: number): string;
+    function toGridCoordinates(latlng: L.LatLng, precision: number, map: L.Map): string;
+    function computeBearingMils(p1: L.LatLng, p2: L.LatLng, map: L.Map): number;
+    function computeBearingDegrees(p1: L.LatLng, p2: L.LatLng, map: L.Map): number;
+    function computeAndFormatBearing(p1: L.LatLng, p2: L.LatLng, map: L.Map, useMils?: boolean): string;
     function CRS(factorx: number, factory: number, tileSize: number): L.CRS;
     interface LayerDisplayOptions {
         minZoom: number;
