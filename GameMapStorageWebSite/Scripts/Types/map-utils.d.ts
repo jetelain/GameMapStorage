@@ -1,10 +1,5 @@
 /// <reference path="leaflet.d.ts" />
 declare namespace GameMapUtils {
-    interface LatLngGraticuleInterval {
-        start: number;
-        end: number;
-        interval: number;
-    }
     interface LatLngGraticuleOptions extends L.LayerOptions {
         font: string;
         fontColor: string;
@@ -79,7 +74,7 @@ declare namespace GameMapUtils {
         onRemove(map: any): void;
         setClass(name: any): void;
     }
-    function overlayButton(options: any): OverlayButton;
+    function overlayButton(options?: OverlayButtonOptions): OverlayButton;
     interface OverlayDivOptions extends L.ControlOptions {
         content: string | HTMLElement;
     }
@@ -92,8 +87,8 @@ declare namespace GameMapUtils {
         options: OverlayDivOptions;
         _container: HTMLElement;
         constructor(options?: OverlayDivOptions);
-        onAdd(map: any): HTMLElement;
-        onRemove(map: any): void;
+        onAdd(map: L.Map): HTMLElement;
+        onRemove(map: L.Map): void;
     }
     function overlayDiv(options: any): OverlayDiv;
     class ToggleButtonGroup {
@@ -176,6 +171,100 @@ declare namespace GameMapUtils {
     }
     function basicInit(mapInfos: LayerDisplayOptions, mapDivId?: string | HTMLElement): MapWithGrid;
     function basicInitFromAPI(gameName: string, mapName: string, mapDivId?: string | HTMLElement, apiBasePath?: string): Promise<L.Map>;
+    class ApiClient {
+        _apiBasePath: any;
+        _failOverApiBasePath: any;
+        constructor(apiBasePath?: string, failOverApiBasePath?: string);
+        _retryFetch(path: string, attempt: any): Promise<any>;
+        _fetch(path: string, attempt?: number): Promise<any>;
+        getGames(): Promise<GameJsonBase[]>;
+        getGame(gameNameOrId: string | number): Promise<GameJson>;
+        getMaps(gameNameOrId: string | number): Promise<GameMapJsonBase[]>;
+        getMap(gameNameOrId: string | number, mapNameOrId: string | number): Promise<GameMapJson>;
+    }
+    interface GameJsonBase {
+        gameId?: number;
+        englishTitle?: string | undefined;
+        name?: string | undefined;
+        attribution?: string | undefined;
+        officialSiteUri?: string | undefined;
+        steamAppId?: string | undefined;
+        lastChangeUtc?: Date | undefined;
+        logo?: string | undefined;
+        logoWebp?: string | undefined;
+        logoPng?: string | undefined;
+    }
+    interface GameJson extends GameJsonBase {
+        colors?: GameColorJson[] | undefined;
+        markers?: GameMarkerJson[] | undefined;
+    }
+    interface GameColorJson {
+        gameColorId?: number;
+        englishTitle?: string | undefined;
+        name?: string | undefined;
+        hexadecimal?: string | undefined;
+        usage?: ColorUsage;
+    }
+    type ColorUsage = "Custom" | "FriendSide" | "NeutralSide" | "HostileSide" | "UnknownSide" | "CivilianSide";
+    interface GameMarkerJson {
+        gameMarkerId?: number;
+        englishTitle?: string | undefined;
+        name?: string | undefined;
+        usage?: MarkerUsage;
+    }
+    type MarkerUsage = "Custom";
+    interface GameMapJsonBase {
+        gameMapId?: number;
+        englishTitle?: string | undefined;
+        appendAttribution?: string | undefined;
+        steamWorkshopId?: string | undefined;
+        officialSiteUri?: string | undefined;
+        sizeInMeters?: number;
+        name?: string | undefined;
+        aliases?: string[] | undefined;
+        thumbnail?: string | undefined;
+        thumbnailWebp?: string | undefined;
+        thumbnailPng?: string | undefined;
+        lastChangeUtc?: Date | undefined;
+        originX?: number;
+        originY?: number;
+        layers?: GameMapLayerJson[] | undefined;
+    }
+    interface GameMapLayerJson {
+        gameMapLayerId?: number;
+        type?: LayerType;
+        format?: LayerFormat;
+        minZoom?: number;
+        maxZoom?: number;
+        defaultZoom?: number;
+        isDefault?: boolean;
+        tileSize?: number;
+        factorX?: number;
+        factorY?: number;
+        culture?: string | undefined;
+        lastChangeUtc?: Date | undefined;
+        dataLastChangeUtc?: Date | undefined;
+        gameMapLayerGuid?: string | undefined;
+        downloadUri?: string | undefined;
+        patternPng?: string | undefined;
+        patternWebp?: string | undefined;
+        pattern?: string | undefined;
+    }
+    type LayerType = "Topographic" | "Satellite" | "Aerial" | "Elevation";
+    type LayerFormat = "PngOnly" | "PngAndWebp" | "SvgOnly" | "SvgAndWebp" | "WebpOnly" | "SinglePDF" | "BookletPDF";
+    interface GameMapJson extends GameMapJsonBase {
+        attribution?: string | undefined;
+        locations?: GameMapLocationJson[] | undefined;
+    }
+    interface GameMapLocationJson {
+        gameMapLocationId?: number;
+        englishTitle?: string | undefined;
+        type?: LocationType;
+        x?: number;
+        y?: number;
+        gameMapLocationGuid?: string | undefined;
+    }
+    type LocationType = "City";
 }
 declare namespace GameMapUtils {
     interface MapToolBaseOptions extends L.LayerOptions {

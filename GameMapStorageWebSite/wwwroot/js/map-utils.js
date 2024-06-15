@@ -13,10 +13,7 @@ var GameMapUtils;
                 opacity: 1,
                 weight: 0.8,
                 color: '#444',
-                font: '12px Verdana',
-                zoomInterval: [
-                    { start: 0, end: 10, interval: 1000 }
-                ]
+                font: '12px Verdana'
             }, options));
             var defaultFontName = 'Verdana';
             var _ff = this.options.font.split(' ');
@@ -551,8 +548,8 @@ var GameMapUtils;
     }
     GameMapUtils.basicInit = basicInit;
     async function basicInitFromAPI(gameName, mapName, mapDivId = 'map', apiBasePath = "https://atlas.plan-ops.fr/api/v1/") {
-        const response = await fetch(`${apiBasePath}games/${encodeURIComponent(gameName)}/maps/${encodeURIComponent(mapName)}`);
-        const map = await response.json();
+        const client = new ApiClient();
+        const map = await client.getMap(gameName, mapName);
         const layer = map.layers.find(l => l.isDefault);
         return basicInit({
             minZoom: layer.minZoom,
@@ -570,6 +567,59 @@ var GameMapUtils;
         }, mapDivId);
     }
     GameMapUtils.basicInitFromAPI = basicInitFromAPI;
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+    class ApiClient {
+        constructor(apiBasePath = "https://atlas.plan-ops.fr/", failOverApiBasePath = "https://de.atlas.plan-ops.fr/") {
+            this._apiBasePath = apiBasePath;
+            this._failOverApiBasePath = failOverApiBasePath;
+        }
+        async _retryFetch(path, attempt) {
+            await delay(500 + (Math.random() * 1000));
+            return await this._fetch(path, attempt + 1);
+        }
+        async _fetch(path, attempt = 0) {
+            let response;
+            try {
+                if (attempt < 5) {
+                    response = await fetch(this._apiBasePath + path);
+                }
+                else {
+                    response = await fetch(this._failOverApiBasePath + path);
+                }
+                if (response.status == 200) {
+                    return await response.json();
+                }
+            }
+            catch (e) {
+                if (attempt < 10) {
+                    return await this._retryFetch(path, attempt + 1);
+                }
+                else {
+                    throw e;
+                }
+            }
+            if (response) {
+                if (response.status == 429 && attempt < 10) {
+                    return await this._retryFetch(path, attempt + 1);
+                }
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+            throw new Error();
+        }
+        async getGames() {
+            return await this._fetch("api/v1/games");
+        }
+        async getGame(gameNameOrId) {
+            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}`);
+        }
+        async getMaps(gameNameOrId) {
+            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}/maps`);
+        }
+        async getMap(gameNameOrId, mapNameOrId) {
+            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}/maps/${encodeURIComponent(mapNameOrId)}`);
+        }
+    }
+    GameMapUtils.ApiClient = ApiClient;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
 /// <reference path="../types/leaflet.d.ts" />

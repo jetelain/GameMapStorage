@@ -97,7 +97,7 @@ namespace GameMapUtils {
         }
     };
 
-    export function overlayButton (options) {
+    export function overlayButton(options?: OverlayButtonOptions): OverlayButton {
         return new GameMapUtils.OverlayButton(options);
     };
         
@@ -123,7 +123,7 @@ namespace GameMapUtils {
             }, options));
         }
 
-        onAdd (map) {
+        onAdd(map: L.Map) {
             this._container = L.DomUtil.create('div', '');
             L.DomEvent.disableClickPropagation(this._container);
             let content = this.options.content;
@@ -136,7 +136,7 @@ namespace GameMapUtils {
             return this._container;
         }
 
-        onRemove (map) {
+        onRemove(map: L.Map) {
 
         }
     }
@@ -292,7 +292,7 @@ namespace GameMapUtils {
         }
     }
 
-    export function buttonGroupBlock(options?: ButtonGroupOptions) {
+    export function buttonGroupBlock(options?: ButtonGroupOptions): ButtonGroupBlock {
         return new GameMapUtils.ButtonGroupBlock(options);
     };
 };

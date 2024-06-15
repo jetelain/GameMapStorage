@@ -27,4 +27,6 @@
 		<PackageReference Include="NSwag.AspNetCore" Version="14.0.8" Condition="'$(Configuration)'=='Debug'" />
 	</ItemGroup>
 
+	<ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+
 </Project>

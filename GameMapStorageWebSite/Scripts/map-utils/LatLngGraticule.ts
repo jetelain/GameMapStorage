@@ -3,12 +3,6 @@
 
 namespace GameMapUtils {
 
-    export interface LatLngGraticuleInterval  {
-        start: number;
-        end: number;
-        interval: number;
-    }
-
     export interface LatLngGraticuleOptions extends L.LayerOptions {
         font: string;
         fontColor: string;
@@ -34,10 +28,7 @@ namespace GameMapUtils {
                 opacity: 1,
                 weight: 0.8,
                 color: '#444',
-                font: '12px Verdana',
-                zoomInterval: [
-                    { start: 0, end: 10, interval: 1000 }
-                ]
+                font: '12px Verdana'
             }, options));
 
             var defaultFontName = 'Verdana';

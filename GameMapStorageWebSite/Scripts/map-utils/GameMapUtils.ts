@@ -135,29 +135,11 @@ namespace GameMapUtils {
         return map;
     }
 
-    interface APILayerResponse {
-        isDefault: boolean;
-        tileSize: number;
-        factorX: number;
-        factorY: number;
-        minZoom: number;
-        maxZoom: number;
-        pattern: string;
-    }
-
-    interface APIMapResponse {
-        appendAttribution: string;
-        sizeInMeters: number;
-        layers: APILayerResponse[];
-        originX?: number;
-        originY?: number;
-    }
-
     export async function basicInitFromAPI(gameName: string, mapName: string, mapDivId: string | HTMLElement = 'map', apiBasePath: string = "https://atlas.plan-ops.fr/api/v1/"): Promise<L.Map> {
 
-        const response = await fetch(`${apiBasePath}games/${encodeURIComponent(gameName)}/maps/${encodeURIComponent(mapName)}`);
+        const client = new ApiClient();
 
-        const map = await response.json() as APIMapResponse;
+        const map = await client.getMap(gameName, mapName);
 
         const layer = map.layers.find(l => l.isDefault);
 
@@ -177,4 +159,161 @@ namespace GameMapUtils {
         }, mapDivId);
     }
 
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
+    export class ApiClient {
+        _apiBasePath;
+        _failOverApiBasePath;
+
+        constructor(apiBasePath = "https://atlas.plan-ops.fr/", failOverApiBasePath ="https://de.atlas.plan-ops.fr/") {
+            this._apiBasePath = apiBasePath;
+            this._failOverApiBasePath = failOverApiBasePath;
+        }
+
+        async _retryFetch(path: string, attempt): Promise<any> {
+            await delay(500 + (Math.random() * 1000));
+            return await this._fetch(path, attempt + 1);
+        }
+
+        async _fetch(path: string, attempt: number = 0): Promise<any> {
+            let response;
+            try {
+                if (attempt < 5) {
+                    response = await fetch(this._apiBasePath + path);
+                }
+                else {
+                    response = await fetch(this._failOverApiBasePath + path);
+                }
+                if (response.status == 200) {
+                    return await response.json();
+                }
+            }
+            catch(e) {
+                if (attempt < 10) {
+                    return await this._retryFetch(path, attempt + 1);
+                } else {
+                    throw e;
+                }
+            }
+            if (response) {
+                if (response.status == 429 && attempt < 10) {
+                    return await this._retryFetch(path, attempt + 1);
+                }
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+            throw new Error();
+        }
+
+        async getGames(): Promise<GameJsonBase[]> {
+            return await this._fetch("api/v1/games") as GameJsonBase[];
+        }
+
+        async getGame(gameNameOrId: string|number): Promise<GameJson> {
+            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}`) as GameJson;
+        }
+
+        async getMaps(gameNameOrId: string | number): Promise<GameMapJsonBase[]> {
+            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}/maps`) as GameMapJsonBase[];
+        }
+
+        async getMap(gameNameOrId: string | number, mapNameOrId: string | number): Promise<GameMapJson> {
+            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}/maps/${encodeURIComponent(mapNameOrId)}`) as GameMapJson;
+        }
+    }
+
+    export interface GameJsonBase {
+        gameId?: number;
+        englishTitle?: string | undefined;
+        name?: string | undefined;
+        attribution?: string | undefined;
+        officialSiteUri?: string | undefined;
+        steamAppId?: string | undefined;
+        lastChangeUtc?: Date | undefined;
+        logo?: string | undefined;
+        logoWebp?: string | undefined;
+        logoPng?: string | undefined;
+    }
+
+    export interface GameJson extends GameJsonBase {
+        colors?: GameColorJson[] | undefined;
+        markers?: GameMarkerJson[] | undefined;
+    }
+
+    export interface GameColorJson {
+        gameColorId?: number;
+        englishTitle?: string | undefined;
+        name?: string | undefined;
+        hexadecimal?: string | undefined;
+        usage?: ColorUsage;
+    }
+
+    export type ColorUsage = "Custom" | "FriendSide" | "NeutralSide" | "HostileSide" | "UnknownSide" | "CivilianSide";
+
+    export interface GameMarkerJson {
+        gameMarkerId?: number;
+        englishTitle?: string | undefined;
+        name?: string | undefined;
+        usage?: MarkerUsage;
+    }
+
+    export type MarkerUsage = "Custom";
+
+    export interface GameMapJsonBase {
+        gameMapId?: number;
+        englishTitle?: string | undefined;
+        appendAttribution?: string | undefined;
+        steamWorkshopId?: string | undefined;
+        officialSiteUri?: string | undefined;
+        sizeInMeters?: number;
+        name?: string | undefined;
+        aliases?: string[] | undefined;
+        thumbnail?: string | undefined;
+        thumbnailWebp?: string | undefined;
+        thumbnailPng?: string | undefined;
+        lastChangeUtc?: Date | undefined;
+        originX?: number;
+        originY?: number;
+        layers?: GameMapLayerJson[] | undefined;
+    }
+
+    export interface GameMapLayerJson {
+        gameMapLayerId?: number;
+        type?: LayerType;
+        format?: LayerFormat;
+        minZoom?: number;
+        maxZoom?: number;
+        defaultZoom?: number;
+        isDefault?: boolean;
+        tileSize?: number;
+        factorX?: number;
+        factorY?: number;
+        culture?: string | undefined;
+        lastChangeUtc?: Date | undefined;
+        dataLastChangeUtc?: Date | undefined;
+        gameMapLayerGuid?: string | undefined;
+        downloadUri?: string | undefined;
+        patternPng?: string | undefined;
+        patternWebp?: string | undefined;
+        pattern?: string | undefined;
+    }
+
+    export type LayerType = "Topographic" | "Satellite" | "Aerial" | "Elevation";
+
+    export type LayerFormat = "PngOnly" | "PngAndWebp" | "SvgOnly" | "SvgAndWebp" | "WebpOnly" | "SinglePDF" | "BookletPDF";
+
+    export interface GameMapJson extends GameMapJsonBase {
+        attribution?: string | undefined;
+        locations?: GameMapLocationJson[] | undefined;
+    }
+
+    export interface GameMapLocationJson {
+        gameMapLocationId?: number;
+        englishTitle?: string | undefined;
+        type?: LocationType;
+        x?: number;
+        y?: number;
+        gameMapLocationGuid?: string | undefined;
+    }
+
+    export type LocationType = "City";
 };
