@@ -97,7 +97,10 @@ namespace GameMapStorageWebSite.Controllers
                     MinZoom = layer.MinZoom,
                     TilePattern = ImagePathHelper.GetLayerPattern(Request, layer),
                     TileSize = layer.TileSize,
-                    Attribution = MapUtils.CombineAttibutions(map.Game!.Attribution, map.AppendAttribution)
+                    Attribution = MapUtils.CombineAttibutions(map.Game!.Attribution, map.AppendAttribution),
+                    SizeInMeters = map.SizeInMeters,
+                    OriginX = map.OriginX,
+                    OriginY = map.OriginY
                 }
             });
         }

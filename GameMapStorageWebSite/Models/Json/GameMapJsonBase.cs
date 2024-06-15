@@ -21,6 +21,8 @@ namespace GameMapStorageWebSite.Models.Json
             Name = gameMap.Name;
             Aliases = gameMap.Aliases;
             LastChangeUtc = gameMap.LastChangeUtc;
+            OriginX = gameMap.OriginX;
+            OriginY = gameMap.OriginY;
 
             Thumbnail = pathBuilder.GetThumbnail(gameMap);
             ThumbnailWebp = pathBuilder.GetThumbnail(true, gameMap);
@@ -50,6 +52,10 @@ namespace GameMapStorageWebSite.Models.Json
         public string? ThumbnailPng { get; set; }
 
         public DateTime? LastChangeUtc { get; set; }
+
+        public double OriginX { get; set; }
+
+        public double OriginY { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<GameMapLayerJson>? Layers { get; set; }

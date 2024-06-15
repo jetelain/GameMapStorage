@@ -30,5 +30,14 @@ namespace GameMapStorageWebSite.Models
 
         [JsonPropertyName("attribution")]
         public required string Attribution { get; set; }
+
+        [JsonPropertyName("originX")]
+        public double OriginX { get; set; }
+
+        [JsonPropertyName("originY")]
+        public double OriginY { get; set; }
+
+        [JsonPropertyName("sizeInMeters")]
+        public required double SizeInMeters { get; set; }
     }
 }

@@ -62,7 +62,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize("AdminEdit")]
-        public async Task<IActionResult> Create([Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,Name,GameId")] GameMap gameMap, string? aliases)
+        public async Task<IActionResult> Create([Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,Name,OriginX,OriginY,GameId")] GameMap gameMap, string? aliases)
         {
             if (ModelState.IsValid)
             {
@@ -99,7 +99,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize("AdminEdit")]
-        public async Task<IActionResult> Edit(int id, [Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,Name")] GameMap gameMap, string? aliases)
+        public async Task<IActionResult> Edit(int id, [Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,OriginX,OriginY,Name")] GameMap gameMap, string? aliases)
         {
             if (id != gameMap.GameMapId)
             {
@@ -118,6 +118,8 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 existing.OfficialSiteUri = gameMap.OfficialSiteUri;
                 existing.SizeInMeters = gameMap.SizeInMeters;
                 existing.Name = gameMap.Name;
+                existing.OriginX = gameMap.OriginX;
+                existing.OriginY = gameMap.OriginY;
                 existing.Aliases = GetAliases(aliases);
                 existing.LastChangeUtc = DateTime.UtcNow;
                 existing.CitiesCount = await _context.GameMapLocations.Where(l => l.GameMapId == gameMap.GameMapId && l.Type == LocationType.City).CountAsync();

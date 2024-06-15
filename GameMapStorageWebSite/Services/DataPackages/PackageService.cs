@@ -103,7 +103,9 @@ namespace GameMapStorageWebSite.Services.DataPackages
                     LastChangeUtc = DateTime.UtcNow,
                     SizeInMeters = indexContent.SizeInMeters,
                     Locations = indexContent.Locations.Select(l => new GameMapLocation() { EnglishTitle = l.EnglishTitle, Type = l.Type, X = l.X, Y = l.Y, GameMapLocationGuid = Guid.NewGuid() }).ToList(),
-                    CitiesCount = indexContent.Locations.Count(l => l.Type == LocationType.City)
+                    CitiesCount = indexContent.Locations.Count(l => l.Type == LocationType.City),
+                    OriginX = indexContent.OriginX,
+                    OriginY = indexContent.OriginY
                 };
                 context.GameMaps.Add(map);
             }

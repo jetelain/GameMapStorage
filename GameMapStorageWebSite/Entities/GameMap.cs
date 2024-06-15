@@ -30,6 +30,12 @@ namespace GameMapStorageWebSite.Entities
         [Display(Name = "Aliases")]
         public string[]? Aliases { get; set; }
 
+        [Display(Name = "X Origin")]
+        public double OriginX { get; set; }
+
+        [Display(Name = "Y Origin")]
+        public double OriginY { get; set; }
+
         public DateTime? LastChangeUtc { get; set; }
 
         // FK to Game
@@ -39,6 +45,7 @@ namespace GameMapStorageWebSite.Entities
 
         public List<GameMapLayer>? Layers { get; set; }
         public List<GameMapLocation>? Locations { get; set; }
+
 
         internal void UpdateCitiesCount()
         {

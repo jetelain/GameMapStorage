@@ -4,6 +4,10 @@
 
 namespace GameMapUtils {
 
+    export interface MapWithGrid extends L.Map{
+        grid?: MapGrid;
+    }
+
     export function formatCoordinate(num: number, precision: number): string {
         if (precision === undefined || precision > 5) {
             precision = 4;
@@ -12,13 +16,41 @@ namespace GameMapUtils {
             return "0".repeat(precision);
         }
         if (num < 0) {
-            return (100000 + (num % 100000)).toFixed(0).padStart(5, "0").substring(5 - precision);
+            return (100000 + (num % 100000)).toFixed(0).padStart(5, "0").substring(0, precision);
         }
-        return (num % 100000).toFixed(0).padStart(5, "0").substring(5 - precision);
+        return (num % 100000).toFixed(0).padStart(5, "0").substring(0, precision);
     }
 
-    export function toGridCoordinates (latlng: L.LatLng, precision: number, map: L.Map): string {
-        return GameMapUtils.formatCoordinate(latlng.lng, precision) + " - " + GameMapUtils.formatCoordinate(latlng.lat, precision);
+
+    export interface MapGridOptions {
+        sizeInMeters: number;
+        originX: number;
+        originY: number;
+        defaultPrecision: number;
+    }
+
+    export class MapGrid {
+
+        options: MapGridOptions;
+
+        constructor(options: MapGridOptions) {
+            this.options = options;
+        }
+
+        toCoordinates(latlng: L.LatLng, precision?: number) {
+            if (!precision) {
+                precision = this.options.defaultPrecision;
+            }
+            return formatCoordinate(latlng.lng + this.options.originX, precision)
+                + " - " + formatCoordinate(latlng.lat + this.options.originY, precision);
+        }
+    }
+
+    export function toGridCoordinates(latlng: L.LatLng, precision: number, map: L.Map): string {
+        if ((map as MapWithGrid).grid) {
+            return (map as MapWithGrid).grid.toCoordinates(latlng, precision);
+        }
+        return formatCoordinate(latlng.lng, precision) + " - " + formatCoordinate(latlng.lat, precision);
     }
 
     export function computeBearingMils (p1: L.LatLng, p2: L.LatLng, map: L.Map): number {
@@ -65,9 +97,12 @@ namespace GameMapUtils {
         tilePattern: string;
         defaultPosition: [number, number];
         defaultZoom: number;
+        originX?: number;
+        originY?: number;
+        sizeInMeters?: number;
     }
 
-    export function basicInit(mapInfos: LayerDisplayOptions, mapDivId: string | HTMLElement = 'map'): L.Map {
+    export function basicInit(mapInfos: LayerDisplayOptions, mapDivId: string | HTMLElement = 'map'): MapWithGrid {
 
         var map = L.map(mapDivId, {
             minZoom: mapInfos.minZoom,
@@ -75,6 +110,13 @@ namespace GameMapUtils {
             crs: GameMapUtils.CRS(mapInfos.factorX, mapInfos.factorY, mapInfos.tileSize),
             zoomDelta: 0.5,
             zoomSnap: 0.25
+        }) as MapWithGrid;
+
+        map.grid = new MapGrid({
+            sizeInMeters: mapInfos.sizeInMeters || (mapInfos.tileSize / mapInfos.factorX),
+            originX: mapInfos.originX || 0,
+            originY: mapInfos.originY || 0,
+            defaultPrecision: 4
         });
 
         L.tileLayer(mapInfos.tilePattern, {
@@ -107,6 +149,8 @@ namespace GameMapUtils {
         appendAttribution: string;
         sizeInMeters: number;
         layers: APILayerResponse[];
+        originX?: number;
+        originY?: number;
     }
 
     export async function basicInitFromAPI(gameName: string, mapName: string, mapDivId: string | HTMLElement = 'map', apiBasePath: string = "https://atlas.plan-ops.fr/api/v1/"): Promise<L.Map> {
@@ -126,7 +170,10 @@ namespace GameMapUtils {
             attribution: map.appendAttribution,
             tilePattern: layer.pattern,
             defaultPosition: [map.sizeInMeters / 2, map.sizeInMeters / 2],
-            defaultZoom: 2
+            defaultZoom: 2,
+            originX: map.originX,
+            originY: map.originY,
+            sizeInMeters: map.sizeInMeters
         }, mapDivId);
     }
 

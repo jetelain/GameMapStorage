@@ -1,4 +1,5 @@
-/// <reference path="../types/leaflet.d.ts" /> 
+/// <reference path="../types/leaflet.d.ts" />
+/// <reference path="GameMapUtils.ts" />
 var GameMapUtils;
 (function (GameMapUtils) {
     /**
@@ -25,20 +26,16 @@ var GameMapUtils;
             if (!this.options.fontColor) {
                 this.options.fontColor = this.options.color;
             }
-            if (this.options.zoomInterval) {
-                if (!this.options.latInterval) {
-                    this.options.latInterval = this.options.zoomInterval;
-                }
-                if (!this.options.lngInterval) {
-                    this.options.lngInterval = this.options.zoomInterval;
-                }
-            }
         }
         initialize(options) {
             L.Util.setOptions(this, options);
         }
         onAdd(map) {
             this._map = map;
+            this._grid = map.grid;
+            if (!this._grid) {
+                this._grid = new GameMapUtils.MapGrid({ originX: 0, originY: 0, defaultPrecision: 4, sizeInMeters: 1000000 });
+            }
             if (!this._container) {
                 this._initCanvas();
             }
@@ -50,6 +47,7 @@ var GameMapUtils;
             return this;
         }
         onRemove(map) {
+            this._grid = null;
             map.getPanes().overlayPane.removeChild(this._container);
             map.off('viewreset', this._reset, this);
             map.off('move', this._reset, this);
@@ -107,7 +105,6 @@ var GameMapUtils;
             canvas.height = size.y;
             canvas.style.width = size.x + 'px';
             canvas.style.height = size.y + 'px';
-            this.__calcInterval();
             this.__draw(true);
         }
         _onCanvasLoad() {
@@ -115,55 +112,6 @@ var GameMapUtils;
         }
         _updateOpacity() {
             L.DomUtil.setOpacity(this._canvas, this.options.opacity);
-        }
-        __format_lat(lat) {
-            let str = "00" + (lat / 1000).toFixed();
-            return str.substring(str.length - 2);
-        }
-        __format_lng(lng) {
-            let str = "00" + (lng / 1000).toFixed();
-            return str.substring(str.length - 2);
-        }
-        __calcInterval() {
-            let zoom = this._map.getZoom();
-            if (this._currZoom != zoom) {
-                this._currLngInterval = 0;
-                this._currLatInterval = 0;
-                this._currZoom = zoom;
-            }
-            let interv;
-            if (!this._currLngInterval) {
-                try {
-                    for (let idx in this.options.lngInterval) {
-                        let dict = this.options.lngInterval[idx];
-                        if (dict.start <= zoom) {
-                            if (dict.end && dict.end >= zoom) {
-                                this._currLngInterval = dict.interval;
-                                break;
-                            }
-                        }
-                    }
-                }
-                catch (e) {
-                    this._currLngInterval = 0;
-                }
-            }
-            if (!this._currLatInterval) {
-                try {
-                    for (let idx in this.options.latInterval) {
-                        let dict = this.options.latInterval[idx];
-                        if (dict.start <= zoom) {
-                            if (dict.end && dict.end >= zoom) {
-                                this._currLatInterval = dict.interval;
-                                break;
-                            }
-                        }
-                    }
-                }
-                catch (e) {
-                    this._currLatInterval = 0;
-                }
-            }
         }
         __draw(label) {
             function _parse_px_to_int(txt) {
@@ -179,93 +127,80 @@ var GameMapUtils;
                 return 0;
             }
             ;
-            var self = this, canvas = this._canvas, map = this._map;
+            const canvas = this._canvas, map = this._map, grid = this._grid;
             if (L.Browser.canvas && map) {
-                if (!this._currLngInterval || !this._currLatInterval) {
-                    this.__calcInterval();
-                }
-                let latInterval = this._currLatInterval, lngInterval = this._currLngInterval;
-                let ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const latInterval = 1000, lngInterval = 1000, ww = canvas.width, hh = canvas.height, originX = grid.options.originX, originY = grid.options.originY, sizeInMeters = grid.options.sizeInMeters;
+                const latGap = (-originY) % latInterval, lngGap = (-originX) % lngInterval;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, ww, hh);
                 ctx.lineWidth = this.options.weight;
                 ctx.strokeStyle = this.options.color;
                 ctx.fillStyle = this.options.fontColor;
                 if (this.options.font) {
                     ctx.font = this.options.font;
                 }
-                let txtWidth = ctx.measureText('0').width;
                 let txtHeight = 12;
                 try {
                     let _font_size = ctx.font.split(' ')[0];
                     txtHeight = _parse_px_to_int(_font_size);
                 }
                 catch (e) { }
-                let ww = canvas.width, hh = canvas.height;
-                let lt = map.containerPointToLatLng(L.point(0, 0));
-                let rt = map.containerPointToLatLng(L.point(ww, 0));
-                let rb = map.containerPointToLatLng(L.point(ww, hh));
-                let _lat_b = rb.lat, _lat_t = lt.lat;
-                let _lon_l = lt.lng, _lon_r = rt.lng;
-                let _point_per_lat = (_lat_t - _lat_b) / (hh * 0.2);
-                if (isNaN(_point_per_lat)) {
+                const lt = map.containerPointToLatLng(L.point(0, 0));
+                const rt = map.containerPointToLatLng(L.point(ww, 0));
+                const rb = map.containerPointToLatLng(L.point(ww, hh));
+                let startLat = rb.lat, endLat = lt.lat;
+                let startLng = lt.lng, endLng = rt.lng;
+                const pointPerLat = Math.max(1, (endLat - startLat) / (hh * 0.2));
+                if (isNaN(pointPerLat)) {
                     return;
                 }
-                if (_point_per_lat < 1) {
-                    _point_per_lat = 1;
-                }
-                _lat_b = Math.trunc(_lat_b - _point_per_lat);
-                _lat_t = Math.trunc(_lat_t + _point_per_lat);
-                var _point_per_lon = (_lon_r - _lon_l) / (ww * 0.2);
-                if (_point_per_lon < 1) {
-                    _point_per_lon = 1;
-                }
-                _lon_r = Math.trunc(_lon_r + _point_per_lon);
-                _lon_l = Math.trunc(_lon_l - _point_per_lon);
-                var ll, latstr, lngstr;
-                function __draw_lat_line(self, lat_tick) {
-                    ll = self._latLngToCanvasPoint(L.latLng(lat_tick, _lon_l));
-                    latstr = self.__format_lat(lat_tick);
-                    txtWidth = ctx.measureText(latstr).width;
-                    let __lon_right = _lon_r;
-                    let rr = self._latLngToCanvasPoint(L.latLng(lat_tick, __lon_right));
-                    /*ctx.beginPath();
-                    ctx.moveTo(ll.x + 1, ll.y);
-                    ctx.lineTo(rr.x - 1, rr.y);
-                    ctx.stroke();*/
+                startLat = Math.trunc(startLat - pointPerLat);
+                endLat = Math.trunc(endLat + pointPerLat);
+                const pointPerLon = Math.max(1, (endLng - startLng) / (ww * 0.2));
+                endLng = Math.trunc(endLng + pointPerLon);
+                startLng = Math.trunc(startLng - pointPerLon);
+                function drawLatLine(self, lat_tick) {
+                    const left = self._latLngToCanvasPoint(L.latLng(lat_tick, startLng));
+                    const right = self._latLngToCanvasPoint(L.latLng(lat_tick, endLng));
+                    const latstr = GameMapUtils.formatCoordinate(lat_tick + grid.options.originY, 2);
+                    const txtWidth = ctx.measureText(latstr).width;
+                    //ctx.beginPath();
+                    //ctx.moveTo(left.x + 1, left.y);
+                    //ctx.lineTo(right.x - 1, right.y);
+                    //ctx.stroke();
                     if (label) {
-                        let _yy = ll.y + (txtHeight / 2) - 2;
+                        const _yy = left.y + (txtHeight / 2) - 2;
                         ctx.fillText(latstr, 0, _yy);
                         ctx.fillText(latstr, ww - txtWidth, _yy);
                     }
                 }
                 ;
                 if (latInterval > 0) {
-                    for (var i = 0; i <= _lat_t; i += latInterval) {
-                        if (i >= _lat_b) {
-                            __draw_lat_line(this, i);
+                    for (let lat = latGap; lat <= endLat; lat += latInterval) {
+                        if (lat >= startLat && lat <= sizeInMeters) {
+                            drawLatLine(this, lat);
                         }
                     }
                 }
-                function __draw_lon_line(self, lon_tick) {
-                    lngstr = self.__format_lng(lon_tick);
-                    txtWidth = ctx.measureText(lngstr).width;
-                    let bb = self._latLngToCanvasPoint(L.latLng(_lat_b, lon_tick));
-                    let __lat_top = _lat_t;
-                    let tt = self._latLngToCanvasPoint(L.latLng(__lat_top, lon_tick));
-                    /*ctx.beginPath();
-                    ctx.moveTo(tt.x, tt.y + 1);
-                    ctx.lineTo(bb.x, bb.y - 1);
-                    ctx.stroke();*/
+                function drawLngLine(self, lon_tick) {
+                    const bottom = self._latLngToCanvasPoint(L.latLng(startLat, lon_tick));
+                    const top = self._latLngToCanvasPoint(L.latLng(endLat, lon_tick));
+                    const lngstr = GameMapUtils.formatCoordinate(lon_tick + grid.options.originX, 2);
+                    const txtWidth = ctx.measureText(lngstr).width;
+                    //ctx.beginPath();
+                    //ctx.moveTo(top.x, top.y + 1);
+                    //ctx.lineTo(bottom.x, bottom.y - 1);
+                    //ctx.stroke();
                     if (label) {
-                        ctx.fillText(lngstr, tt.x - (txtWidth / 2), txtHeight + 1);
-                        ctx.fillText(lngstr, bb.x - (txtWidth / 2), hh - 3);
+                        ctx.fillText(lngstr, top.x - (txtWidth / 2), txtHeight + 1);
+                        ctx.fillText(lngstr, bottom.x - (txtWidth / 2), hh - 3);
                     }
                 }
                 ;
                 if (lngInterval > 0) {
-                    for (var i = 0; i <= _lon_r; i += lngInterval) {
-                        if (i >= _lon_l) {
-                            __draw_lon_line(this, i);
+                    for (let lng = lngGap; lng <= endLng; lng += lngInterval) {
+                        if (lng >= startLng && lng <= sizeInMeters) {
+                            drawLngLine(this, lng);
                         }
                     }
                 }
@@ -532,13 +467,29 @@ var GameMapUtils;
             return "0".repeat(precision);
         }
         if (num < 0) {
-            return (100000 + (num % 100000)).toFixed(0).padStart(5, "0").substring(5 - precision);
+            return (100000 + (num % 100000)).toFixed(0).padStart(5, "0").substring(0, precision);
         }
-        return (num % 100000).toFixed(0).padStart(5, "0").substring(5 - precision);
+        return (num % 100000).toFixed(0).padStart(5, "0").substring(0, precision);
     }
     GameMapUtils.formatCoordinate = formatCoordinate;
+    class MapGrid {
+        constructor(options) {
+            this.options = options;
+        }
+        toCoordinates(latlng, precision) {
+            if (!precision) {
+                precision = this.options.defaultPrecision;
+            }
+            return formatCoordinate(latlng.lng + this.options.originX, precision)
+                + " - " + formatCoordinate(latlng.lat + this.options.originY, precision);
+        }
+    }
+    GameMapUtils.MapGrid = MapGrid;
     function toGridCoordinates(latlng, precision, map) {
-        return GameMapUtils.formatCoordinate(latlng.lng, precision) + " - " + GameMapUtils.formatCoordinate(latlng.lat, precision);
+        if (map.grid) {
+            return map.grid.toCoordinates(latlng, precision);
+        }
+        return formatCoordinate(latlng.lng, precision) + " - " + formatCoordinate(latlng.lat, precision);
     }
     GameMapUtils.toGridCoordinates = toGridCoordinates;
     function computeBearingMils(p1, p2, map) {
@@ -582,6 +533,12 @@ var GameMapUtils;
             zoomDelta: 0.5,
             zoomSnap: 0.25
         });
+        map.grid = new MapGrid({
+            sizeInMeters: mapInfos.sizeInMeters || (mapInfos.tileSize / mapInfos.factorX),
+            originX: mapInfos.originX || 0,
+            originY: mapInfos.originY || 0,
+            defaultPrecision: 4
+        });
         L.tileLayer(mapInfos.tilePattern, {
             attribution: mapInfos.attribution,
             tileSize: mapInfos.tileSize
@@ -606,7 +563,10 @@ var GameMapUtils;
             attribution: map.appendAttribution,
             tilePattern: layer.pattern,
             defaultPosition: [map.sizeInMeters / 2, map.sizeInMeters / 2],
-            defaultZoom: 2
+            defaultZoom: 2,
+            originX: map.originX,
+            originY: map.originY,
+            sizeInMeters: map.sizeInMeters
         }, mapDivId);
     }
     GameMapUtils.basicInitFromAPI = basicInitFromAPI;
