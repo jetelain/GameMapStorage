@@ -1,0 +1,553 @@
+{
+  "x-generator": "NSwag v14.0.8.0 (NJsonSchema v11.0.1.0 (Newtonsoft.Json v13.0.0.0))",
+  "openapi": "3.0.0",
+  "info": {
+    "title": "GameMapStorage",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://atlas.plan-ops.fr/"
+    },
+    {
+      "url": "https://de.atlas.plan-ops.fr/"
+    }
+  ],
+  "paths": {
+    "/api/v1/games": {
+      "get": {
+        "tags": [
+          "ApiV1"
+        ],
+        "operationId": "ApiV1_GetGames",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameJsonBase"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/games/{gameNameOrId}": {
+      "get": {
+        "tags": [
+          "ApiV1"
+        ],
+        "operationId": "ApiV1_GetGame",
+        "parameters": [
+          {
+            "name": "gameNameOrId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/games/{gameNameOrId}/maps": {
+      "get": {
+        "tags": [
+          "ApiV1"
+        ],
+        "operationId": "ApiV1_GetMaps",
+        "parameters": [
+          {
+            "name": "gameNameOrId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameMapJsonBase"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/games/{gameNameOrId}/maps/{mapNameOrId}": {
+      "get": {
+        "tags": [
+          "ApiV1"
+        ],
+        "operationId": "ApiV1_GetMap",
+        "parameters": [
+          {
+            "name": "gameNameOrId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "mapNameOrId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameMapJson"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GameJsonBase": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "englishTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "attribution": {
+            "type": "string",
+            "nullable": true
+          },
+          "officialSiteUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "steamAppId": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastChangeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoWebp": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoPng": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GameJson": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GameJsonBase"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "colors": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "$ref": "#/components/schemas/GameColorJson"
+                }
+              },
+              "markers": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "$ref": "#/components/schemas/GameMarkerJson"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GameColorJson": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameColorId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "englishTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "hexadecimal": {
+            "type": "string",
+            "nullable": true
+          },
+          "usage": {
+            "$ref": "#/components/schemas/ColorUsage"
+          }
+        }
+      },
+      "ColorUsage": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Custom",
+          "FriendSide",
+          "NeutralSide",
+          "HostileSide",
+          "UnknownSide",
+          "CivilianSide"
+        ],
+        "enum": [
+          "Custom",
+          "FriendSide",
+          "NeutralSide",
+          "HostileSide",
+          "UnknownSide",
+          "CivilianSide"
+        ]
+      },
+      "GameMarkerJson": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameMarkerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "englishTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "usage": {
+            "$ref": "#/components/schemas/MarkerUsage"
+          }
+        }
+      },
+      "MarkerUsage": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Custom"
+        ],
+        "enum": [
+          "Custom"
+        ]
+      },
+      "GameMapJsonBase": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameMapId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "englishTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "appendAttribution": {
+            "type": "string",
+            "nullable": true
+          },
+          "steamWorkshopId": {
+            "type": "string",
+            "nullable": true
+          },
+          "officialSiteUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "sizeInMeters": {
+            "type": "number",
+            "format": "double"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliases": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "thumbnail": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailWebp": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailPng": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastChangeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "originX": {
+            "type": "number",
+            "format": "double"
+          },
+          "originY": {
+            "type": "number",
+            "format": "double"
+          },
+          "layers": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/GameMapLayerJson"
+            }
+          }
+        }
+      },
+      "GameMapLayerJson": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameMapLayerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "$ref": "#/components/schemas/LayerType"
+          },
+          "format": {
+            "$ref": "#/components/schemas/LayerFormat"
+          },
+          "minZoom": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxZoom": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultZoom": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "tileSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "factorX": {
+            "type": "number",
+            "format": "double"
+          },
+          "factorY": {
+            "type": "number",
+            "format": "double"
+          },
+          "culture": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastChangeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dataLastChangeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "gameMapLayerGuid": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "downloadUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "patternPng": {
+            "type": "string",
+            "nullable": true
+          },
+          "patternWebp": {
+            "type": "string",
+            "nullable": true
+          },
+          "pattern": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LayerType": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Topographic",
+          "Satellite",
+          "Aerial",
+          "Elevation"
+        ],
+        "enum": [
+          "Topographic",
+          "Satellite",
+          "Aerial",
+          "Elevation"
+        ]
+      },
+      "LayerFormat": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "PngOnly",
+          "PngAndWebp",
+          "SvgOnly",
+          "SvgAndWebp",
+          "WebpOnly",
+          "SinglePDF",
+          "BookletPDF"
+        ],
+        "enum": [
+          "PngOnly",
+          "PngAndWebp",
+          "SvgOnly",
+          "SvgAndWebp",
+          "WebpOnly",
+          "SinglePDF",
+          "BookletPDF"
+        ]
+      },
+      "GameMapJson": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GameMapJsonBase"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "attribution": {
+                "type": "string",
+                "nullable": true
+              },
+              "locations": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "$ref": "#/components/schemas/GameMapLocationJson"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "GameMapLocationJson": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gameMapLocationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "englishTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/LocationType"
+          },
+          "x": {
+            "type": "number",
+            "format": "double"
+          },
+          "y": {
+            "type": "number",
+            "format": "double"
+          },
+          "gameMapLocationGuid": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          }
+        }
+      },
+      "LocationType": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "City"
+        ],
+        "enum": [
+          "City"
+        ]
+      }
+    }
+  }
+}

@@ -28,7 +28,7 @@ namespace GameMapUtils {
             this._map = map;
             L.DomEvent.disableClickPropagation(this._container);
             map.on('mousemove', this._onMouseMove, this);
-            this._container.innerHTML = GameMapUtils.toGrid(L.latLng(0, 0), this.options.precision, this._map);
+            this._container.innerHTML = GameMapUtils.toGridCoordinates(L.latLng(0, 0), this.options.precision, this._map);
             return this._container;
         }
 
@@ -38,7 +38,7 @@ namespace GameMapUtils {
         }
 
         _onMouseMove (e) {
-            this._container.innerHTML = GameMapUtils.toGrid(e.latlng, this.options.precision, this._map);
+            this._container.innerHTML = GameMapUtils.toGridCoordinates(e.latlng, this.options.precision, this._map);
         }
 
     }
@@ -97,7 +97,7 @@ namespace GameMapUtils {
         }
     };
 
-    export function overlayButton (options) {
+    export function overlayButton(options?: OverlayButtonOptions): OverlayButton {
         return new GameMapUtils.OverlayButton(options);
     };
         
@@ -123,7 +123,7 @@ namespace GameMapUtils {
             }, options));
         }
 
-        onAdd (map) {
+        onAdd(map: L.Map) {
             this._container = L.DomUtil.create('div', '');
             L.DomEvent.disableClickPropagation(this._container);
             let content = this.options.content;
@@ -136,7 +136,7 @@ namespace GameMapUtils {
             return this._container;
         }
 
-        onRemove (map) {
+        onRemove(map: L.Map) {
 
         }
     }
@@ -292,7 +292,7 @@ namespace GameMapUtils {
         }
     }
 
-    export function buttonGroupBlock(options?: ButtonGroupOptions) {
+    export function buttonGroupBlock(options?: ButtonGroupOptions): ButtonGroupBlock {
         return new GameMapUtils.ButtonGroupBlock(options);
     };
 };

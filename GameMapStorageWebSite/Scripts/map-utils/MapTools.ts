@@ -223,7 +223,7 @@ namespace GameMapUtils {
         }
 
         _onRotateMarkerDrag () {
-            this.setBearing(GameMapUtils.bearing(this._latlng, this._rotateMarker.getLatLng(), this._map));
+            this.setBearing(GameMapUtils.computeBearingDegrees(this._latlng, this._rotateMarker.getLatLng(), this._map));
         }
 
         _resetBearing () {
@@ -345,7 +345,7 @@ namespace GameMapUtils {
         }
 
         _onRotateMarkerDrag () {
-            this.setBearing(GameMapUtils.bearing(this._latlng, this._rotateMarker.getLatLng(), this._map) - 90);
+            this.setBearing(GameMapUtils.computeBearingDegrees(this._latlng, this._rotateMarker.getLatLng(), this._map) - 90);
         }
 
         _updateDragMarkerIconTransform () {

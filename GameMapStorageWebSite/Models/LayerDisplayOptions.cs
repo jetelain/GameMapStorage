@@ -2,7 +2,7 @@
 
 namespace GameMapStorageWebSite.Models
 {
-    public class MapInfos
+    public class LayerDisplayOptions
     {
         [JsonPropertyName("minZoom")]
         public int MinZoom { get; set; }
@@ -10,10 +10,10 @@ namespace GameMapStorageWebSite.Models
         [JsonPropertyName("maxZoom")]
         public int MaxZoom { get; set; }
 
-        [JsonPropertyName("factorx")]
+        [JsonPropertyName("factorX")]
         public double FactorX { get; set; }
 
-        [JsonPropertyName("factory")]
+        [JsonPropertyName("factorY")]
         public double FactorY { get; set; }
 
         [JsonPropertyName("tileSize")]
@@ -30,5 +30,14 @@ namespace GameMapStorageWebSite.Models
 
         [JsonPropertyName("attribution")]
         public required string Attribution { get; set; }
+
+        [JsonPropertyName("originX")]
+        public double OriginX { get; set; }
+
+        [JsonPropertyName("originY")]
+        public double OriginY { get; set; }
+
+        [JsonPropertyName("sizeInMeters")]
+        public required double SizeInMeters { get; set; }
     }
 }

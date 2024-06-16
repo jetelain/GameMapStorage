@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public sealed class DownloadController : DownloadControllerBase
     {
         private readonly IImageLayerService layerService;

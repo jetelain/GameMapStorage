@@ -35,6 +35,8 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             target.LastChangeUtc = source.LastChangeUtc;
             target.Name = source.Name;
             target.Aliases = source.Aliases;
+            target.OriginX = source.OriginX;
+            target.OriginY = source.OriginY;
 
             target.Layers = layers.UpdateOrCreateEntities(source.Layers!, target.Layers!);
             target.Locations = locations.UpdateOrCreateEntities(source.Locations!, target.Locations!);
@@ -109,6 +111,8 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
                 LastChangeUtc = source.LastChangeUtc,
                 Name = source.Name,
                 Aliases = source.Aliases,
+                OriginX = source.OriginX,
+                OriginY = source.OriginY,
 
                 Layers = layers.CreateEntities(source.Layers),
                 Locations = locations.CreateEntities(source.Locations),

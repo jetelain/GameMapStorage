@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class HomeController : Controller
     {
         private readonly GameMapStorageContext _context;
@@ -86,7 +87,7 @@ namespace GameMapStorageWebSite.Controllers
                 Map = map, 
                 Layer = layer,
                 AcceptWebp = ImagePathHelper.AcceptWebp(Request),
-                MapInfos = new MapInfos()
+                MapInfos = new LayerDisplayOptions()
                 {
                     FactorX = layer.FactorX,
                     DefaultPosition = [y ?? (map.SizeInMeters  / 2), x ?? (map.SizeInMeters / 2)],
@@ -96,7 +97,10 @@ namespace GameMapStorageWebSite.Controllers
                     MinZoom = layer.MinZoom,
                     TilePattern = ImagePathHelper.GetLayerPattern(Request, layer),
                     TileSize = layer.TileSize,
-                    Attribution = MapUtils.CombineAttibutions(map.Game!.Attribution, map.AppendAttribution)
+                    Attribution = MapUtils.CombineAttibutions(map.Game!.Attribution, map.AppendAttribution),
+                    SizeInMeters = map.SizeInMeters,
+                    OriginX = map.OriginX,
+                    OriginY = map.OriginY
                 }
             });
         }

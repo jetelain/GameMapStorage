@@ -48,6 +48,16 @@
                 <span asp-validation-for="Aliases" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="OriginX" class="control-label"></label>
+                <input asp-for="OriginX" class="form-control" />
+                <span asp-validation-for="OriginX" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="OriginY" class="control-label"></label>
+                <input asp-for="OriginY" class="form-control" />
+                <span asp-validation-for="OriginY" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="GameId" class="control-label"></label>
                 <select asp-for="GameId" class ="form-control" asp-items="ViewBag.GameId"></select>
             </div>
