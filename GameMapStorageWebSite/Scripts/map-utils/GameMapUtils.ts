@@ -135,11 +135,15 @@ namespace GameMapUtils {
         return map;
     }
 
-    export async function basicInitFromAPI(gameName: string, mapName: string, mapDivId: string | HTMLElement = 'map', apiBasePath: string = "https://atlas.plan-ops.fr/api/v1/"): Promise<L.Map> {
+    export async function basicInitFromAPI(gameName: string, mapName: string, mapDivId: string | HTMLElement = 'map', apiBasePath: string = "https://atlas.plan-ops.fr/api/v1/"): Promise<L.Map | null> {
 
-        const client = new ApiClient();
+        const client = new ApiClient(apiBasePath);
 
         const map = await client.getMap(gameName, mapName);
+
+        if (map == null) {
+            return null;
+        }
 
         const layer = map.layers.find(l => l.isDefault);
 
@@ -184,6 +188,9 @@ namespace GameMapUtils {
                 else {
                     response = await fetch(this._failOverApiBasePath + path);
                 }
+                if (response.status == 404) {
+                    return null;
+                }
                 if (response.status == 200) {
                     return await response.json();
                 }
@@ -208,16 +215,16 @@ namespace GameMapUtils {
             return await this._fetch("api/v1/games") as GameJsonBase[];
         }
 
-        async getGame(gameNameOrId: string|number): Promise<GameJson> {
-            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}`) as GameJson;
+        async getGame(gameNameOrId: string | number): Promise<GameJson | null> {
+            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}`) as (GameJson | null);
         }
 
         async getMaps(gameNameOrId: string | number): Promise<GameMapJsonBase[]> {
             return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}/maps`) as GameMapJsonBase[];
         }
 
-        async getMap(gameNameOrId: string | number, mapNameOrId: string | number): Promise<GameMapJson> {
-            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}/maps/${encodeURIComponent(mapNameOrId)}`) as GameMapJson;
+        async getMap(gameNameOrId: string | number, mapNameOrId: string | number): Promise<GameMapJson | null> {
+            return await this._fetch(`api/v1/games/${encodeURIComponent(gameNameOrId)}/maps/${encodeURIComponent(mapNameOrId)}`) as (GameMapJson | null);
         }
     }
 

@@ -170,7 +170,7 @@ declare namespace GameMapUtils {
         sizeInMeters?: number;
     }
     function basicInit(mapInfos: LayerDisplayOptions, mapDivId?: string | HTMLElement): MapWithGrid;
-    function basicInitFromAPI(gameName: string, mapName: string, mapDivId?: string | HTMLElement, apiBasePath?: string): Promise<L.Map>;
+    function basicInitFromAPI(gameName: string, mapName: string, mapDivId?: string | HTMLElement, apiBasePath?: string): Promise<L.Map | null>;
     class ApiClient {
         _apiBasePath: any;
         _failOverApiBasePath: any;
@@ -178,9 +178,9 @@ declare namespace GameMapUtils {
         _retryFetch(path: string, attempt: any): Promise<any>;
         _fetch(path: string, attempt?: number): Promise<any>;
         getGames(): Promise<GameJsonBase[]>;
-        getGame(gameNameOrId: string | number): Promise<GameJson>;
+        getGame(gameNameOrId: string | number): Promise<GameJson | null>;
         getMaps(gameNameOrId: string | number): Promise<GameMapJsonBase[]>;
-        getMap(gameNameOrId: string | number, mapNameOrId: string | number): Promise<GameMapJson>;
+        getMap(gameNameOrId: string | number, mapNameOrId: string | number): Promise<GameMapJson | null>;
     }
     interface GameJsonBase {
         gameId?: number;

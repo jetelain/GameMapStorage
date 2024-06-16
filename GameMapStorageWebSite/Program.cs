@@ -112,7 +112,13 @@ namespace GameMapStorageWebSite
 
 #if DEBUG
             services.AddOpenApiDocument();
-#endif
+#endif            
+            
+            services.AddCors(o => o.AddPolicy("Api", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .WithMethods("GET");
+            }));
         }
 
         private static void SetupDataMode(IServiceCollection services, DataConfigurationService config)
@@ -203,6 +209,8 @@ namespace GameMapStorageWebSite
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 

@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Models.Json;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace GameMapStorageWebSite.Controllers
 {
     [ApiController]
     [Route("api/v1")]
+    [EnableCors("Api")]
     public sealed class ApiV1Controller : Controller
     {
         private readonly GameMapStorageContext context;

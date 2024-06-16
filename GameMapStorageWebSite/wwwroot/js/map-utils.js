@@ -548,8 +548,11 @@ var GameMapUtils;
     }
     GameMapUtils.basicInit = basicInit;
     async function basicInitFromAPI(gameName, mapName, mapDivId = 'map', apiBasePath = "https://atlas.plan-ops.fr/api/v1/") {
-        const client = new ApiClient();
+        const client = new ApiClient(apiBasePath);
         const map = await client.getMap(gameName, mapName);
+        if (map == null) {
+            return null;
+        }
         const layer = map.layers.find(l => l.isDefault);
         return basicInit({
             minZoom: layer.minZoom,
@@ -585,6 +588,9 @@ var GameMapUtils;
                 }
                 else {
                     response = await fetch(this._failOverApiBasePath + path);
+                }
+                if (response.status == 404) {
+                    return null;
                 }
                 if (response.status == 200) {
                     return await response.json();
