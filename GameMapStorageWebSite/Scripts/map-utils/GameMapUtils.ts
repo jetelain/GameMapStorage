@@ -1,4 +1,4 @@
-﻿/// <reference path="../types/leaflet.d.ts" />
+﻿/// <reference path="../Types/leaflet.d.ts" />
 /// <reference path="LatLngGraticule.ts" />
 /// <reference path="Overlays.ts" /> 
 

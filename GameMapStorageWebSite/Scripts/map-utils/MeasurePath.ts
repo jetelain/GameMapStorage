@@ -1,4 +1,4 @@
-﻿/// <reference path="../types/leaflet.d.ts" />
+﻿/// <reference path="../Types/leaflet.d.ts" />
 /// <reference path="GameMapUtils.ts" />
 /// <reference path="Overlays.ts" /> 
 
