@@ -2,9 +2,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Restore dependencies
-      run: dotnet restore --configuration Release GameMapStorage.sln
+      run: dotnet restore GameMapStorage.sln
 
     - name: Build
       run: dotnet build --no-restore --configuration Release GameMapStorage.sln
