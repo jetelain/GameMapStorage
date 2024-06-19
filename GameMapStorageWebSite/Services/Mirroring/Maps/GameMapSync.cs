@@ -136,6 +136,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
         {
             var localMaps = await context.GameMaps.Where(m => m.GameId == targetGame.GameId).ToListAsync();
             await context.GameMapLayers.Where(m => m.GameMap!.GameId == targetGame.GameId).ToListAsync();
+            await context.GameMapLocations.Where(m => m.GameMap!.GameId == targetGame.GameId).ToListAsync();
             return localMaps;
         }
 
