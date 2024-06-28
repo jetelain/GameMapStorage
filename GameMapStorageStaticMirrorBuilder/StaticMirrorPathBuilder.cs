@@ -13,18 +13,27 @@ namespace GameMapStorageStaticMirrorBuilder
             return null;
         }
 
-        public string GetLayerPattern(IGameMapLayerIdentifier layer)
+        public string GetLayerPattern(GameMapLayer layer)
         {
             return GetLayerPattern(defaultUseWebp, layer);
         }
 
-        public string GetLayerPattern(bool useWebp, IGameMapLayerIdentifier layer)
+        public string GetLayerPattern(bool useWebp, GameMapLayer layer)
         {
-            if (useWebp)
+            if (layer.Format.HasSvg())
             {
-                return FormattableString.Invariant($"{basePath}/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/{{z}}/{{x}}/{{y}}.webp");
+                return GetLayerPattern(layer, "svg");
             }
-            return FormattableString.Invariant($"{basePath}/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/{{z}}/{{x}}/{{y}}.png");
+            if (layer.Format.HasWebp() && useWebp)
+            {
+                return GetLayerPattern(layer, "webp");
+            }
+            return GetLayerPattern(layer, "png");
+        }
+
+        public string GetLayerPattern(IGameMapLayerIdentifier layer, string ext)
+        {
+            return FormattableString.Invariant($"{basePath}/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/{{z}}/{{x}}/{{y}}.{ext}");
         }
 
         public string GetLogo(IGameIdentifier game)

@@ -100,7 +100,8 @@ namespace GameMapStorageWebSite.Controllers
                     Attribution = MapUtils.CombineAttibutions(map.Game!.Attribution, map.AppendAttribution),
                     SizeInMeters = map.SizeInMeters,
                     OriginX = map.OriginX,
-                    OriginY = map.OriginY
+                    OriginY = map.OriginY,
+                    IsSvg = layer.Format.HasSvg()
                 }
             });
         }

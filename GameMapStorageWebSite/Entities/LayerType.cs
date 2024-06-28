@@ -5,6 +5,7 @@
         Topographic,
         Satellite,
         Aerial,
-        Elevation
+        Elevation,
+        TopographicMapToolKit
     }
 }

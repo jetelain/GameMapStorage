@@ -131,16 +131,24 @@ namespace GameMapStorageWebSite.Services
                 ?? new LocalStorageFile("wwwroot/img/missing/tile.webp");
         }
 
+        public async Task<IStorageFile> ReadTileSvg(IGameMapLayerIdentifier layer, int zoom, int x, int y)
+        {
+            return (await storageService.GetAsync(GetBasePath(layer, zoom, x, y) + ".svg"))
+                ?? new LocalStorageFile("wwwroot/img/missing/tile.svg");
+        }
+
         public async Task WriteArchiveTo(GameMapLayer layer, Stream target, LayerStorageMode mode)
         {
             var packPng = mode.HasFlag(LayerStorageMode.PngTiles) && layer.Format.HasPng();
             var packWebp = mode.HasFlag(LayerStorageMode.WebpTiles) && layer.Format.HasWebp();
+            var packSource = mode.HasFlag(LayerStorageMode.SourcePng) && layer.Format.HasSourcePng();
+            var packSvg = layer.Format.HasSvg();
             ValidateLayer(layer);
             using var zip = new ZipArchive(target, ZipArchiveMode.Create);
             // Add a JSON with metadata ?
             for(int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                if (mode.HasFlag(LayerStorageMode.SourcePng))
+                if (packSource)
                 {
                     await CreateEntry(zip, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
                 }
@@ -156,6 +164,10 @@ namespace GameMapStorageWebSite.Services
                         if (packWebp)
                         {
                             await CreateEntry(zip, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
+                        }
+                        if (packSvg)
+                        {
+                            await CreateEntry(zip, $"{zoom}/{x}/{y}.svg", GetBasePath(layer, zoom, x, y) + ".svg");
                         }
                     }
                 }
@@ -183,19 +195,34 @@ namespace GameMapStorageWebSite.Services
 
         public async Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive)
         {
+            var hasPng = layer.Format.HasPng();
+            var hasWebp = layer.Format.HasWebp();
+            var hasSvg = layer.Format.HasSvg();
+            var hasSourcePng = layer.Format.HasSourcePng();
+
             ValidateLayer(layer);
             for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                if (hasSourcePng)
+                {
+                    await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                }
                 var count = MapUtils.GetTileRowCount(zoom);
                 for (int x = 0; x < count; x++)
                 {
                     for (int y = 0; y < count; y++)
                     {
-                        await UnPack(archive, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
-                        if (layer.Format == LayerFormat.PngAndWebp)
+                        if (hasPng)
+                        {
+                            await UnPack(archive, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
+                        }
+                        if (hasWebp)
                         {
                             await UnPack(archive, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
+                        }
+                        if (hasSvg)
+                        {
+                            await UnPack(archive, $"{zoom}/{x}/{y}.svg", GetBasePath(layer, zoom, x, y) + ".svg");
                         }
                     }
                 }

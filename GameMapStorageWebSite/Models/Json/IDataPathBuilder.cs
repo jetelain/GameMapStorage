@@ -6,8 +6,9 @@ namespace GameMapStorageWebSite.Models.Json
     {
         string GetLogo(IGameIdentifier game);
         string GetLogo(bool useWebp, IGameIdentifier game);
-        string GetLayerPattern(IGameMapLayerIdentifier layer);
-        string GetLayerPattern(bool useWebp, IGameMapLayerIdentifier layer);
+        string GetLayerPattern(GameMapLayer layer);
+        string GetLayerPattern(bool acceptWebp, GameMapLayer layer);
+        string GetLayerPattern(IGameMapLayerIdentifier layer, string ext);
         string GetThumbnail(IGameMapIdentifier gameMap);
         string GetThumbnail(bool useWebp, IGameMapIdentifier gameMap);
         string? GetDownloadUri(IGameMapLayerIdentifier layer);

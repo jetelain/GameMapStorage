@@ -16,5 +16,10 @@
         {
             return layerFormat == LayerFormat.SvgOnly || layerFormat == LayerFormat.SvgAndWebp;
         }
+
+        public static bool HasSourcePng(this LayerFormat layerFormat)
+        {
+            return layerFormat == LayerFormat.WebpOnly || layerFormat == LayerFormat.PngAndWebp || layerFormat == LayerFormat.PngOnly;
+        }
     }
 }

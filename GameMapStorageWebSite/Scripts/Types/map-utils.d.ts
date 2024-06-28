@@ -168,6 +168,7 @@ declare namespace GameMapUtils {
         originX?: number;
         originY?: number;
         sizeInMeters?: number;
+        isSvg?: boolean;
     }
     function basicInit(mapInfos: LayerDisplayOptions, mapDivId?: string | HTMLElement): MapWithGrid;
     function basicInitFromAPI(gameName: string, mapName: string, mapDivId?: string | HTMLElement, apiBasePath?: string): Promise<L.Map | null>;

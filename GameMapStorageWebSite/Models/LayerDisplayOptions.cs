@@ -39,5 +39,8 @@ namespace GameMapStorageWebSite.Models
 
         [JsonPropertyName("sizeInMeters")]
         public required double SizeInMeters { get; set; }
+
+        [JsonPropertyName("isSvg")]
+        public required bool IsSvg { get; set; }
     }
 }

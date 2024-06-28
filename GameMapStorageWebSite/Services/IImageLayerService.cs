@@ -15,9 +15,12 @@ namespace GameMapStorageWebSite.Services
 
         Task<IStorageFile> ReadTileWebp(IGameMapLayerIdentifier layer, int zoom, int x, int y);
 
+        Task<IStorageFile> ReadTileSvg(IGameMapLayerIdentifier layer, int zoom, int x, int y);
+
         int GetSizeAtZoom(GameMapLayer layer, int zoom);
 
         Task<IStorageFile> GetArchive(GameMapLayer layer, LayerStorageMode mode = LayerStorageMode.Full);
+
         Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive);
     }
 }

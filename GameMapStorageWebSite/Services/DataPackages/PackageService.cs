@@ -1,7 +1,9 @@
 ﻿using System.IO.Compression;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Works.ProcessLayers;
+using GameMapStorageWebSite.Works.UnpackLayers;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Services.DataPackages
@@ -27,15 +29,40 @@ namespace GameMapStorageWebSite.Services.DataPackages
 
             var layer = await CreateLayerDefinition(indexContent, map);
 
-            await SubmitBackgroundWork(zip, indexContent, layer);
-
+            if (indexContent.Images != null)
+            {
+                await SubmitProcessLayerBackgroundWork(zip, indexContent, layer);
+            }
+            else if (indexContent.Format != null)
+            {
+                await SubmitExtractLayerBackgroundWork(stream, indexContent, layer);
+            }
             return layer;
         }
 
-        private async Task SubmitBackgroundWork(ZipArchive zip, PackageIndex indexContent, GameMapLayer layer)
+        private async Task SubmitExtractLayerBackgroundWork(Stream source, PackageIndex indexContent, GameMapLayer layer)
         {
             var workspace = workspaceService.GetLayerWorkspace(layer.GameMapLayerId);
-            foreach (var image in indexContent.Images)
+            using (var target = File.Create(Path.Combine(workspace, "content.zip")))
+            {
+                source.Position = 0;
+                await source.CopyToAsync(target);
+            }
+            context.Works.Add(new BackgroundWork()
+            {
+                Type = BackgroundWorkType.UnpackLayer,
+                CreatedUtc = DateTime.UtcNow,
+                GameMapLayerId = layer.GameMapLayerId,
+                GameMapLayer = layer,
+                Data = JsonSerializer.Serialize(new UnpackLayerWorkData(layer.GameMapLayerId))
+            });
+            await context.SaveChangesAsync();
+        }
+
+        private async Task SubmitProcessLayerBackgroundWork(ZipArchive zip, PackageIndex indexContent, GameMapLayer layer)
+        {
+            var workspace = workspaceService.GetLayerWorkspace(layer.GameMapLayerId);
+            foreach (var image in indexContent.Images!)
             {
                 zip.GetEntry(image.FileName)!.ExtractToFile(Path.Combine(workspace, image.FileName));
             }
@@ -61,19 +88,40 @@ namespace GameMapStorageWebSite.Services.DataPackages
                 Type = indexContent.Type,
                 GameMap = map,
                 State = LayerState.Created,
-                Format = LayerFormat.PngAndWebp,
+                Format = GetFormat(indexContent),
                 DefaultZoom = indexContent.DefaultZoom,
                 FactorX = indexContent.FactorX,
                 FactorY = indexContent.FactorY,
                 TileSize = indexContent.TileSize,
-                MaxZoom = indexContent.Images.Max(i => i.MaxZoom),
-                MinZoom = indexContent.Images.Min(i => i.MinZoom),
+                MaxZoom = indexContent.MaxZoom ?? indexContent.Images?.Max(i => i.MaxZoom) ?? 0,
+                MinZoom = indexContent.MinZoom ?? indexContent.Images?.Min(i => i.MinZoom) ?? 0,
                 LastChangeUtc = DateTime.UtcNow,
                 GameMapLayerGuid = Guid.NewGuid()
             };
             context.GameMapLayers.Add(layer);
             await context.SaveChangesAsync(); // we need GameMapLayerId to continue
             return layer;
+        }
+
+        private LayerFormat GetFormat(PackageIndex indexContent)
+        {
+            if (indexContent.Images != null)
+            {
+                return LayerFormat.PngAndWebp;
+            }
+            if (indexContent.Format != null)
+            {
+                switch(indexContent.Format.Value)
+                {
+                    case LayerFormat.SvgOnly:
+                    case LayerFormat.SvgAndWebp:
+                    case LayerFormat.PngOnly:
+                    case LayerFormat.PngAndWebp:
+                    case LayerFormat.WebpOnly:
+                        return indexContent.Format.Value;
+                }
+            }
+            throw new ApplicationException("Invalid package.");
         }
 
         private async Task<GameMap> GetOrCreateMap(PackageIndex indexContent)
@@ -102,8 +150,8 @@ namespace GameMapStorageWebSite.Services.DataPackages
                     GameId = game.GameId,
                     LastChangeUtc = DateTime.UtcNow,
                     SizeInMeters = indexContent.SizeInMeters,
-                    Locations = indexContent.Locations.Select(l => new GameMapLocation() { EnglishTitle = l.EnglishTitle, Type = l.Type, X = l.X, Y = l.Y, GameMapLocationGuid = Guid.NewGuid() }).ToList(),
-                    CitiesCount = indexContent.Locations.Count(l => l.Type == LocationType.City),
+                    Locations = indexContent.Locations?.Select(l => new GameMapLocation() { EnglishTitle = l.EnglishTitle, Type = l.Type, X = l.X, Y = l.Y, GameMapLocationGuid = Guid.NewGuid() })?.ToList(),
+                    CitiesCount = indexContent.Locations?.Count(l => l.Type == LocationType.City) ?? 0,
                     OriginX = indexContent.OriginX,
                     OriginY = indexContent.OriginY
                 };
@@ -122,17 +170,20 @@ namespace GameMapStorageWebSite.Services.DataPackages
             PackageIndex? indexContent;
             using (var indexStream = index.Open())
             {
-                indexContent = await JsonSerializer.DeserializeAsync<PackageIndex>(indexStream);
+                indexContent = await JsonSerializer.DeserializeAsync<PackageIndex>(indexStream, new JsonSerializerOptions() { Converters = { new JsonStringEnumConverter() } });
             }
             if (indexContent == null)
             {
                 throw new ApplicationException("Bad index.json");
             }
-            foreach (var image in indexContent.Images)
+            if (indexContent.Images != null)
             {
-                if (zip.GetEntry(image.FileName) == null)
+                foreach (var image in indexContent.Images)
                 {
-                    throw new ApplicationException($"Missing '{image.FileName}'");
+                    if (zip.GetEntry(image.FileName) == null)
+                    {
+                        throw new ApplicationException($"Missing '{image.FileName}'");
+                    }
                 }
             }
             return indexContent;

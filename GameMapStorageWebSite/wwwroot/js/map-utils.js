@@ -1,4 +1,4 @@
-/// <reference path="../types/leaflet.d.ts" />
+/// <reference path="../Types/leaflet.d.ts" />
 /// <reference path="GameMapUtils.ts" />
 var GameMapUtils;
 (function (GameMapUtils) {
@@ -217,7 +217,7 @@ var GameMapUtils;
     GameMapUtils.latlngGraticule = latlngGraticule;
     ;
 })(GameMapUtils || (GameMapUtils = {}));
-/// <reference path="../types/leaflet.d.ts" /> 
+/// <reference path="../Types/leaflet.d.ts" /> 
 /// <reference path="GameMapUtils.ts" /> 
 var GameMapUtils;
 (function (GameMapUtils) {
@@ -451,7 +451,7 @@ var GameMapUtils;
     ;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
-/// <reference path="../types/leaflet.d.ts" />
+/// <reference path="../Types/leaflet.d.ts" />
 /// <reference path="LatLngGraticule.ts" />
 /// <reference path="Overlays.ts" /> 
 var GameMapUtils;
@@ -525,10 +525,11 @@ var GameMapUtils;
     function basicInit(mapInfos, mapDivId = 'map') {
         var map = L.map(mapDivId, {
             minZoom: mapInfos.minZoom,
-            maxZoom: mapInfos.maxZoom,
+            maxZoom: mapInfos.isSvg ? mapInfos.maxZoom + 3 : mapInfos.maxZoom + 1,
             crs: GameMapUtils.CRS(mapInfos.factorX, mapInfos.factorY, mapInfos.tileSize),
             zoomDelta: 0.5,
-            zoomSnap: 0.25
+            zoomSnap: 0.25,
+            zoomAnimation: !mapInfos.isSvg
         });
         map.grid = new MapGrid({
             sizeInMeters: mapInfos.sizeInMeters || (mapInfos.tileSize / mapInfos.factorX),
@@ -538,7 +539,8 @@ var GameMapUtils;
         });
         L.tileLayer(mapInfos.tilePattern, {
             attribution: mapInfos.attribution,
-            tileSize: mapInfos.tileSize
+            tileSize: mapInfos.tileSize,
+            maxNativeZoom: mapInfos.maxZoom
         }).addTo(map);
         map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
         GameMapUtils.latlngGraticule().addTo(map);
@@ -566,7 +568,8 @@ var GameMapUtils;
             defaultZoom: 2,
             originX: map.originX,
             originY: map.originY,
-            sizeInMeters: map.sizeInMeters
+            sizeInMeters: map.sizeInMeters,
+            isSvg: layer.format == 'SvgOnly' || layer.format == 'SvgAndWebp'
         }, mapDivId);
     }
     GameMapUtils.basicInitFromAPI = basicInitFromAPI;
@@ -628,7 +631,7 @@ var GameMapUtils;
     GameMapUtils.ApiClient = ApiClient;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
-/// <reference path="../types/leaflet.d.ts" />
+/// <reference path="../Types/leaflet.d.ts" />
 /// <reference path="GameMapUtils.ts" />
 /// <reference path="Overlays.ts" /> 
 var GameMapUtils;
@@ -989,7 +992,7 @@ var GameMapUtils;
     ;
 })(GameMapUtils || (GameMapUtils = {}));
 ;
-/// <reference path="../types/leaflet.d.ts" />
+/// <reference path="../Types/leaflet.d.ts" />
 /// <reference path="GameMapUtils.ts" />
 /// <reference path="Overlays.ts" /> 
 var GameMapUtils;

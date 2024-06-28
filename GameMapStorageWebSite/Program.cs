@@ -11,6 +11,7 @@ using GameMapStorageWebSite.Works;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
+using GameMapStorageWebSite.Works.UnpackLayers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -53,6 +54,7 @@ namespace GameMapStorageWebSite
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
+//                .AddBearerToken()
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Home/SignInUser";
@@ -60,6 +62,8 @@ namespace GameMapStorageWebSite
                     options.AccessDeniedPath = "/Home/Denied";
                 })
                 .AddSteam(s => s.ApplicationKey = configuration["SteamKey"]);
+
+//            services.AddSingleton<IBearerTokenService, BearerTokenService>();
 
             services.AddAuthorization(options =>
             {
@@ -104,10 +108,11 @@ namespace GameMapStorageWebSite
             services.AddScoped<IWorker<MigrateArma3MapWorkData>, MigrateArma3MapWorker>();
             services.AddScoped<IWorker<ProcessLayerWorkData>, ProcessLayerWorker>();
             services.AddScoped<IWorker<MirrorLayerWorkData>, MirrorLayerWorker>();
+            services.AddScoped<IWorker<UnpackLayerWorkData>, UnpackLayerWorker>();
             services.AddScoped<BackgroundWorker>();
             services.AddHostedService<BackgroundWorkerHostedService>();
             services.AddSingleton<IDataConfigurationService>(config);
-
+            
             services.AddScoped<IMirrorService, MirrorService>();
 
 #if DEBUG
