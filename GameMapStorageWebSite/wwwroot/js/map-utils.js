@@ -542,7 +542,12 @@ var GameMapUtils;
             tileSize: mapInfos.tileSize,
             maxNativeZoom: mapInfos.maxZoom
         }).addTo(map);
-        map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
+        if (mapInfos.bounds) {
+            map.fitBounds(mapInfos.bounds);
+        }
+        else {
+            map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
+        }
         GameMapUtils.latlngGraticule().addTo(map);
         L.control.scale({ maxWidth: 200, imperial: false }).addTo(map);
         GameMapUtils.gridMousePosition().addTo(map);

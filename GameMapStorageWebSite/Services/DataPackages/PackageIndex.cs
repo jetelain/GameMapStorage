@@ -21,5 +21,15 @@ namespace GameMapStorageWebSite.Services.DataPackages
         public double OriginY { get; set; }
         public int? MinZoom { get; set; }
         public int? MaxZoom { get; set; }
+        public Guid? GameMapLayerGuid { get; set; }
+
+        public int GetMaxZoom()
+        {
+            return MaxZoom ?? Images?.Max(i => i.MaxZoom) ?? 0;
+        }
+        public int GetMinZoom()
+        {
+            return MinZoom ?? Images?.Min(i => i.MinZoom) ?? 0;
+        }
     }
 }

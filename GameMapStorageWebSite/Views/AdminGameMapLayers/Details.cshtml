@@ -16,11 +16,15 @@
 
 <h1>@Html.DisplayFor(model => model.Type)</h1>
 <p>
-    <a class="btn btn-sm btn-secondary" asp-action="Index"><i class="fa-solid fa-arrow-left"></i> All Layers List</a>
-    <a class="btn btn-sm btn-secondary" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.GameMap!.Game!.Name" asp-route-mapName="@Model.GameMap!.Name" asp-route-layerId="@Model.GameMapLayerId"><i class="fa-solid fa-map"></i> View</a>
+    <a class="btn btn-sm btn-primary" asp-action="Index"><i class="fa-solid fa-arrow-left"></i> All Layers List</a>
+    <a class="btn btn-sm btn-primary" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.GameMap!.Game!.Name" asp-route-mapName="@Model.GameMap!.Name" asp-route-layerId="@Model.GameMapLayerId"><i class="fa-solid fa-map"></i> View</a>
+    <a class="btn btn-sm btn-primary" asp-controller="Download" asp-action="GetLayerArchive" asp-route-gameId="@Model.GameMap!.GameId" asp-route-gameMapId="@Model.GameMapId" asp-route-gameMapLayerId="@Model.GameMapLayerId"><i class="fa-solid fa-download"></i> Download Package</a>
+
+
     @if (canEdit)
     {
-        <a asp-action="Edit" class="btn btn-sm btn-secondary" asp-route-id="@Model?.GameMapLayerId"><i class="fa-solid fa-pen"></i> Edit Informations</a>
+        <a asp-action="Edit" class="btn btn-sm btn-secondary ms-2" asp-route-id="@Model?.GameMapLayerId"><i class="fa-solid fa-pen"></i> Edit Informations</a>
+        <a asp-action="UpdateFromPackage" class="btn btn-sm btn-secondary" asp-route-id="@Model?.GameMapLayerId"><i class="fa-solid fa-upload"></i> Update From Package</a>
     }
 </p>
 

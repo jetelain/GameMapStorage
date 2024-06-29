@@ -27,8 +27,15 @@ namespace GameMapStorageWebSite.Services.DataPackages
 
             var map = await GetOrCreateMap(indexContent);
 
-            var layer = await CreateLayerDefinition(indexContent, map);
+            var layer = await CreateLayerDefinition(indexContent, map, false);
 
+            await SubmitBackgroundWork(stream, zip, indexContent, layer);
+
+            return layer;
+        }
+
+        private async Task SubmitBackgroundWork(Stream stream, ZipArchive zip, PackageIndex indexContent, GameMapLayer layer)
+        {
             if (indexContent.Images != null)
             {
                 await SubmitProcessLayerBackgroundWork(zip, indexContent, layer);
@@ -37,7 +44,29 @@ namespace GameMapStorageWebSite.Services.DataPackages
             {
                 await SubmitExtractLayerBackgroundWork(stream, indexContent, layer);
             }
-            return layer;
+        }
+
+        public async Task UpdateLayerFromPackage(Stream stream, GameMapLayer layer)
+        {
+            using var zip = new ZipArchive(stream);
+
+            var indexContent = await GetAndCheckIndex(zip);
+
+            if (layer.GameMap!.Game!.Name != indexContent.GameName)
+            {
+                throw new ApplicationException("Game name mismatch.");
+            }
+            if ( layer.GameMap!.Name != indexContent.MapName )
+            {
+                throw new ApplicationException("Map name mismatch.");
+            }
+            if (indexContent.GameMapLayerGuid != null && layer.GameMapLayerGuid!.Value != indexContent.GameMapLayerGuid.Value)
+            {
+                throw new ApplicationException("Layer GUID mismatch.");
+            }
+            await UpdateLayer(indexContent, layer);
+
+            await SubmitBackgroundWork(stream, zip, indexContent, layer);
         }
 
         private async Task SubmitExtractLayerBackgroundWork(Stream source, PackageIndex indexContent, GameMapLayer layer)
@@ -80,8 +109,22 @@ namespace GameMapStorageWebSite.Services.DataPackages
             await context.SaveChangesAsync();
         }
 
-        private async Task<GameMapLayer> CreateLayerDefinition(PackageIndex indexContent, GameMap map)
+        private async Task<GameMapLayer> CreateLayerDefinition(PackageIndex indexContent, GameMap map, bool allowUpdate)
         {
+            if (indexContent.GameMapLayerGuid != null)
+            {
+                var existing = await context.GameMapLayers.FirstOrDefaultAsync(l => l.GameMapId == map.GameMapId && l.GameMapLayerGuid == indexContent.GameMapLayerGuid);
+                if (existing != null)
+                {
+                    if (!allowUpdate)
+                    {
+                        throw new ApplicationException("Layer already exists. Use update operation instead.");
+                    }
+                    await UpdateLayer(indexContent, existing);
+                    return existing;
+                }
+            }
+
             var layer = new GameMapLayer()
             {
                 Culture = indexContent.Culture,
@@ -93,14 +136,31 @@ namespace GameMapStorageWebSite.Services.DataPackages
                 FactorX = indexContent.FactorX,
                 FactorY = indexContent.FactorY,
                 TileSize = indexContent.TileSize,
-                MaxZoom = indexContent.MaxZoom ?? indexContent.Images?.Max(i => i.MaxZoom) ?? 0,
-                MinZoom = indexContent.MinZoom ?? indexContent.Images?.Min(i => i.MinZoom) ?? 0,
+                MaxZoom = indexContent.GetMaxZoom(),
+                MinZoom = indexContent.GetMinZoom(),
                 LastChangeUtc = DateTime.UtcNow,
-                GameMapLayerGuid = Guid.NewGuid()
+                GameMapLayerGuid = indexContent.GameMapLayerGuid ?? Guid.NewGuid()
             };
             context.GameMapLayers.Add(layer);
             await context.SaveChangesAsync(); // we need GameMapLayerId to continue
             return layer;
+        }
+
+        private async Task UpdateLayer(PackageIndex indexContent, GameMapLayer layer)
+        {
+            layer.Culture = indexContent.Culture;
+            layer.Type = indexContent.Type;
+            layer.State = LayerState.Created;
+            layer.Format = GetFormat(indexContent);
+            layer.DefaultZoom = indexContent.DefaultZoom;
+            layer.FactorX = indexContent.FactorX;
+            layer.FactorY = indexContent.FactorY;
+            layer.TileSize = indexContent.TileSize;
+            layer.MaxZoom = indexContent.GetMaxZoom();
+            layer.MinZoom = indexContent.GetMinZoom();
+            layer.LastChangeUtc = DateTime.UtcNow;
+            context.GameMapLayers.Update(layer);
+            await context.SaveChangesAsync();
         }
 
         private LayerFormat GetFormat(PackageIndex indexContent)
@@ -188,5 +248,6 @@ namespace GameMapStorageWebSite.Services.DataPackages
             }
             return indexContent;
         }
+
     }
 }

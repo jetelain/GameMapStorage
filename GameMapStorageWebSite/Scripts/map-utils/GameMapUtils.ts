@@ -101,6 +101,7 @@ namespace GameMapUtils {
         originY?: number;
         sizeInMeters?: number;
         isSvg?: boolean;
+        bounds?: [[number, number], [number, number]];
     }
 
     export function basicInit(mapInfos: LayerDisplayOptions, mapDivId: string | HTMLElement = 'map'): MapWithGrid {
@@ -127,7 +128,12 @@ namespace GameMapUtils {
             maxNativeZoom: mapInfos.maxZoom
         }).addTo(map);
 
-        map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
+        if (mapInfos.bounds) {
+            map.fitBounds(mapInfos.bounds);
+        }
+        else {
+            map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
+        }
 
         GameMapUtils.latlngGraticule().addTo(map);
 

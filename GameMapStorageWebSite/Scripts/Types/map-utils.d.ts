@@ -169,6 +169,7 @@ declare namespace GameMapUtils {
         originY?: number;
         sizeInMeters?: number;
         isSvg?: boolean;
+        bounds?: [[number, number], [number, number]];
     }
     function basicInit(mapInfos: LayerDisplayOptions, mapDivId?: string | HTMLElement): MapWithGrid;
     function basicInitFromAPI(gameName: string, mapName: string, mapDivId?: string | HTMLElement, apiBasePath?: string): Promise<L.Map | null>;

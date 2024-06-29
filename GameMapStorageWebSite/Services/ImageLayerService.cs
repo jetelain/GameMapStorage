@@ -1,6 +1,9 @@
 ﻿using System.Globalization;
 using System.IO.Compression;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -145,8 +148,10 @@ namespace GameMapStorageWebSite.Services
             var packSvg = layer.Format.HasSvg();
             ValidateLayer(layer);
             using var zip = new ZipArchive(target, ZipArchiveMode.Create);
-            // Add a JSON with metadata ?
-            for(int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
+
+            await AddIndexJson(layer, zip);
+
+            for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
                 if (packSource)
                 {
@@ -174,6 +179,39 @@ namespace GameMapStorageWebSite.Services
             }
         }
 
+        private static async Task AddIndexJson(GameMapLayer layer, ZipArchive zip)
+        {
+            if ( layer.GameMap == null || layer.GameMap.Game == null)
+            {
+                throw new ArgumentException();
+            }
+            var index = new PackageIndex()
+            {
+                EnglishTitle = layer.GameMap.EnglishTitle,
+                MapName = layer.GameMap.Name ?? string.Empty,
+                OriginX = layer.GameMap.OriginX,
+                OriginY = layer.GameMap.OriginY,
+                SizeInMeters = layer.GameMap.SizeInMeters,
+                GameName = layer.GameMap.Game.Name,
+                Culture = layer.Culture ?? string.Empty,
+                DefaultZoom = layer.DefaultZoom,
+                FactorX = layer.FactorX,
+                FactorY = layer.FactorY,
+                Format = layer.Format,
+                GameMapLayerGuid = layer.GameMapLayerGuid,
+                MaxZoom = layer.MaxZoom,
+                MinZoom = layer.MinZoom,
+                TileSize = layer.TileSize,
+                Type = layer.Type,
+                Locations = layer.GameMap.Locations?.Select(l => new PackageLocation(l.EnglishTitle, l.Type, l.X, l.Y))?.ToArray()
+            };
+            var entry = zip.CreateEntry("index.json");
+            using (var entryStream = entry.Open())
+            {
+                await JsonSerializer.SerializeAsync(entryStream, index, new JsonSerializerOptions() { Converters = { new JsonStringEnumConverter() } });
+            }
+        }
+
         private async Task CreateEntry(ZipArchive zip, string entryName, string storageFile)
         {
             var file = await storageService.GetAsync(storageFile);
@@ -189,7 +227,6 @@ namespace GameMapStorageWebSite.Services
         public Task<IStorageFile> GetArchive(GameMapLayer layer, LayerStorageMode mode = LayerStorageMode.Full)
         {
             ValidateLayer(layer);
-            // TODO: Create a cache option to avoid re-creating the zip each time
             return Task.FromResult<IStorageFile>(new MemoryStorageFile(s => WriteArchiveTo(layer, s, mode), layer.LastChangeUtc));
         }
 

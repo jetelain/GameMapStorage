@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,7 +47,7 @@ namespace GameMapStorageWebSite.Controllers
 
         [Route("maps/{gameName}/{mapName}")]
         [Route("maps/{gameName}/{mapName}/{layerId}")]
-        public async Task<IActionResult> Map(string gameName, string mapName, int? layerId = null, double? x = null, double? y = null, int? zoom = null)
+        public async Task<IActionResult> Map(string gameName, string mapName, int? layerId = null, double? x = null, double? y = null, int? zoom = null, double? w = null, double? h = null)
         {
             var map = await _context.GameMaps
                 .Include(m => m.Game)
@@ -101,7 +101,8 @@ namespace GameMapStorageWebSite.Controllers
                     SizeInMeters = map.SizeInMeters,
                     OriginX = map.OriginX,
                     OriginY = map.OriginY,
-                    IsSvg = layer.Format.HasSvg()
+                    IsSvg = layer.Format.HasSvg(),
+                    Bounds = x != null && y != null && w != null && h != null ? [[y.Value, x.Value], [y.Value + h.Value, x.Value + w.Value]] : null
                 }
             });
         }

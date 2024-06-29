@@ -64,9 +64,9 @@
                 <div class="list-group text-center">
                     @foreach (var layer in Model.Map.Layers!)
                     {
-                        <a class="list-group-item@(layer.GameMapLayerId == Model.Layer.GameMapLayerId ? " active" : "")" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game.Name" asp-route-mapName="@Model.Map.Name" asp-route-layerId="@layer.GameMapLayerId">
+                        <a class="layer-link list-group-item@(layer.GameMapLayerId == Model.Layer.GameMapLayerId ? " active" : "")" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game.Name" asp-route-mapName="@Model.Map.Name" asp-route-layerId="@layer.GameMapLayerId">
                             <img src="@ImagePathHelper.GetLayerPreview(Model.AcceptWebp, layer)" class="mw-100" style="max-height: 64px;" /> <br />
-                            @layer.Type
+                            @Html.DisplayFor(_ => layer.Type)
                         </a>
                     }
                 </div>
