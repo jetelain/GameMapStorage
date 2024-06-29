@@ -71,6 +71,60 @@ namespace GameMapStorageWebSite.Controllers.Admin
             return View();
         }
 
+
+        // GET: AdminGameMapLayers/Edit/5
+        [HttpGet]
+        [Authorize("AdminEdit")]
+        public async Task<IActionResult> UpdateFromPackage(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var gameMapLayer = await _context.GameMapLayers
+                .Include(g => g.GameMap)
+                .Include(g => g.GameMap!.Game)
+                .FirstOrDefaultAsync(m => m.GameMapLayerId == id);
+            if (gameMapLayer == null)
+            {
+                return NotFound();
+            }
+            return View(gameMapLayer);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
+        [Authorize("AdminEdit")]
+        public async Task<IActionResult> UpdateFromPackage(int id, int gameMapLayerId, IFormFile package)
+        {
+            if (id != gameMapLayerId)
+            {
+                return NotFound();
+            }
+            var gameMapLayer = await _context.GameMapLayers
+                .Include(g => g.GameMap)
+                .Include(g => g.GameMap!.Game)
+                .FirstOrDefaultAsync(m => m.GameMapLayerId == id);
+            if (gameMapLayer == null)
+            {
+                return NotFound();
+            }
+            using var stream = package.OpenReadStream();
+            try
+            {
+                await _packageService.UpdateLayerFromPackage(stream, gameMapLayer);
+                return RedirectToAction(nameof(Details), new { id = gameMapLayer.GameMapLayerId });
+            }
+            catch (Exception ex)
+            {
+                ViewBag.UploadError = ex.Message;
+            }
+            return View(gameMapLayer);
+        }
+
+
         // GET: AdminGameMapLayers/Edit/5
         [Authorize("AdminEdit")]
         public async Task<IActionResult> Edit(int? id)
@@ -115,7 +169,8 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 existing.LastChangeUtc = DateTime.UtcNow;
                 _context.Update(existing);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                return RedirectToAction(nameof(Details), new { id = gameMapLayer.GameMapLayerId });
             }
             return View(gameMapLayer);
         }

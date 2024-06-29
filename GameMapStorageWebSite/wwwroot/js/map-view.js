@@ -1,7 +1,29 @@
 ﻿
+function updateLayerLinks(map) {
+    const box = map.getBounds();
+    const newQuery = `?x=${Math.round(box.getWest())}&y=${Math.round(box.getSouth())}&w=${Math.round(box.getEast() - box.getWest())}&h=${Math.round(box.getNorth() - box.getSouth())}`;
+
+    document.querySelectorAll(".layer-link").forEach(layerLink => {
+        const href = layerLink.getAttribute("href");
+        const search = href.indexOf('?');
+        if (search != -1) {
+            layerLink.setAttribute("href", href.substring(0, search) + newQuery);
+        }
+        else {
+            layerLink.setAttribute("href", href + newQuery);
+        }
+    });
+}
+
 function mapInit(mapInfos) {
 
     var map = GameMapUtils.basicInit(mapInfos);
+
+    map.on('zoomend moveend', function () {
+        updateLayerLinks(map);
+    });
+
+    updateLayerLinks(map);
 
     let lastMeasure;
 

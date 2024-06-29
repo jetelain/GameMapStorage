@@ -1,6 +1,9 @@
 ﻿using System.Globalization;
 using System.IO.Compression;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -131,16 +134,26 @@ namespace GameMapStorageWebSite.Services
                 ?? new LocalStorageFile("wwwroot/img/missing/tile.webp");
         }
 
+        public async Task<IStorageFile> ReadTileSvg(IGameMapLayerIdentifier layer, int zoom, int x, int y)
+        {
+            return (await storageService.GetAsync(GetBasePath(layer, zoom, x, y) + ".svg"))
+                ?? new LocalStorageFile("wwwroot/img/missing/tile.svg");
+        }
+
         public async Task WriteArchiveTo(GameMapLayer layer, Stream target, LayerStorageMode mode)
         {
             var packPng = mode.HasFlag(LayerStorageMode.PngTiles) && layer.Format.HasPng();
             var packWebp = mode.HasFlag(LayerStorageMode.WebpTiles) && layer.Format.HasWebp();
+            var packSource = mode.HasFlag(LayerStorageMode.SourcePng) && layer.Format.HasSourcePng();
+            var packSvg = layer.Format.HasSvg();
             ValidateLayer(layer);
             using var zip = new ZipArchive(target, ZipArchiveMode.Create);
-            // Add a JSON with metadata ?
-            for(int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
+
+            await AddIndexJson(layer, zip);
+
+            for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                if (mode.HasFlag(LayerStorageMode.SourcePng))
+                if (packSource)
                 {
                     await CreateEntry(zip, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
                 }
@@ -157,8 +170,45 @@ namespace GameMapStorageWebSite.Services
                         {
                             await CreateEntry(zip, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
                         }
+                        if (packSvg)
+                        {
+                            await CreateEntry(zip, $"{zoom}/{x}/{y}.svg", GetBasePath(layer, zoom, x, y) + ".svg");
+                        }
                     }
                 }
+            }
+        }
+
+        private static async Task AddIndexJson(GameMapLayer layer, ZipArchive zip)
+        {
+            if ( layer.GameMap == null || layer.GameMap.Game == null)
+            {
+                throw new ArgumentException();
+            }
+            var index = new PackageIndex()
+            {
+                EnglishTitle = layer.GameMap.EnglishTitle,
+                MapName = layer.GameMap.Name ?? string.Empty,
+                OriginX = layer.GameMap.OriginX,
+                OriginY = layer.GameMap.OriginY,
+                SizeInMeters = layer.GameMap.SizeInMeters,
+                GameName = layer.GameMap.Game.Name,
+                Culture = layer.Culture ?? string.Empty,
+                DefaultZoom = layer.DefaultZoom,
+                FactorX = layer.FactorX,
+                FactorY = layer.FactorY,
+                Format = layer.Format,
+                GameMapLayerGuid = layer.GameMapLayerGuid,
+                MaxZoom = layer.MaxZoom,
+                MinZoom = layer.MinZoom,
+                TileSize = layer.TileSize,
+                Type = layer.Type,
+                Locations = layer.GameMap.Locations?.Select(l => new PackageLocation(l.EnglishTitle, l.Type, l.X, l.Y))?.ToArray()
+            };
+            var entry = zip.CreateEntry("index.json");
+            using (var entryStream = entry.Open())
+            {
+                await JsonSerializer.SerializeAsync(entryStream, index, new JsonSerializerOptions() { Converters = { new JsonStringEnumConverter() } });
             }
         }
 
@@ -177,25 +227,39 @@ namespace GameMapStorageWebSite.Services
         public Task<IStorageFile> GetArchive(GameMapLayer layer, LayerStorageMode mode = LayerStorageMode.Full)
         {
             ValidateLayer(layer);
-            // TODO: Create a cache option to avoid re-creating the zip each time
             return Task.FromResult<IStorageFile>(new MemoryStorageFile(s => WriteArchiveTo(layer, s, mode), layer.LastChangeUtc));
         }
 
         public async Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive)
         {
+            var hasPng = layer.Format.HasPng();
+            var hasWebp = layer.Format.HasWebp();
+            var hasSvg = layer.Format.HasSvg();
+            var hasSourcePng = layer.Format.HasSourcePng();
+
             ValidateLayer(layer);
             for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                if (hasSourcePng)
+                {
+                    await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                }
                 var count = MapUtils.GetTileRowCount(zoom);
                 for (int x = 0; x < count; x++)
                 {
                     for (int y = 0; y < count; y++)
                     {
-                        await UnPack(archive, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
-                        if (layer.Format == LayerFormat.PngAndWebp)
+                        if (hasPng)
+                        {
+                            await UnPack(archive, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
+                        }
+                        if (hasWebp)
                         {
                             await UnPack(archive, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
+                        }
+                        if (hasSvg)
+                        {
+                            await UnPack(archive, $"{zoom}/{x}/{y}.svg", GetBasePath(layer, zoom, x, y) + ".svg");
                         }
                     }
                 }

@@ -4,6 +4,7 @@ using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
+using GameMapStorageWebSite.Works.UnpackLayers;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Works
@@ -71,6 +72,9 @@ namespace GameMapStorageWebSite.Works
 
                 case BackgroundWorkType.MirrorLayer:
                     return CallWorker<MirrorLayerWorkData>(work, progress);
+
+                case BackgroundWorkType.UnpackLayer:
+                    return CallWorker<UnpackLayerWorkData>(work, progress);
             }
             return Task.CompletedTask;
         }

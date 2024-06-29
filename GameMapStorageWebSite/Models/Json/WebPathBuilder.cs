@@ -23,12 +23,12 @@ namespace GameMapStorageWebSite.Models.Json
             return basePath + ImagePathHelper.GetLogo(useWebp, game);
         }
 
-        public string GetLayerPattern(IGameMapLayerIdentifier layer)
+        public string GetLayerPattern(GameMapLayer layer)
         {
             return GetLayerPattern(defaultUseWebp, layer);
         }
 
-        public string GetLayerPattern(bool useWebp, IGameMapLayerIdentifier layer)
+        public string GetLayerPattern(bool useWebp, GameMapLayer layer)
         {
             return basePath + ImagePathHelper.GetLayerPattern(useWebp, layer);
         }
@@ -46,6 +46,11 @@ namespace GameMapStorageWebSite.Models.Json
         public string? GetDownloadUri(IGameMapLayerIdentifier layer)
         {
             return $"{basePath}/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}.zip";
+        }
+
+        public string GetLayerPattern(IGameMapLayerIdentifier layer, string ext)
+        {
+            return basePath + ImagePathHelper.GetLayerPattern(layer, ext);
         }
     }
 }

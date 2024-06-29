@@ -14,6 +14,7 @@ namespace GameMapStorageWebSite.Controllers
 
         private static string PngContentType = PngFormat.Instance.DefaultMimeType;
         private static string WebpContentType = WebpFormat.Instance.DefaultMimeType;
+        private static string SvgContentType = "image/svg+xml";
 
         private readonly IImageLayerService layerService;
         private readonly IThumbnailService thumbnailService;
@@ -32,6 +33,11 @@ namespace GameMapStorageWebSite.Controllers
         private Task<IResult> ToResultPng(IStorageFile? file)
         {
             return ToResult(file, PngContentType);
+        }
+
+        private Task<IResult> ToResultSvg(IStorageFile? file)
+        {
+            return ToResult(file, SvgContentType);
         }
 
         [Route("data/{gameId}/maps/{gameMapId}/{gameMapLayerId}/{z}/{x}/{y}.png")]
@@ -56,6 +62,18 @@ namespace GameMapStorageWebSite.Controllers
                 return Results.NotFound();
             }
             return await ToResultWebp(await layerService.ReadTileWebp(new GameMapLayerIdentifier(gameId, gameMapId, gameMapLayerId), z, x, y));
+        }
+
+        [Route("data/{gameId}/maps/{gameMapId}/{gameMapLayerId}/{z}/{x}/{y}.svg")]
+        [ResponseCache(Duration = CacheDuractionInSeconds, Location = ResponseCacheLocation.Any)]
+        public async Task<IResult> GetTileSvg(int gameId, int gameMapId, int gameMapLayerId, int z, int x, int y)
+        {
+            var count = MapUtils.GetTileRowCount(z);
+            if (x < 0 || x >= count || y < 0 || y >= count)
+            {
+                return Results.NotFound();
+            }
+            return await ToResultSvg(await layerService.ReadTileSvg(new GameMapLayerIdentifier(gameId, gameMapId, gameMapLayerId), z, x, y));
         }
 
         [Route("data/{gameId}/logo.png")]

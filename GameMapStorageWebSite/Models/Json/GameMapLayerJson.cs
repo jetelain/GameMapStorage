@@ -39,11 +39,15 @@ namespace GameMapStorageWebSite.Models.Json
             DownloadUri = pathBuilder.GetDownloadUri(gameMapLayer);
             if (Format.HasPng())
             {
-                PatternPng = pathBuilder.GetLayerPattern(false, gameMapLayer);
+                PatternPng = pathBuilder.GetLayerPattern(gameMapLayer, "png");
             }
             if (Format.HasWebp())
             {
-                PatternWebp = pathBuilder.GetLayerPattern(true, gameMapLayer);
+                PatternWebp = pathBuilder.GetLayerPattern(gameMapLayer, "webp");
+            }
+            if (Format.HasSvg())
+            {
+                PatternSvg = pathBuilder.GetLayerPattern(gameMapLayer, "svg");
             }
             Pattern = pathBuilder.GetLayerPattern(gameMapLayer);
         }
@@ -84,6 +88,9 @@ namespace GameMapStorageWebSite.Models.Json
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? PatternWebp { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? PatternSvg { get; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Pattern { get; set; }

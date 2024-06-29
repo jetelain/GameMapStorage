@@ -100,16 +100,19 @@ namespace GameMapUtils {
         originX?: number;
         originY?: number;
         sizeInMeters?: number;
+        isSvg?: boolean;
+        bounds?: [[number, number], [number, number]];
     }
 
     export function basicInit(mapInfos: LayerDisplayOptions, mapDivId: string | HTMLElement = 'map'): MapWithGrid {
 
         var map = L.map(mapDivId, {
             minZoom: mapInfos.minZoom,
-            maxZoom: mapInfos.maxZoom,
+            maxZoom: mapInfos.isSvg ? mapInfos.maxZoom + 3 : mapInfos.maxZoom + 1,
             crs: GameMapUtils.CRS(mapInfos.factorX, mapInfos.factorY, mapInfos.tileSize),
             zoomDelta: 0.5,
-            zoomSnap: 0.25
+            zoomSnap: 0.25,
+            zoomAnimation: !mapInfos.isSvg
         }) as MapWithGrid;
 
         map.grid = new MapGrid({
@@ -121,10 +124,16 @@ namespace GameMapUtils {
 
         L.tileLayer(mapInfos.tilePattern, {
             attribution: mapInfos.attribution,
-            tileSize: mapInfos.tileSize
+            tileSize: mapInfos.tileSize,
+            maxNativeZoom: mapInfos.maxZoom
         }).addTo(map);
 
-        map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
+        if (mapInfos.bounds) {
+            map.fitBounds(mapInfos.bounds);
+        }
+        else {
+            map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
+        }
 
         GameMapUtils.latlngGraticule().addTo(map);
 
@@ -159,7 +168,8 @@ namespace GameMapUtils {
             defaultZoom: 2,
             originX: map.originX,
             originY: map.originY,
-            sizeInMeters: map.sizeInMeters
+            sizeInMeters: map.sizeInMeters,
+            isSvg: layer.format == 'SvgOnly' || layer.format == 'SvgAndWebp'
         }, mapDivId);
     }
 

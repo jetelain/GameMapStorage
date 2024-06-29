@@ -125,7 +125,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 existing.CitiesCount = await _context.GameMapLocations.Where(l => l.GameMapId == gameMap.GameMapId && l.Type == LocationType.City).CountAsync();
                 _context.Update(existing);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new { id = gameMap.GameMapId });
             }
             return View(gameMap);
         }
@@ -166,7 +166,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
                     ViewBag.ImageError = e.Message;
                     return View(nameof(Edit), map);
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new { id = gameMapId });
             }
             return View(nameof(Edit), map);
         }
