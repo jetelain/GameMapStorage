@@ -42,6 +42,8 @@ namespace GameMapStorageWebSite.Models
 
         [JsonPropertyName("isSvg")]
         public required bool IsSvg { get; set; }
+
+        [JsonPropertyName("bounds")]
         public double[][]? Bounds { get; internal set; }
     }
 }
