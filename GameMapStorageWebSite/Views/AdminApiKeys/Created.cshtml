@@ -1,0 +1,27 @@
+﻿@model CreatedApiKeyViewModel
+
+@{
+    ViewData["Title"] = "Api Key";
+}
+
+<p>Copy and store value, it cannot be retreived again.</p>
+
+<dl class="row">
+    <dt class="col-sm-2">
+        apiKeyId
+    </dt>
+    <dd class="col-sm-10">
+        <code>@Model.ApiKey.ApiKeyId</code>
+    </dd>
+    <dt class="col-sm-2">
+        apiKey
+    </dt>
+    <dd class="col-sm-10">
+        <code>@Model.ClearText</code>
+    </dd>
+</dl>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

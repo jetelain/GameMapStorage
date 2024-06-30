@@ -20,6 +20,8 @@ namespace GameMapStorageWebSite.Entities
 
         public DbSet<BackgroundWork> Works { get; set; }
 
+        public DbSet<ApiKey> ApiKeys { get; set; }
+
         public GameMapStorageContext(DbContextOptions<GameMapStorageContext> options)
             : base(options)
         {
@@ -40,6 +42,7 @@ namespace GameMapStorageWebSite.Entities
             modelBuilder.Entity<GameColor>().ToTable("GameColor");
             modelBuilder.Entity<GameMarker>().ToTable("GameMarker");
             modelBuilder.Entity<BackgroundWork>().ToTable("BackgroundWork");
+            modelBuilder.Entity<ApiKey>().ToTable("ApiKey");
         }
 
         internal async Task InitData()
