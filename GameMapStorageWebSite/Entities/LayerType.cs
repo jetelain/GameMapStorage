@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace GameMapStorageWebSite.Entities
 {
@@ -7,10 +6,14 @@ namespace GameMapStorageWebSite.Entities
     {
         [Display(Name = "Topographic (Game)")]
         Topographic,
+
         [Display(Name = "Satellite (Game)")]
         Satellite,
+
         Aerial,
+
         Elevation,
+
         [Display(Name = "Topographic (Atlas)")]
         TopographicAtlas
     }

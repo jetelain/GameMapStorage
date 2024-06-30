@@ -195,7 +195,7 @@ namespace GameMapStorageWebSite.Services.DataPackages
             var map = await context.GameMaps.FirstOrDefaultAsync(g => g.Name == indexContent.MapName && g.GameId == game.GameId);
             if (map != null)
             {
-                if (map.SizeInMeters != indexContent.SizeInMeters)
+                if (Math.Round(map.SizeInMeters, 1) != Math.Round(indexContent.SizeInMeters, 1))
                 {
                     throw new ApplicationException($"Map '{indexContent.MapName}' is already registred with a different size. Existing = '{map.SizeInMeters}', Package = '{indexContent.SizeInMeters}'");
                 }

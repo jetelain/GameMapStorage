@@ -20,7 +20,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.5.0" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.4.4" Condition="'$(Configuration)'=='Debug'">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.4.4" Condition="'$(VsInstallRoot)'!=''">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Security;
 using GameMapStorageWebSite.Services;
@@ -12,10 +13,12 @@ using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
 using GameMapStorageWebSite.Works.UnpackLayers;
+using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
@@ -54,7 +57,7 @@ namespace GameMapStorageWebSite
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
-//                .AddBearerToken()
+                .AddBearerToken()
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Home/SignInUser";
@@ -63,18 +66,33 @@ namespace GameMapStorageWebSite
                 })
                 .AddSteam(s => s.ApplicationKey = configuration["SteamKey"]);
 
-//            services.AddSingleton<IBearerTokenService, BearerTokenService>();
-
             services.AddAuthorization(options =>
             {
                 var admins = configuration.GetSection("Admins").Get<string[]>() ?? Array.Empty<string>();
+
                 options.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.NameIdentifier, admins));
+
                 options.AddPolicy("AdminEdit", policy => policy
                     .RequireClaim(ClaimTypes.NameIdentifier, admins)
                     .AddRequirements(new DataModeRequirement(DataMode.Syndicated, DataMode.Primary, DataMode.Proxy)));
+
+                options.AddPolicy("ApiAdminEdit", policy => policy
+                    .AddAuthenticationSchemes(BearerTokenDefaults.AuthenticationScheme)
+                    .RequireClaim(ApiSecurityHelper.TicketClaimType, ApiSecurityHelper.CurrentTicket)
+                    .AddRequirements(new DataModeRequirement(DataMode.Syndicated, DataMode.Primary, DataMode.Proxy))
+                    .AddRequirements(new ValidApiKeyIdRequirement()));
             });
 
+            services.AddRateLimiter(_ => _
+                .AddConcurrencyLimiter(policyName: "ApiAuth", options =>
+                {
+                    options.PermitLimit = 1;
+                    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                    options.QueueLimit = 5;
+                }));
+
             services.AddSingleton<IAuthorizationHandler>(new DataModeRequirementHandler(config));
+            services.AddScoped<IAuthorizationHandler,ValidApiKeyIdRequirementHandler>();
 
             services.AddControllersWithViews()
                 .AddJsonOptions(jsonOptions =>
@@ -214,6 +232,8 @@ namespace GameMapStorageWebSite
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseRateLimiter();
 
             app.UseCors();
 
