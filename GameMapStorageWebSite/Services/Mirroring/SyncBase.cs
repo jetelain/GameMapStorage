@@ -20,9 +20,12 @@ namespace GameMapStorageWebSite.Services.Mirroring
         public List<TEntity> UpdateOrCreateEntities(List<TJson> sourceList, List<TEntity> targetList)
         {
             var newList = sourceList.Select(source => UpdateOrCreateEntity(source, targetList)).ToList();
-            foreach(var removed in targetList.Except(newList))
+            if (targetList != null)
             {
-                Remove(removed);
+                foreach (var removed in targetList.Except(newList))
+                {
+                    Remove(removed);
+                }
             }
             return newList;
         }
