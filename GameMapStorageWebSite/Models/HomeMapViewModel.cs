@@ -13,5 +13,6 @@ namespace GameMapStorageWebSite.Models
         public required GameMapLayer Layer { get; set; }
 
         public required LayerDisplayOptions MapInfos { get; set; }
+        public bool HasPaperMaps { get; internal set; }
     }
 }

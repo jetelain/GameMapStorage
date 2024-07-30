@@ -1,0 +1,85 @@
+﻿@using System.Globalization
+@model GameMap
+@{
+    ViewData["Title"] = Model.EnglishTitle + " - " + Model.Game!.EnglishTitle;
+    ViewData["Attribution"] = MapUtils.CombineAttibutions(Model.Game!.Attribution, Model.AppendAttribution);
+}
+
+<h1 class="h3 text-center">
+    @Model.EnglishTitle
+</h1>
+
+<p>
+    <a class="btn btn-sm btn-secondary" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game!.Name" asp-route-mapName="@Model.Name"><i class="fa-solid fa-arrow-left"></i> Go Back to Map</a>
+</p>
+
+<h2 class="h4">Full Size Maps</h2>
+
+<table class="table">
+    <tr>
+        <th class="w-50">Name</th>
+        <th>Paper Size</th>
+        <th>Scale</th>
+        <th>File Size</th>
+    </tr>
+
+    @foreach (var paper in Model.PaperMaps!.Where(p => p.FileFormat == PaperFileFormat.SinglePDF))
+    {
+        <tr>
+            <td>
+                <a asp-controller="Download" asp-action="GetPaperMap" asp-route-gameId="@Model.GameId" asp-route-gameMapId="@Model.GameMapId" asp-route-gamePaperMapId="@paper.GamePaperMapId">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    @Model.EnglishTitle
+                    @if (!string.IsNullOrEmpty(paper.Name))
+                    {
+                        <span class="badge bg-primary">@paper.Name</span>
+                    }
+                </a>
+            </td>
+            <td>
+                @Html.DisplayFor(_ => paper.PaperSize)
+            </td>
+            <td>
+                1:@paper.Scale
+            </td>
+            <td>
+                @MapUtils.HumanFileSize(paper.FileSize)
+            </td>
+        </tr>
+    }
+
+</table>
+
+<h2 class="h4">Booklet</h2>
+<table class="table">
+    <tr>
+        <th class="w-50">Name</th>
+        <th>Paper Size</th>
+        <th>Pages</th>
+        <th>Scale</th>
+        <th>File Size</th>
+    </tr>
+    @foreach (var paper in Model.PaperMaps!.Where(p => p.FileFormat == PaperFileFormat.BookletPDF))
+    {
+        <tr>
+            <td>
+                <a asp-controller="Download" asp-action="GetPaperMap" asp-route-gameId="@Model.GameId" asp-route-gameMapId="@Model.GameMapId" asp-route-gamePaperMapId="@paper.GamePaperMapId">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    @Model.EnglishTitle
+                </a>
+            </td>
+            <td>
+                @Html.DisplayFor(_ => paper.PaperSize)
+            </td>
+            <td>
+                @(paper.Pages?.Select(p => p.PageNumber).Max()) pages
+            </td>
+            <td>
+                1:@paper.Scale
+            </td>
+            <td>
+                @MapUtils.HumanFileSize(paper.FileSize)
+            </td>
+        </tr>
+    }
+</table>

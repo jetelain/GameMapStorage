@@ -53,11 +53,18 @@
                         <a class="list-group-item" href="https://steamcommunity.com/workshop/filedetails/?id=@Model.Map.SteamWorkshopId"><i class="fa-brands fa-steam"></i> Steam Workshop</a>
                     }
                 </div>
-                @if (Model.Game.Name == "arma3")
+                @if (Model.Game.Name == "arma3" || Model.HasPaperMaps)
                 {
                     <h2 class="h6 mt-3">Tools</h2>
                     <div class="list-group text-center">
-                        <a class="list-group-item" href="https://maps.plan-ops.fr/TacMaps/Create?worldName=@Model.Map.Name"><i class="fa-solid fa-map"></i> Create a tactical map</a>
+                        @if (Model.Game.Name == "arma3")
+                        {
+                            <a class="list-group-item" href="https://maps.plan-ops.fr/TacMaps/Create?worldName=@Model.Map.Name"><i class="fa-solid fa-map"></i> Create a tactical map</a>
+                        }
+                        @if (Model.HasPaperMaps)
+                        {
+                            <a class="list-group-item" asp-action="PaperMaps" asp-route-gameName="@Model.Game.Name" asp-route-mapName="@Model.Map.Name"><i class="fa-solid fa-file-pdf"></i> Download Paper Map</a>
+                        }
                     </div>
                 }
                 <h2 class="h6 mt-3">Layers</h2>

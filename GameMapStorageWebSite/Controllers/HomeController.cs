@@ -45,9 +45,29 @@ namespace GameMapStorageWebSite.Controllers
             return View(new HomeGameViewModel() { Maps = maps, Game = game, AcceptWebp = ImagePathHelper.AcceptWebp(Request) });
         }
 
-        [Route("maps/{gameName}/{mapName}")]
-        [Route("maps/{gameName}/{mapName}/{layerId}")]
-        public async Task<IActionResult> Map(string gameName, string mapName, int? layerId = null, double? x = null, double? y = null, int? zoom = null, double? w = null, double? h = null)
+
+        [Route("maps/{gameName}/{mapName}/papermaps")]
+        public async Task<IActionResult> PaperMaps(string gameName, string mapName)
+        {
+            var map = await GetMap(gameName, mapName);
+            if (map == null)
+            {
+                return NotFound();
+            }
+
+            map.Layers = await _context.GameMapLayers
+                .Where(m => m.GameMap == map && m.State == LayerState.Ready)
+                .ToListAsync();
+
+            map.PaperMaps = await _context.GamePaperMaps
+                .Where(m => m.GameMap == map)
+                .OrderBy(m => m.FileFormat).ThenBy(m => m.Name)
+                .ToListAsync();
+
+            return View(map);
+        }
+
+        private async Task<GameMap?> GetMap(string gameName, string mapName)
         {
             var map = await _context.GameMaps
                 .Include(m => m.Game)
@@ -60,11 +80,19 @@ namespace GameMapStorageWebSite.Controllers
                     .Include(m => m.Game)
                     .Where(g => g.Aliases!.Contains(mapName) && g.Game!.Name == gameName)
                     .FirstOrDefaultAsync();
+            }
 
-                if (map == null)
-                {
-                    return NotFound();
-                }
+            return map;
+        }
+
+        [Route("maps/{gameName}/{mapName}")]
+        [Route("maps/{gameName}/{mapName}/{layerId}")]
+        public async Task<IActionResult> Map(string gameName, string mapName, int? layerId = null, double? x = null, double? y = null, int? zoom = null, double? w = null, double? h = null)
+        {
+            var map = await GetMap(gameName, mapName);
+            if (map == null)
+            {
+                return NotFound();
             }
 
             map.Layers = await _context.GameMapLayers
@@ -87,6 +115,7 @@ namespace GameMapStorageWebSite.Controllers
                 Map = map, 
                 Layer = layer,
                 AcceptWebp = ImagePathHelper.AcceptWebp(Request),
+                HasPaperMaps = await _context.GamePaperMaps.Where(m => m.GameMap == map).AnyAsync(),
                 MapInfos = new LayerDisplayOptions()
                 {
                     FactorX = layer.FactorX,

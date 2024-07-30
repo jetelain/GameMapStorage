@@ -6,7 +6,7 @@ namespace GameMapStorageWebSite.Controllers
 {
     public abstract class DownloadControllerBase : Controller
     {
-        protected async Task<IResult> ToResult(IStorageFile? file, string contentType)
+        protected async Task<IResult> ToResult(IStorageFile? file, string contentType, string? fileDownloadName = null)
         {
             if (file != null)
             {
@@ -14,9 +14,9 @@ namespace GameMapStorageWebSite.Controllers
                 if (file is MemoryStorageFile)
                 {
                     AllowSynchronousIO();
-                    return Results.Stream(file.CopyTo, contentType, null, file.LastModified);
+                    return Results.Stream(file.CopyTo, contentType, fileDownloadName, file.LastModified);
                 }
-                return Results.Stream(await file.OpenRead(), contentType, null, file.LastModified);
+                return Results.Stream(await file.OpenRead(), contentType, fileDownloadName, file.LastModified);
             }
             return Results.NotFound();
         }

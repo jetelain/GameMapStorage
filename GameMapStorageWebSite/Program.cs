@@ -117,6 +117,7 @@ namespace GameMapStorageWebSite
             services.AddScoped<IImageLayerService, ImageLayerService>();
             services.AddScoped<IThumbnailService, ThumbnailService>();
             services.AddScoped<IPackageService, PackageService>();
+            services.AddScoped<IPaperMapService, PaperMapService>();
             services.AddSingleton<ILocalStorageService, LocalStorageService>();
 
             SetupDataMode(services, config);
