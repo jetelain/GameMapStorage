@@ -171,3 +171,73 @@
         }
     </tbody>
 </table>
+
+<h2 class="mt-4 h4">Paper Maps</h2>
+<hr />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => Model.PaperMaps![0].GameMap)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => Model.PaperMaps![0].FileFormat)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => Model.PaperMaps![0].PaperSize)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => Model.PaperMaps![0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => Model.PaperMaps![0].FileSize)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => Model.PaperMaps![0].Scale)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => Model.PaperMaps![0].LastChangeUtc)
+            </th>
+            @if (canEdit)
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.PaperMaps!)
+        {
+            <tr>
+                <td>
+                    <a asp-controller="AdminGamePaperMaps" asp-action="Details" asp-route-id="@item.GamePaperMapId">@Html.DisplayFor(modelItem => item.GameMap!.EnglishTitle)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FileFormat)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PaperSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @MapUtils.HumanFileSize(item.FileSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Scale)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastChangeUtc)
+                </td>
+                @if (canEdit)
+                {
+                    <td>
+                        <a asp-controller="AdminGamePaperMaps" asp-action="Details" asp-route-id="@item.GamePaperMapId">Details</a> |
+                        <a asp-controller="AdminGamePaperMaps" asp-action="Delete" asp-route-id="@item.GamePaperMapId">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

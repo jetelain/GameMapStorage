@@ -45,6 +45,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 return NotFound();
             }
             gameMap.Layers = await _context.GameMapLayers.Where(l => l.GameMapId == id).ToListAsync();
+            gameMap.PaperMaps = await _context.GamePaperMaps.Where(l => l.GameMapId == id).OrderBy(m => m.FileFormat).ThenBy(m => m.Name).ToListAsync();
             return View(gameMap);
         }
 

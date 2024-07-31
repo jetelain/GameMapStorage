@@ -1,0 +1,76 @@
+﻿@model IEnumerable<GameMapStorageWebSite.Entities.GamePaperMap>
+@inject IAuthorizationService authorizationService
+
+@{
+    ViewData["Title"] = "Paper Maps";
+    var canEdit = (await authorizationService.AuthorizeAsync(User, "AdminEdit")).Succeeded;
+}
+
+<h1>Paper Maps</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.GameMap)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FileFormat)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PaperSize)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FileSize)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Scale)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastChangeUtc)
+            </th>
+            @if (canEdit)
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.GamePaperMapId">@Html.DisplayFor(modelItem => item.GameMap!.EnglishTitle)</a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FileFormat)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PaperSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @MapUtils.HumanFileSize(item.FileSize)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Scale)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastChangeUtc)
+                </td>
+                @if (canEdit)
+                {
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.GamePaperMapId">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.GamePaperMapId">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
