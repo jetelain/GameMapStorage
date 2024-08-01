@@ -7,6 +7,9 @@
         ProcessLayer,
 
         MirrorLayer,
-        UnpackLayer
+
+        UnpackLayer,
+
+        MirrorPaperMap
     }
 }

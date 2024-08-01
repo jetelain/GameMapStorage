@@ -111,5 +111,49 @@ namespace GameMapStorageWebSite.Controllers
             return Json(mapJson);
         }
 
+        [HttpGet]
+        [Route("games/{gameNameOrId}/maps/{mapNameOrId}/papermaps")]
+        [Produces<GamePaperMapJson[]>]
+        public async Task<IActionResult> GetMapPaperMaps(string gameNameOrId, string mapNameOrId)
+        {
+            var game = await FindGame(gameNameOrId);
+            if (game == null)
+            {
+                return NotFound();
+            }
+            var map = await FindMap(game, mapNameOrId);
+            if (map == null)
+            {
+                return NotFound();
+            }
+            var pathBuilder = GetPathBuilder();
+
+            var papermaps = await context.GamePaperMaps
+                .Where(p => p.GameMapId == map.GameMapId && p.FileSize > 0)
+                .ToListAsync();
+
+            return Json(papermaps.Select(m => new GamePaperMapJson(m, pathBuilder)).ToList());
+        }
+
+        [HttpGet]
+        [Route("games/{gameNameOrId}/papermaps")]
+        [Produces<GamePaperMapMapJson[]>]
+        public async Task<IActionResult> GetMapPaperMaps(string gameNameOrId)
+        {
+            var game = await FindGame(gameNameOrId);
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            var pathBuilder = GetPathBuilder();
+
+            var papermaps = await context.GamePaperMaps
+                .Include(p => p.GameMap)
+                .Where(p => p.GameMap!.GameId == game.GameId && p.FileSize > 0)
+                .ToListAsync();
+
+            return Json(papermaps.Select(m => new GamePaperMapMapJson(m, pathBuilder)).ToList());
+        }
     }
 }

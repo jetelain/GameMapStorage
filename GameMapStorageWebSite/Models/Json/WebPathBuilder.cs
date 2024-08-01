@@ -52,5 +52,10 @@ namespace GameMapStorageWebSite.Models.Json
         {
             return basePath + ImagePathHelper.GetLayerPattern(layer, ext);
         }
+
+        public string? GetDownloadUri(GamePaperMap layer)
+        {
+            return $"{basePath}/data/{layer.GameMap!.GameId}/maps/{layer.GameMapId}/papermaps/{layer.GamePaperMapId}.pdf";
+        }
     }
 }

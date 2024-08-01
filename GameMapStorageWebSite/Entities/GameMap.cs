@@ -45,7 +45,7 @@ namespace GameMapStorageWebSite.Entities
 
         public List<GameMapLayer>? Layers { get; set; }
         public List<GameMapLocation>? Locations { get; set; }
-
+        public List<GamePaperMap>? PaperMaps { get; set; }
 
         internal void UpdateCitiesCount()
         {

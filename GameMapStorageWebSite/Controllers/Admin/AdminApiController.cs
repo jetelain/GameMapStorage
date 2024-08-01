@@ -1,12 +1,15 @@
 ﻿using System.Security.Claims;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Migrations;
 using GameMapStorageWebSite.Security;
+using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace GameMapStorageWebSite.Controllers.Admin
 {
@@ -16,11 +19,13 @@ namespace GameMapStorageWebSite.Controllers.Admin
     {
         private readonly GameMapStorageContext _context;
         private readonly IPackageService _packageService;
+        private readonly IPaperMapService _paperMap;
 
-        public AdminApiController(GameMapStorageContext context, IPackageService packageService)
+        public AdminApiController(GameMapStorageContext context, IPackageService packageService, IPaperMapService paperMap)
         {
             _context = context;
             _packageService = packageService;
+            _paperMap = paperMap;
         }
 
         [HttpPost]
@@ -90,6 +95,63 @@ namespace GameMapStorageWebSite.Controllers.Admin
             {
                 using var stream = package.OpenReadStream();
                 await _packageService.UpdateLayerFromPackage(stream, gameMapLayer);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        [Authorize("ApiAdminEdit")]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
+        [Route("papermaps")]
+        public async Task<IActionResult> CreatePaperMap([FromForm] string jsonDefinition, [FromForm] IFormFile content)
+        {
+            try
+            {
+                var definition = JsonConvert.DeserializeObject<PaperMapDefinition>(jsonDefinition);
+                if (definition == null)
+                {
+                    return BadRequest("Bad definition");
+                }
+                using var stream = content.OpenReadStream();
+                await _paperMap.Create(definition, (int)content.Length, stream.CopyToAsync);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Authorize("ApiAdminEdit")]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
+        [Route("papermaps/{id}")]
+        public async Task<IActionResult> UpdatePaperMap(int id, [FromForm] string jsonDefinition, [FromForm] IFormFile content)
+        {
+            var gameMapLayer = await _context.GamePaperMaps
+                .Include(g => g.GameMap)
+                .Include(g => g.GameMap!.Game)
+                .FirstOrDefaultAsync(m => m.GamePaperMapId == id);
+            if (gameMapLayer == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                var definition = JsonConvert.DeserializeObject<PaperMapDefinition>(jsonDefinition);
+                if (definition == null)
+                {
+                    return BadRequest("Bad definition");
+                }
+                using var stream = content.OpenReadStream();
+                await _paperMap.Update(definition, (int)content.Length, stream.CopyToAsync, gameMapLayer);
                 return Ok();
             }
             catch (Exception ex)

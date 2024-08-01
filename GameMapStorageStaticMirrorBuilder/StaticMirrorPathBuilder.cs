@@ -13,6 +13,11 @@ namespace GameMapStorageStaticMirrorBuilder
             return null;
         }
 
+        public string? GetDownloadUri(GamePaperMap layer)
+        {
+            return FormattableString.Invariant($"{basePath}/{layer.GameMap!.GameId}/maps/{layer.GameMapId}/papermaps/{layer.GamePaperMapId}.pdf");
+        }
+
         public string GetLayerPattern(GameMapLayer layer)
         {
             return GetLayerPattern(defaultUseWebp, layer);

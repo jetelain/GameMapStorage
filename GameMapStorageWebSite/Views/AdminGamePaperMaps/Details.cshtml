@@ -1,0 +1,75 @@
+﻿@model GameMapStorageWebSite.Entities.GamePaperMap
+@inject IAuthorizationService authorizationService
+
+@{
+    ViewData["Title"] = $"Paper Map {Model.GameMap!.EnglishTitle}";
+    var canEdit = (await authorizationService.AuthorizeAsync(User, "AdminEdit")).Succeeded;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="AdminGames" asp-action="Details" asp-route-id="@Model.GameMap!.GameId">@Model.GameMap!.Game!.EnglishTitle</a></li>
+        <li class="breadcrumb-item"><a asp-controller="AdminGameMaps" asp-action="Details" asp-route-id="@Model.GameMapId">@Model.GameMap!.EnglishTitle</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Html.DisplayFor(model => model.FileFormat) @Html.DisplayFor(model => model.Name)</li>
+    </ol>
+</nav>
+
+<h1>@Html.DisplayFor(model => model.FileFormat) @Html.DisplayFor(model => model.Name)</h1>
+
+<p>
+    <a class="btn btn-sm btn-primary" asp-action="Index"><i class="fa-solid fa-arrow-left"></i> All Paper Map List</a>
+    <a class="btn btn-sm btn-secondary" asp-controller="Download" asp-action="GetPaperMap" asp-route-gameId="@Model.GameMap!.GameId" asp-route-gameMapId="@Model.GameMapId" asp-route-gamePaperMapId="@Model.GamePaperMapId"><i class="fa-solid fa-file-pdf"></i> Download</a>
+</p>
+
+
+<div>
+    <h4>GamePaperMap</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.FileFormat)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.FileFormat)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PaperSize)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PaperSize)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.FileSize)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.FileSize)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Scale)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Scale)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LastChangeUtc)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LastChangeUtc)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.GameMap)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.GameMap!.EnglishTitle)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

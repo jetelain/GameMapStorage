@@ -9,6 +9,7 @@ using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Mirroring;
 using GameMapStorageWebSite.Services.Storages;
 using GameMapStorageWebSite.Works;
+using GameMapStorageWebSite.Works.MirrorPaperMaps;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
@@ -117,6 +118,7 @@ namespace GameMapStorageWebSite
             services.AddScoped<IImageLayerService, ImageLayerService>();
             services.AddScoped<IThumbnailService, ThumbnailService>();
             services.AddScoped<IPackageService, PackageService>();
+            services.AddScoped<IPaperMapService, PaperMapService>();
             services.AddSingleton<ILocalStorageService, LocalStorageService>();
 
             SetupDataMode(services, config);
@@ -127,6 +129,7 @@ namespace GameMapStorageWebSite
             services.AddScoped<IWorker<ProcessLayerWorkData>, ProcessLayerWorker>();
             services.AddScoped<IWorker<MirrorLayerWorkData>, MirrorLayerWorker>();
             services.AddScoped<IWorker<UnpackLayerWorkData>, UnpackLayerWorker>();
+            services.AddScoped<IWorker<MirrorPaperMapWorkData>, MirrorPaperMapWorker>();
             services.AddScoped<BackgroundWorker>();
             services.AddHostedService<BackgroundWorkerHostedService>();
             services.AddSingleton<IDataConfigurationService>(config);

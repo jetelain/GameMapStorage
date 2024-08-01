@@ -6,8 +6,6 @@
         PngAndWebp,
         SvgOnly,
         SvgAndWebp,
-        WebpOnly,
-        SinglePDF,
-        BookletPDF
+        WebpOnly
     }
 }

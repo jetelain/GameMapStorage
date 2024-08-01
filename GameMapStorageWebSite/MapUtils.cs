@@ -20,5 +20,10 @@
         {
             return CombineAttibutions(attribution, string.Join(", ", appendAttribution.Where(a => !string.IsNullOrEmpty(a)).Distinct(StringComparer.OrdinalIgnoreCase).Order())); 
         }
+
+        public static string HumanFileSize(int fileSize)
+        {
+            return $"{fileSize/1024.0/1024.0:0.00} Mo";
+        }
     }
 }

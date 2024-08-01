@@ -1,6 +1,7 @@
 ﻿
 using System.Text.Json;
 using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Works.MirrorPaperMaps;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.ProcessLayers;
@@ -75,6 +76,9 @@ namespace GameMapStorageWebSite.Works
 
                 case BackgroundWorkType.UnpackLayer:
                     return CallWorker<UnpackLayerWorkData>(work, progress);
+
+                case BackgroundWorkType.MirrorPaperMap:
+                    return CallWorker<MirrorPaperMapWorkData>(work, progress);
             }
             return Task.CompletedTask;
         }

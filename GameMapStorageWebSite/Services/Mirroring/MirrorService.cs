@@ -30,7 +30,8 @@ namespace GameMapStorageWebSite.Services.Mirroring
             var report = new SyncReport();
             using var client = httpClientFactory.CreateClient("Mirror");
 
-            var alreadyScheduled = await context.Works.Where(w => w.State == BackgroundWorkState.Pending && w.Type == BackgroundWorkType.MirrorLayer && w.GameMapLayerId != null).Select(w => w.GameMapLayerId!.Value).ToListAsync();
+            var alreadyScheduledLayers = await context.Works.Where(w => w.State == BackgroundWorkState.Pending && w.Type == BackgroundWorkType.MirrorLayer && w.GameMapLayerId != null).Select(w => w.GameMapLayerId!.Value).ToListAsync();
+            var alreadyScheduledPapers = await context.Works.Where(w => w.State == BackgroundWorkState.Pending && w.Type == BackgroundWorkType.MirrorPaperMap && w.GamePaperMapId != null).Select(w => w.GamePaperMapId!.Value).ToListAsync();
 
             progress?.Report($"Mirror from '{client.BaseAddress}'");
             var gamesSync = new GameSync(report, context, true);
@@ -41,13 +42,17 @@ namespace GameMapStorageWebSite.Services.Mirroring
 
             foreach (var (targetGame, sourceGame) in results)
             {
-                progress?.Report($"Process '{targetGame.EnglishTitle}'");
-                var mapsSync = new GameMapSync(report, context, targetGame, sourceGame, alreadyScheduled, true);
+                progress?.Report($"Maps and Layers '{targetGame.EnglishTitle}'");
+                var mapsSync = new GameMapSync(report, context, targetGame, sourceGame, alreadyScheduledLayers, true);
                 await mapsSync.Do(client);
 
                 progress?.Report($"Store thumbnails ({mapsSync.ImagesToDownload.Count})");
                 await mapsSync.DownloadImages(client, thumbnailService);
-            }
+
+                progress?.Report($"Paper Maps '{targetGame.EnglishTitle}'");
+                var paperSync = new GamePaperMapSync(report, context, targetGame, sourceGame, alreadyScheduledPapers, true);
+                await paperSync.Do(client);
+             }
             report.Done();
             return report;
         }

@@ -1,0 +1,106 @@
+﻿@using System.Globalization
+@model GameMap
+@{
+    ViewData["Title"] = Model.EnglishTitle + " - " + Model.Game!.EnglishTitle;
+}
+
+<h1 class="h3 text-center">
+    @Model.EnglishTitle
+</h1>
+
+<p>
+    <a class="btn btn-sm btn-secondary" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.Game!.Name" asp-route-mapName="@Model.Name"><i class="fa-solid fa-arrow-left"></i> Go Back to Map</a>
+</p>
+
+<h2 class="h4">Full-size Maps</h2>
+
+<p>Full-size maps are intended to be printed on large paper sheets, optionally laminated, then folded or wall-displayed. They can be printed at architectural plan printing services.</p>
+
+<table class="table">
+    <tr>
+        <th class="w-50">Name</th>
+        <th>Paper Size</th>
+        <th>Scale</th>
+        <th>File Size</th>
+    </tr>
+
+    @foreach (var paper in Model.PaperMaps!.Where(p => p.FileFormat == PaperFileFormat.SinglePDF))
+    {
+        <tr>
+            <td>
+                <a asp-controller="Download" asp-action="GetPaperMap" asp-route-gameId="@Model.GameId" asp-route-gameMapId="@Model.GameMapId" asp-route-gamePaperMapId="@paper.GamePaperMapId">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    @Model.EnglishTitle
+                    @if (!string.IsNullOrEmpty(paper.Name))
+                    {
+                        <span class="badge bg-primary">@paper.Name</span>
+                    }
+                </a>
+            </td>
+            <td>
+                @Html.DisplayFor(_ => paper.PaperSize)
+            </td>
+            <td>
+                1:@paper.Scale
+            </td>
+            <td>
+                @MapUtils.HumanFileSize(paper.FileSize)
+            </td>
+        </tr>
+    }
+
+</table>
+
+<h2 class="h4">Booklet</h2>
+
+<p>Booklets are designed to be printed and laminated into a reusable book. They can be printed at most printing services.</p>
+
+<table class="table">
+    <tr>
+        <th class="w-50">Name</th>
+        <th>Paper Size</th>
+        <th>Pages</th>
+        <th>Scale</th>
+        <th>File Size</th>
+    </tr>
+    @foreach (var paper in Model.PaperMaps!.Where(p => p.FileFormat == PaperFileFormat.BookletPDF))
+    {
+        <tr>
+            <td>
+                <a asp-controller="Download" asp-action="GetPaperMap" asp-route-gameId="@Model.GameId" asp-route-gameMapId="@Model.GameMapId" asp-route-gamePaperMapId="@paper.GamePaperMapId">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    @Model.EnglishTitle
+                </a>
+            </td>
+            <td>
+                @Html.DisplayFor(_ => paper.PaperSize)
+            </td>
+            <td>
+                @(paper.Pages?.Count) pages
+            </td>
+            <td>
+                1:@paper.Scale
+            </td>
+            <td>
+                @MapUtils.HumanFileSize(paper.FileSize)
+            </td>
+        </tr>
+    }
+</table>
+
+<div class="container text-muted mt-5 mb-3">
+
+    <p>Original Map @MapUtils.CombineAttibutions(Model.Game!.Attribution, Model.AppendAttribution)</p>
+
+    @if(Model.Game.Name.StartsWith("arma"))
+    {
+        <p>
+            Those paper maps are licensed under <a href="https://www.bohemia.net/community/licenses/arma-public-license-share-alike">Arma Public License Share Alike (APL-SA)</a> <img src="https://www.bohemia.net/assets/img/licenses/APL-SA.png" alt="APL-SA" style="height:1.5em;" />.
+        </p>
+    }
+    else
+    {
+        <p xmlns:cc="http://creativecommons.org/ns#">Those paper maps are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/nc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1" alt=""></a></p>
+    }
+
+</div>

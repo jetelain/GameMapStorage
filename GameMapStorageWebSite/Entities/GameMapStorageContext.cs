@@ -14,6 +14,8 @@ namespace GameMapStorageWebSite.Entities
 
         public DbSet<GameMapLayer> GameMapLayers { get; set; }
 
+        public DbSet<GamePaperMap> GamePaperMaps { get; set; }
+
         public DbSet<GameColor> GameColors { get; set; }
 
         public DbSet<GameMarker> GameMarkers { get; set; }
@@ -41,8 +43,19 @@ namespace GameMapStorageWebSite.Entities
             modelBuilder.Entity<GameMapLayer>().ToTable("GameMapLayer");
             modelBuilder.Entity<GameColor>().ToTable("GameColor");
             modelBuilder.Entity<GameMarker>().ToTable("GameMarker");
-            modelBuilder.Entity<BackgroundWork>().ToTable("BackgroundWork");
+
+            modelBuilder.Entity<BackgroundWork>(e =>
+            {
+                e.HasOne(e => e.GameMapLayer).WithMany(e => e.Works).OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(e => e.GamePaperMap).WithMany().OnDelete(DeleteBehavior.Cascade);
+                e.ToTable("BackgroundWork");
+            });
+
             modelBuilder.Entity<ApiKey>().ToTable("ApiKey");
+
+            modelBuilder.Entity<GamePaperMap>()
+                .OwnsMany(p => p.Pages, p => p.ToJson())
+                .ToTable("GamePaperMap");
         }
 
         internal async Task InitData()

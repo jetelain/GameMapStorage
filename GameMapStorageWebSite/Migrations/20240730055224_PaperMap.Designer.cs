@@ -3,6 +3,7 @@ using System;
 using GameMapStorageWebSite.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,12 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameMapStorageWebSite.Migrations
 {
     [DbContext(typeof(GameMapStorageContext))]
-    partial class GameMapStorageContextModelSnapshot : ModelSnapshot
+    [Migration("20240730055224_PaperMap")]
+    partial class PaperMap
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
 
             modelBuilder.Entity("GameMapStorageWebSite.Entities.ApiKey", b =>
                 {
@@ -65,9 +68,6 @@ namespace GameMapStorageWebSite.Migrations
                     b.Property<int?>("GameMapLayerId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("GamePaperMapId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime?>("StartedUtc")
                         .HasColumnType("TEXT");
 
@@ -80,8 +80,6 @@ namespace GameMapStorageWebSite.Migrations
                     b.HasKey("BackgroundWorkId");
 
                     b.HasIndex("GameMapLayerId");
-
-                    b.HasIndex("GamePaperMapId");
 
                     b.ToTable("BackgroundWork", (string)null);
                 });
@@ -355,17 +353,9 @@ namespace GameMapStorageWebSite.Migrations
                 {
                     b.HasOne("GameMapStorageWebSite.Entities.GameMapLayer", "GameMapLayer")
                         .WithMany("Works")
-                        .HasForeignKey("GameMapLayerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("GameMapStorageWebSite.Entities.GamePaperMap", "GamePaperMap")
-                        .WithMany()
-                        .HasForeignKey("GamePaperMapId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GameMapLayerId");
 
                     b.Navigation("GameMapLayer");
-
-                    b.Navigation("GamePaperMap");
                 });
 
             modelBuilder.Entity("GameMapStorageWebSite.Entities.GameColor", b =>
@@ -431,37 +421,15 @@ namespace GameMapStorageWebSite.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("GameMapStorageWebSite.Entities.GamePaperMapPage", "Pages", b1 =>
+                    b.OwnsOne("System.Collections.Generic.List<GameMapStorageWebSite.Entities.GamePaperMapPage>", "Pages", b1 =>
                         {
                             b1.Property<int>("GamePaperMapId")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
+                            b1.Property<int>("Capacity")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<double>("MapHeight")
-                                .HasColumnType("REAL");
-
-                            b1.Property<double>("MapOriginX")
-                                .HasColumnType("REAL");
-
-                            b1.Property<double>("MapOriginY")
-                                .HasColumnType("REAL");
-
-                            b1.Property<double>("MapWidth")
-                                .HasColumnType("REAL");
-
-                            b1.Property<int>("PageNumber")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<double>("PaperOriginX")
-                                .HasColumnType("REAL");
-
-                            b1.Property<double>("PaperOriginY")
-                                .HasColumnType("REAL");
-
-                            b1.HasKey("GamePaperMapId", "Id");
+                            b1.HasKey("GamePaperMapId");
 
                             b1.ToTable("GamePaperMap");
 
