@@ -53,7 +53,20 @@ namespace GameMapStorageWebSite.Controllers
             {
                 return Results.NotFound();
             }
-            return await ToResult(file, "application/pdf", $"{layer.GameMap!.Name}_{layer.Name}.pdf");
+            string fileName;
+            if (layer.FileFormat == PaperFileFormat.BookletPDF)
+            {
+                fileName = $"{layer.GameMap!.Name}_booklet.pdf";
+            }
+            else if (string.IsNullOrEmpty(layer.Name))
+            {
+                fileName = $"{layer.GameMap!.Name}.pdf";
+            }
+            else 
+            {
+                fileName = $"{layer.GameMap!.Name}_{layer.Name}.pdf";
+            }
+            return await ToResult(file, "application/pdf", fileName);
         }
     }
 }
