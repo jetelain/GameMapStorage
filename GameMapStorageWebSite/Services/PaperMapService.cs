@@ -24,8 +24,6 @@ namespace GameMapStorageWebSite.Services
         public async Task StoreFile(GamePaperMap paperMap, int fileSize, Func<Stream, Task> write)
         {
             await storageService.StoreAsync(GetPath(paperMap), write);
-
-            paperMap.LastChangeUtc = DateTime.UtcNow;
             paperMap.FileSize = fileSize;
             await context.SaveChangesAsync();
         }
@@ -63,7 +61,8 @@ namespace GameMapStorageWebSite.Services
                 FileFormat = def.FileFormat,
                 PaperSize = def.PaperSize,
                 Pages = def.Pages,
-                Scale = def.Scale
+                Scale = def.Scale,
+                LastChangeUtc = DateTime.UtcNow
             };
             context.GamePaperMaps.Add(paperMap);
             await context.SaveChangesAsync();
@@ -82,6 +81,7 @@ namespace GameMapStorageWebSite.Services
             paperMap.PaperSize = definition.PaperSize;
             paperMap.Scale = definition.Scale;
             paperMap.Name = definition.Name;
+            paperMap.LastChangeUtc = DateTime.UtcNow;
             await StoreFile(paperMap, fileSize, write);
         }
     }

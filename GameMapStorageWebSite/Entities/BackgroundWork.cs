@@ -21,5 +21,9 @@
         public int? GameMapLayerId { get; set; }
 
         public GameMapLayer? GameMapLayer { get; set; }
+
+        public int? GamePaperMapId { get; set; }
+
+        public GamePaperMap? GamePaperMap { get; set; }
     }
 }

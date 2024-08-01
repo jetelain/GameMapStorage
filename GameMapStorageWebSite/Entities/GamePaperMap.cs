@@ -1,6 +1,6 @@
 ﻿namespace GameMapStorageWebSite.Entities
 {
-    public class GamePaperMap : IGameMapIdentifier
+    public class GamePaperMap : IGameMapIdentifier, IWithTimestamp
     {
         public int GamePaperMapId { get; set; }
 

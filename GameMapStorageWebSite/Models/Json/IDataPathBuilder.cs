@@ -12,5 +12,6 @@ namespace GameMapStorageWebSite.Models.Json
         string GetThumbnail(IGameMapIdentifier gameMap);
         string GetThumbnail(bool useWebp, IGameMapIdentifier gameMap);
         string? GetDownloadUri(IGameMapLayerIdentifier layer);
+        string? GetDownloadUri(GamePaperMap layer);
     }
 }

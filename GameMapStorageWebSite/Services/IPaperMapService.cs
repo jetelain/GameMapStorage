@@ -10,5 +10,7 @@ namespace GameMapStorageWebSite.Services
         Task<IStorageFile?> GetFile(GamePaperMap layer);
 
         Task Update(PaperMapDefinition definition, int fileSize, Func<Stream, Task> write, GamePaperMap paperMap);
+
+        Task StoreFile(GamePaperMap paperMap, int fileSize, Func<Stream, Task> write);
     }
 }
