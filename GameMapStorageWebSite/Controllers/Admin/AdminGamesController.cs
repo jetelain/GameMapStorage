@@ -42,6 +42,8 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 return NotFound();
             }
             game.Maps = await _context.GameMaps.Where(m => m.GameId == id).OrderBy(m => m.EnglishTitle).ToListAsync();
+            game.Colors = await _context.GameColors.Where(c => c.GameId == id).OrderBy(m => m.EnglishTitle).ToListAsync();
+            game.Markers = await _context.GameMarkers.Where(m => m.GameId == id).OrderBy(m => m.EnglishTitle).ToListAsync();
             return View(game);
         }
 

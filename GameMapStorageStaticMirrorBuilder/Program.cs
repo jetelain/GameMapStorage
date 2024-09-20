@@ -92,6 +92,7 @@ namespace GameMapStorageStaticMirrorBuilder
             services.AddSingleton<IStorageService>(remoteStorage);
             services.AddSingleton<IWorkspaceService>(workspace);
             services.AddSingleton<IImageLayerService, ImageLayerService>();
+            services.AddSingleton<IImageMarkerService, ImageMarkerService>();
             services.AddSingleton<IThumbnailService, ThumbnailService>();
             services.AddSingleton<IDataConfigurationService, StaticDataConfiguration>();
             services.AddSingleton<IMirrorService, MirrorService>();

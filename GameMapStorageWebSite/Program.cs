@@ -115,8 +115,9 @@ namespace GameMapStorageWebSite
 
             services.AddScoped<IMigrateArma3MapFactory, MigrateArma3MapFactory>();
 
-            services.AddScoped<IImageLayerService, ImageLayerService>();
-            services.AddScoped<IThumbnailService, ThumbnailService>();
+            services.AddSingleton<IImageLayerService, ImageLayerService>();
+            services.AddSingleton<IImageMarkerService, ImageMarkerService>();
+            services.AddSingleton<IThumbnailService, ThumbnailService>();
             services.AddScoped<IPackageService, PackageService>();
             services.AddScoped<IPaperMapService, PaperMapService>();
             services.AddSingleton<ILocalStorageService, LocalStorageService>();

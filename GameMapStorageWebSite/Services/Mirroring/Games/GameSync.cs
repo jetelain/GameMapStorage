@@ -91,5 +91,14 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
                 await thumbnailService.SetGameLogo(target, image);
             }
         }
+
+        public async Task DownloadImages(HttpClient client, IThumbnailService thumbnailService, IImageMarkerService markerService)
+        {
+            await DownloadImages(client, thumbnailService);
+
+            await markers.DownloadImages(client, markerService);
+        }
+
+        public int ImagesToDownloadCount => ImagesToDownload.Count + markers.ImagesToDownload.Count;
     }
 }

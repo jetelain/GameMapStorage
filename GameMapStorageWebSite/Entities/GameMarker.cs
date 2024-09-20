@@ -1,6 +1,6 @@
 ﻿namespace GameMapStorageWebSite.Entities
 {
-    public class GameMarker
+    public class GameMarker : IGameMarkerIdentifier
     {
         public int GameMarkerId { get; set; }
 

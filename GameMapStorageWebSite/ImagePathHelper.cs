@@ -1,5 +1,6 @@
 ﻿using GameMapStorageWebSite.Entities;
 using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace GameMapStorageWebSite
 {
@@ -70,6 +71,24 @@ namespace GameMapStorageWebSite
                 return FormattableString.Invariant($"/data/{game.GameId}/logo.webp");
             }
             return FormattableString.Invariant($"/data/{game.GameId}/logo.png");
+        }
+
+        public static string GetMarker(bool useWebp, IGameMarkerIdentifier gameMarker)
+        {
+            if (useWebp)
+            {
+                return FormattableString.Invariant($"/data/{gameMarker.GameId}/markers/{gameMarker.GameMarkerId}.webp");
+            }
+            return FormattableString.Invariant($"/data/{gameMarker.GameId}/markers/{gameMarker.GameMarkerId}.png");
+        }
+
+        public static string GetMarkerPattern(bool useWebp, IGameMarkerIdentifier gameMarker)
+        {
+            if (useWebp)
+            {
+                return FormattableString.Invariant($"/data/{gameMarker.GameId}/markers/{{color}}/{gameMarker.GameMarkerId}.webp");
+            }
+            return FormattableString.Invariant($"/data/{gameMarker.GameId}/markers/{{color}}/{gameMarker.GameMarkerId}.png");
         }
     }
 }

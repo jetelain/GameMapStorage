@@ -57,5 +57,15 @@ namespace GameMapStorageWebSite.Models.Json
         {
             return $"{basePath}/data/{layer.GameMap!.GameId}/maps/{layer.GameMapId}/papermaps/{layer.GamePaperMapId}.pdf";
         }
+
+        public string GetMarker(IGameMarkerIdentifier gameMarker)
+        {
+            return GetMarker(defaultUseWebp, gameMarker);
+        }
+
+        public string GetMarker(bool useWebp, IGameMarkerIdentifier gameMarker)
+        {
+            return basePath + ImagePathHelper.GetMarker(useWebp, gameMarker);
+        }
     }
 }

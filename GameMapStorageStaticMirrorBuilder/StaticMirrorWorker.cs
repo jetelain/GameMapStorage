@@ -62,7 +62,7 @@ namespace GameMapStorageStaticMirrorBuilder
             {
                 var gameJson = new GameJson(game, pathBuilder);
                 gameJson.Colors = (await context.GameColors.Where(c => c.GameId == game.GameId).ToListAsync()).Select(c => new GameColorJson(c)).ToList();
-                gameJson.Markers = (await context.GameMarkers.Where(c => c.GameId == game.GameId).ToListAsync()).Select(c => new GameMarkerJson(c)).ToList();
+                gameJson.Markers = (await context.GameMarkers.Where(c => c.GameId == game.GameId).ToListAsync()).Select(c => new GameMarkerJson(c, pathBuilder)).ToList();
 
 
                 var maps = await context.GameMaps.Where(c => c.GameId == game.GameId).ToListAsync();
