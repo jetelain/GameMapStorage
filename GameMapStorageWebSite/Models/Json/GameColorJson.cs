@@ -15,6 +15,7 @@ namespace GameMapStorageWebSite.Models.Json
             EnglishTitle = gameColor.EnglishTitle;
             Name = gameColor.Name;
             Hexadecimal = gameColor.Hexadecimal;
+            ContrastHexadecimal = gameColor.ContrastHexadecimal;
             Usage = gameColor.Usage;
         }
 
@@ -27,5 +28,7 @@ namespace GameMapStorageWebSite.Models.Json
         public string? Hexadecimal { get; set; }
 
         public ColorUsage Usage { get; set; }
+
+        public string? ContrastHexadecimal { get; set; }
     }
 }

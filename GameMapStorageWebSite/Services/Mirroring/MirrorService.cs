@@ -11,13 +11,15 @@ namespace GameMapStorageWebSite.Services.Mirroring
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IDataConfigurationService dataConfiguration;
         private readonly IThumbnailService thumbnailService;
+        private readonly IImageMarkerService markerService;
 
-        public MirrorService(GameMapStorageContext context, IHttpClientFactory httpClientFactory, IDataConfigurationService dataConfiguration, IThumbnailService thumbnailService)
+        public MirrorService(GameMapStorageContext context, IHttpClientFactory httpClientFactory, IDataConfigurationService dataConfiguration, IThumbnailService thumbnailService, IImageMarkerService markerService)
         {
             this.context = context;
             this.httpClientFactory = httpClientFactory;
             this.dataConfiguration = dataConfiguration;
             this.thumbnailService = thumbnailService;
+            this.markerService = markerService;
         }
 
         public async Task<SyncReport> UpdateMirror(IProgress<string>? progress = null)
@@ -37,8 +39,8 @@ namespace GameMapStorageWebSite.Services.Mirroring
             var gamesSync = new GameSync(report, context, true);
             var results = await gamesSync.Do(client);
 
-            progress?.Report($"Store logos ({gamesSync.ImagesToDownload.Count})");
-            await gamesSync.DownloadImages(client, thumbnailService);
+            progress?.Report($"Store logos and markers ({gamesSync.ImagesToDownloadCount})");
+            await gamesSync.DownloadImages(client, thumbnailService, markerService);
 
             foreach (var (targetGame, sourceGame) in results)
             {

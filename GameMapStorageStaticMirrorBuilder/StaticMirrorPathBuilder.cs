@@ -55,9 +55,23 @@ namespace GameMapStorageStaticMirrorBuilder
             return FormattableString.Invariant($"{basePath}/{game.GameId}/logo.png");
         }
 
+        public string GetMarker(bool useWebp, IGameMarkerIdentifier gameMarker)
+        {
+            if (useWebp)
+            {
+                return FormattableString.Invariant($"{basePath}/{gameMarker.GameId}/markers/{gameMarker.GameMarkerId}.webp");
+            }
+            return FormattableString.Invariant($"{basePath}/{gameMarker.GameId}/markers/{gameMarker.GameMarkerId}.png");
+        }
+
         public string GetThumbnail(IGameMapIdentifier gameMap)
         {
             return GetThumbnail(defaultUseWebp, gameMap);
+        }
+
+        public string GetMarker(IGameMarkerIdentifier gameMarker)
+        {
+            return GetMarker(defaultUseWebp, gameMarker);
         }
 
         public string GetThumbnail(bool useWebp, IGameMapIdentifier gameMap)

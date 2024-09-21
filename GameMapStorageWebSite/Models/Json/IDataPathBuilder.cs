@@ -13,5 +13,7 @@ namespace GameMapStorageWebSite.Models.Json
         string GetThumbnail(bool useWebp, IGameMapIdentifier gameMap);
         string? GetDownloadUri(IGameMapLayerIdentifier layer);
         string? GetDownloadUri(GamePaperMap layer);
+        string GetMarker(IGameMarkerIdentifier gameMarker);
+        string GetMarker(bool useWebp, IGameMarkerIdentifier gameMarker);
     }
 }

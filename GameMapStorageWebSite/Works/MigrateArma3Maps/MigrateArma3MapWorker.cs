@@ -113,7 +113,8 @@ namespace GameMapStorageWebSite.Works.MigrateArma3Maps
             var configuration = Configuration.Default.Clone();
             configuration.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions()
             {
-                MaximumPoolSizeMegabytes = 8192
+                MaximumPoolSizeMegabytes = 8192,
+                AllocationLimitMegabytes = 8192
             });
 
             var size = imageLayerService.GetSizeAtZoom(layer, z);

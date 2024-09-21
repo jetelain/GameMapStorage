@@ -1,0 +1,54 @@
+﻿@model GameMapStorageWebSite.Entities.GameColor
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>GameColor</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EnglishTitle)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EnglishTitle)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Hexadecimal)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Hexadecimal)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ContrastHexadecimal)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ContrastHexadecimal)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Usage)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Usage)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Game)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Game.GameId)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.GameColorId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

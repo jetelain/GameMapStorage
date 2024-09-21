@@ -17,6 +17,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
             target.EnglishTitle = source.EnglishTitle!;
             target.Hexadecimal = source.Hexadecimal!;
             target.Name = source.Name!;
+            target.ContrastHexadecimal = source.ContrastHexadecimal!;
             return true;
         }
 
@@ -35,6 +36,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
             {
                 EnglishTitle = source.EnglishTitle!,
                 Hexadecimal = source.Hexadecimal!,
+                ContrastHexadecimal = source.ContrastHexadecimal!,
                 Name = source.Name!,
                 Usage = source.Usage,
                 GameColorId = keepId ? source.GameColorId : default
