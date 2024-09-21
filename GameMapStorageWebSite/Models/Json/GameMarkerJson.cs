@@ -1,4 +1,5 @@
-﻿using GameMapStorageWebSite.Entities;
+﻿using Elfie.Serialization;
+using GameMapStorageWebSite.Entities;
 
 namespace GameMapStorageWebSite.Models.Json
 {
@@ -17,6 +18,10 @@ namespace GameMapStorageWebSite.Models.Json
             Usage = gameMarker.Usage;
             ImagePng = pathBuilder.GetMarker(false, gameMarker);
             ImageWebp = pathBuilder.GetMarker(true, gameMarker);
+            IsColorCompatible = gameMarker.IsColorCompatible;
+            ImageLastChangeUtc = gameMarker.ImageLastChangeUtc;
+            MilSymbolEquivalent = gameMarker.MilSymbolEquivalent;
+            SteamWorkshopId = gameMarker.SteamWorkshopId;
         }
 
         public int GameMarkerId { get; set; }
@@ -30,5 +35,13 @@ namespace GameMapStorageWebSite.Models.Json
         public string? ImagePng { get; set; }
 
         public string? ImageWebp { get; set; }
+
+        public bool IsColorCompatible { get; set; }
+
+        public DateTime? ImageLastChangeUtc { get; set; }
+
+        public string? MilSymbolEquivalent { get; set; }
+
+        public string? SteamWorkshopId { get; set; }
     }
 }

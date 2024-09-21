@@ -16,11 +16,17 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
 
         protected override bool Copy(GameMarkerJson source, GameMarker target)
         {
-            ImagesToDownload.Add((target, source));
-
+            if (target.ImageLastChangeUtc == null || target.ImageLastChangeUtc.Value < source.ImageLastChangeUtc!.Value)
+            {
+                ImagesToDownload.Add((target, source));
+            }
             target.Usage = source.Usage;
             target.EnglishTitle = source.EnglishTitle!;
             target.Name = source.Name!;
+            target.IsColorCompatible = source.IsColorCompatible;
+            target.ImageLastChangeUtc = source.ImageLastChangeUtc;
+            target.MilSymbolEquivalent = source.MilSymbolEquivalent;
+            target.SteamWorkshopId = source.SteamWorkshopId;
             return true;
         }
 
@@ -41,6 +47,10 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
                 Usage = source.Usage!,
                 Name = source.Name!,
                 GameMarkerId = keepId ? source.GameMarkerId : default,
+                IsColorCompatible = source.IsColorCompatible,
+                ImageLastChangeUtc = source.ImageLastChangeUtc,
+                MilSymbolEquivalent = source.MilSymbolEquivalent,
+                SteamWorkshopId = source.SteamWorkshopId
             };
             ImagesToDownload.Add((target, source));
             return target;

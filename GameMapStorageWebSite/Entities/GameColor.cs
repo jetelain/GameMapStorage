@@ -1,4 +1,6 @@
-﻿namespace GameMapStorageWebSite.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace GameMapStorageWebSite.Entities
 {
     public class GameColor
     {
@@ -8,7 +10,11 @@
 
         public required string Name { get; set; }
 
+        [Display(Name = "Hexadecimal Color Code")]
         public required string Hexadecimal {  get; set; }
+
+        [Display(Name = "Contrast Hexadecimal Color Code (eg. for text)")] 
+        public required string ContrastHexadecimal { get; set; }
 
         public ColorUsage Usage { get; set; }
 
