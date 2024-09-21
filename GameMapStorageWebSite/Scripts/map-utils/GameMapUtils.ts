@@ -144,7 +144,7 @@ namespace GameMapUtils {
         return map;
     }
 
-    export async function basicInitFromAPI(gameName: string, mapName: string, mapDivId: string | HTMLElement = 'map', apiBasePath: string = "https://atlas.plan-ops.fr/api/v1/"): Promise<L.Map | null> {
+    export async function basicInitFromAPI(gameName: string, mapName: string, mapDivId: string | HTMLElement = 'map', apiBasePath: string = "https://atlas.plan-ops.fr/"): Promise<L.Map | null> {
 
         const client = new ApiClient(apiBasePath);
 
@@ -262,6 +262,7 @@ namespace GameMapUtils {
         name?: string | undefined;
         hexadecimal?: string | undefined;
         usage?: ColorUsage;
+        contrastHexadecimal?: ColorUsage;
     }
 
     export type ColorUsage = "Custom" | "FriendSide" | "NeutralSide" | "HostileSide" | "UnknownSide" | "CivilianSide";
@@ -271,6 +272,12 @@ namespace GameMapUtils {
         englishTitle?: string | undefined;
         name?: string | undefined;
         usage?: MarkerUsage;
+        imagePng?: string | undefined;
+        imageWebp?: string | undefined;
+        isColorCompatible?: boolean;
+        imageLastChangeUtc?: Date | undefined;
+        milSymbolEquivalent?: string | undefined;
+        steamWorkshopId?: string | undefined;
     }
 
     export type MarkerUsage = "Custom";

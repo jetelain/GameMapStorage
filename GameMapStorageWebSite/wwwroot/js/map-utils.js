@@ -554,7 +554,7 @@ var GameMapUtils;
         return map;
     }
     GameMapUtils.basicInit = basicInit;
-    async function basicInitFromAPI(gameName, mapName, mapDivId = 'map', apiBasePath = "https://atlas.plan-ops.fr/api/v1/") {
+    async function basicInitFromAPI(gameName, mapName, mapDivId = 'map', apiBasePath = "https://atlas.plan-ops.fr/") {
         const client = new ApiClient(apiBasePath);
         const map = await client.getMap(gameName, mapName);
         if (map == null) {

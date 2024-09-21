@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using GameMapStorageWebSite.Entities;
-using GameMapStorageWebSite.Migrations;
 using GameMapStorageWebSite.Security;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
@@ -15,6 +14,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
 {
     [ApiController]
     [Route("api/v1")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class AdminApiController : ControllerBase
     {
         private readonly GameMapStorageContext _context;
