@@ -10,10 +10,10 @@ namespace GameMapStorageWebSite.Entities
 
         public required string Name { get; set; }
 
-        [Display(Name = "Hexadecimal Color Code")]
+        [Display(Name = "Color Code")]
         public required string Hexadecimal {  get; set; }
 
-        [Display(Name = "Contrast Hexadecimal Color Code (eg. for text)")] 
+        [Display(Name = "Contrast Color")] 
         public required string ContrastHexadecimal { get; set; }
 
         public ColorUsage Usage { get; set; }

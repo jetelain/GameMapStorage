@@ -1,0 +1,89 @@
+﻿@model IEnumerable<GameMapStorageWebSite.Entities.GameMarker>
+@inject IAuthorizationService authorizationService
+
+@{
+    ViewData["Title"] = "Markers";
+    var canEdit = (await authorizationService.AuthorizeAsync(User, "AdminEdit")).Succeeded;
+}
+
+<h1>@ViewData["Title"]</h1>
+@if (canEdit)
+{
+    <p>
+        <a asp-action="Create" class="btn btn-secondary">Create New</a>
+    </p>
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.EnglishTitle)
+            </th>
+            <th>
+                Image
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Usage)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsColorCompatible)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MilSymbolEquivalent)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SteamWorkshopId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Game)
+            </th>
+            @if (canEdit)
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.GameMarkerId">@Html.DisplayFor(modelItem => item.EnglishTitle)</a>
+                </td>
+                <td class="@(item.IsColorCompatible ? "bg-dark " : "")text-center">
+                    <a asp-action="Details" asp-route-id="@item.GameMarkerId">
+                        <img src="@ImagePathHelper.GetMarker(false, item)" style="max-width:60px; max-height:60px;" alt="@Html.DisplayFor(modelItem => item.EnglishTitle)" />
+                    </a>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Usage)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsColorCompatible)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MilSymbolEquivalent)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SteamWorkshopId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Game.EnglishTitle)
+                </td>
+                @if (canEdit)
+                {
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.GameMarkerId">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@item.GameMarkerId">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
