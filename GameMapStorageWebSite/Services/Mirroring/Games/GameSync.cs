@@ -28,8 +28,8 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
             target.SteamAppId = source.SteamAppId;
             target.LastChangeUtc = source.LastChangeUtc;
 
-            target.Colors = colors.UpdateOrCreateEntities(source.Colors!, target.Colors!);
-            target.Markers = markers.UpdateOrCreateEntities(source.Markers!, target.Markers!);
+            target.Colors = colors.UpdateOrCreateEntities(source.Colors!, target.Colors ?? new List<GameColor>());
+            target.Markers = markers.UpdateOrCreateEntities(source.Markers!, target.Markers ?? new List<GameMarker>());
             return true;
         }
 
