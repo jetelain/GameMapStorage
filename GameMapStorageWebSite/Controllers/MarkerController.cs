@@ -1,4 +1,5 @@
-﻿using GameMapStorageWebSite.Entities;
+﻿using System.Globalization;
+using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -85,7 +86,7 @@ namespace GameMapStorageWebSite.Controllers
 
         private async ValueTask<IGameMarkerIdentifier?> GetMarkerIdentifier(int gameId, string gameMarkerIdOrName)
         {
-            if (int.TryParse(gameMarkerIdOrName, out var gameMarkerId))
+            if (int.TryParse(gameMarkerIdOrName, CultureInfo.InvariantCulture, out var gameMarkerId))
             {
                 return new GameMarkerIdentifier(gameId, gameMarkerId);
             }
