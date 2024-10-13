@@ -9,8 +9,10 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace GameMapStorageWebSite.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class MarkerController : DownloadControllerBase
+    /// <summary>
+    /// Marker images download
+    /// </summary>
+    public sealed class MarkerController : DownloadControllerBase
     {
         public const int CacheDuractionInSeconds = 4 * 60 * 60; // 4 hours
 

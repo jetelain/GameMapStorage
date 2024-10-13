@@ -7,7 +7,9 @@ using SixLabors.ImageSharp.Formats.Webp;
 
 namespace GameMapStorageWebSite.Controllers
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
+    /// <summary>
+    /// Map layers images download
+    /// </summary>
     public sealed class ImageController : DownloadControllerBase
     {
         public const int CacheDuractionInSeconds = 4 * 60 * 60; // 4 hours

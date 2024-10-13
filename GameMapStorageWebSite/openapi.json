@@ -1,5 +1,5 @@
 {
-  "x-generator": "NSwag v14.0.8.0 (NJsonSchema v11.0.1.0 (Newtonsoft.Json v13.0.0.0))",
+  "x-generator": "NSwag v14.1.0.0 (NJsonSchema v11.0.2.0 (Newtonsoft.Json v13.0.0.0))",
   "openapi": "3.0.0",
   "info": {
     "title": "GameMapStorage",
@@ -141,6 +141,83 @@
           }
         }
       }
+    },
+    "/api/v1/games/{gameNameOrId}/maps/{mapNameOrId}/papermaps": {
+      "get": {
+        "tags": [
+          "ApiV1"
+        ],
+        "operationId": "ApiV1_GetMapPaperMaps",
+        "parameters": [
+          {
+            "name": "gameNameOrId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "mapNameOrId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GamePaperMapJson"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/games/{gameNameOrId}/papermaps": {
+      "get": {
+        "tags": [
+          "ApiV1"
+        ],
+        "operationId": "ApiV1_GetMapPaperMaps2",
+        "parameters": [
+          {
+            "name": "gameNameOrId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GamePaperMapMapJson"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -241,6 +318,10 @@
           },
           "usage": {
             "$ref": "#/components/schemas/ColorUsage"
+          },
+          "contrastHexadecimal": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -282,6 +363,30 @@
           },
           "usage": {
             "$ref": "#/components/schemas/MarkerUsage"
+          },
+          "imagePng": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageWebp": {
+            "type": "string",
+            "nullable": true
+          },
+          "isColorCompatible": {
+            "type": "boolean"
+          },
+          "imageLastChangeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "milSymbolEquivalent": {
+            "type": "string",
+            "nullable": true
+          },
+          "steamWorkshopId": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -440,6 +545,10 @@
             "type": "string",
             "nullable": true
           },
+          "patternSvg": {
+            "type": "string",
+            "nullable": true
+          },
           "pattern": {
             "type": "string",
             "nullable": true
@@ -453,13 +562,15 @@
           "Topographic",
           "Satellite",
           "Aerial",
-          "Elevation"
+          "Elevation",
+          "TopographicAtlas"
         ],
         "enum": [
           "Topographic",
           "Satellite",
           "Aerial",
-          "Elevation"
+          "Elevation",
+          "TopographicAtlas"
         ]
       },
       "LayerFormat": {
@@ -470,18 +581,14 @@
           "PngAndWebp",
           "SvgOnly",
           "SvgAndWebp",
-          "WebpOnly",
-          "SinglePDF",
-          "BookletPDF"
+          "WebpOnly"
         ],
         "enum": [
           "PngOnly",
           "PngAndWebp",
           "SvgOnly",
           "SvgAndWebp",
-          "WebpOnly",
-          "SinglePDF",
-          "BookletPDF"
+          "WebpOnly"
         ]
       },
       "GameMapJson": {
@@ -546,6 +653,145 @@
         ],
         "enum": [
           "City"
+        ]
+      },
+      "GamePaperMapJson": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "gamePaperMapId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileFormat": {
+            "$ref": "#/components/schemas/PaperFileFormat"
+          },
+          "paperSize": {
+            "$ref": "#/components/schemas/PaperSize"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "scale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastChangeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pages": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/GamePaperMapPage"
+            }
+          },
+          "downloadUri": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PaperFileFormat": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "SinglePDF",
+          "BookletPDF"
+        ],
+        "enum": [
+          "SinglePDF",
+          "BookletPDF"
+        ]
+      },
+      "PaperSize": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "A4",
+          "A3",
+          "A2",
+          "A1",
+          "A0",
+          "ArchE"
+        ],
+        "enum": [
+          "A4",
+          "A3",
+          "A2",
+          "A1",
+          "A0",
+          "ArchE"
+        ]
+      },
+      "GamePaperMapPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mapOriginX": {
+            "type": "number",
+            "format": "double"
+          },
+          "mapOriginY": {
+            "type": "number",
+            "format": "double"
+          },
+          "mapWidth": {
+            "type": "number",
+            "format": "double"
+          },
+          "mapHeight": {
+            "type": "number",
+            "format": "double"
+          },
+          "paperOriginX": {
+            "type": "number",
+            "format": "double"
+          },
+          "paperOriginY": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "GamePaperMapMapJson": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GamePaperMapJson"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "gameMapId": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "englishTitle": {
+                "type": "string",
+                "nullable": true
+              },
+              "appendAttribution": {
+                "type": "string",
+                "nullable": true
+              },
+              "mapName": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
         ]
       }
     }
