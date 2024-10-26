@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameMapStorageWebSite.Controllers
 {
+    /// <summary>
+    /// API to query game maps and data
+    /// </summary>
     [ApiController]
     [Route("api/v1")]
     [EnableCors("Api")]
@@ -43,6 +46,10 @@ namespace GameMapStorageWebSite.Controllers
             return await context.GameMaps.FirstOrDefaultAsync(g => g.GameId == game.GameId && (g.Name == mapNameOrId || g.Aliases!.Contains(mapNameOrId)));
         }
 
+        /// <summary>
+        /// List supported games
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("games")]
         [Produces<GameJsonBase[]>]
@@ -52,6 +59,11 @@ namespace GameMapStorageWebSite.Controllers
             return Json((await context.Games.ToListAsync()).Select(g => new GameJsonBase(g, pathBuilder)).ToList());
         }
 
+        /// <summary>
+        /// Get game metadata, standard markers, and standard colors
+        /// </summary>
+        /// <param name="gameNameOrId">Game name ('arma3') or GameId (1)</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("games/{gameNameOrId}")]
         [Produces<GameJson>]
@@ -69,6 +81,11 @@ namespace GameMapStorageWebSite.Controllers
             return Json(gameJson);
         }
 
+        /// <summary>
+        /// List available maps of a game
+        /// </summary>
+        /// <param name="gameNameOrId">Game name ('arma3') or GameId (1)</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("games/{gameNameOrId}/maps")]
         [Produces<GameMapJsonBase[]>]
@@ -86,7 +103,12 @@ namespace GameMapStorageWebSite.Controllers
             return Json(maps.Select(m => new GameMapJsonBase(m, pathBuilder) { Layers = GameMapLayerJson.CreateList(m.Layers, pathBuilder) }).ToList());
         }
 
-
+        /// <summary>
+        /// Get map metadata, available layers, and locations
+        /// </summary>
+        /// <param name="gameNameOrId">Game name ('arma3') or GameId (1)</param>
+        /// <param name="mapNameOrId">Map name ('altis') or GameMapId (1)</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("games/{gameNameOrId}/maps/{mapNameOrId}")]
         [Produces<GameMapJson>]
@@ -111,6 +133,12 @@ namespace GameMapStorageWebSite.Controllers
             return Json(mapJson);
         }
 
+        /// <summary>
+        /// List paper maps of a map
+        /// </summary>
+        /// <param name="gameNameOrId">Game name ('arma3') or GameId (1)</param>
+        /// <param name="mapNameOrId">Map name ('altis') or GameMapId (1)</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("games/{gameNameOrId}/maps/{mapNameOrId}/papermaps")]
         [Produces<GamePaperMapJson[]>]
@@ -135,6 +163,11 @@ namespace GameMapStorageWebSite.Controllers
             return Json(papermaps.Select(m => new GamePaperMapJson(m, pathBuilder)).ToList());
         }
 
+        /// <summary>
+        /// List paper maps of all maps of a game
+        /// </summary>
+        /// <param name="gameNameOrId">Game name ('arma3') or GameId (1)</param>
+        /// <returns></returns>
         [HttpGet]
         [Route("games/{gameNameOrId}/papermaps")]
         [Produces<GamePaperMapMapJson[]>]

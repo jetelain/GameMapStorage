@@ -129,4 +129,6 @@
 @section Styles {
     <link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
     <link rel="stylesheet" href="~/css/map-utils.css" asp-append-version="true" />
+    <meta property="og:title" content="@Model.Map.EnglishTitle - @Html.DisplayFor(m => m.Layer.Type) - @Model.Game.EnglishTitle" />
+    <meta property="og:image" content="@Context.Request.Scheme://@Context.Request.Host@ImagePathHelper.GetLayerPreview(Model.AcceptWebp, Model.Layer)" />
 }

@@ -206,6 +206,7 @@ declare namespace GameMapUtils {
         name?: string | undefined;
         hexadecimal?: string | undefined;
         usage?: ColorUsage;
+        contrastHexadecimal?: ColorUsage;
     }
     type ColorUsage = "Custom" | "FriendSide" | "NeutralSide" | "HostileSide" | "UnknownSide" | "CivilianSide";
     interface GameMarkerJson {
@@ -213,6 +214,12 @@ declare namespace GameMapUtils {
         englishTitle?: string | undefined;
         name?: string | undefined;
         usage?: MarkerUsage;
+        imagePng?: string | undefined;
+        imageWebp?: string | undefined;
+        isColorCompatible?: boolean;
+        imageLastChangeUtc?: Date | undefined;
+        milSymbolEquivalent?: string | undefined;
+        steamWorkshopId?: string | undefined;
     }
     type MarkerUsage = "Custom";
     interface GameMapJsonBase {
