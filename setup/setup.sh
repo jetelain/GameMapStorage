@@ -3,6 +3,10 @@
 # Basic script to install / update a GameMapStorage instance on a Linux server
 # Requires dotnet SDK, see https://learn.microsoft.com/en-us/dotnet/core/install/linux, `sudo apt-get install -y dotnet-sdk-8.0` on Ubuntu 24.04 LTS
 
+# Logs         : journalctl -fu kestrel-gms -n 100
+# Manual Stop  : sudo systemctl stop kestrel-gms
+# Manual Start : sudo systemctl start kestrel-gms
+
 if [ ! -d ~/build/GameMapStorage ]; then
 	mkdir ~/build
 	cd ~/build
@@ -46,6 +50,8 @@ fi
 if [ ! -f /etc/systemd/system/kestrel-gms.service ]; then
 	echo " * Create kestrel-gms.service"
 	sudo cp setup/kestrel-gms.service /etc/systemd/system/kestrel-gms.service
+	
+	sudo systemctl enable kestrel-gms
 fi
 
 echo "Build"

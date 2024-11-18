@@ -130,5 +130,6 @@
     <link rel="stylesheet" href="~/lib/leaflet/leaflet.css" />
     <link rel="stylesheet" href="~/css/map-utils.css" asp-append-version="true" />
     <meta property="og:title" content="@Model.Map.EnglishTitle - @Html.DisplayFor(m => m.Layer.Type) - @Model.Game.EnglishTitle" />
+    <meta property="og:description" content="@string.Format("{0}x{0} km, {1} km², {2} cities", Math.Round(Model.Map.SizeInMeters / 1000.0,1), Math.Round(Model.Map.SizeInMeters*Model.Map.SizeInMeters / 1000000.0), Model.Map.CitiesCount)" />
     <meta property="og:image" content="@Context.Request.Scheme://@Context.Request.Host@ImagePathHelper.GetLayerPreview(Model.AcceptWebp, Model.Layer)" />
 }
