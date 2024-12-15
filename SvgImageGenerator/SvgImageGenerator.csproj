@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\mapkit\MapToolkit.Drawing\MapToolkit.Drawing.csproj" />
-    <ProjectReference Include="..\mapkit\MapToolkit\MapToolkit.csproj" />
+	  <PackageReference Include="Pmad.Drawing" Version="0.1.8" />
   </ItemGroup>
 
 </Project>

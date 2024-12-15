@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using MapToolkit;
-using MapToolkit.Drawing;
+using Pmad.Drawing;
+using Pmad.Geometry;
 using SixLabors.ImageSharp;
 
 namespace SvgImageGenerator
@@ -14,9 +14,9 @@ namespace SvgImageGenerator
 
         static void Main(string[] args)
         {
-            Render.ToSvg("protractor.svg", new Vector(150, 150), DrawProtractor, "prtt");
-            Render.ToSvg("coordinateScale.svg", new Vector(150, 150), DrawCoordinateScale, "cdsc");
-            Render.ToSvg("ruler.svg", new Vector(812, 812), DrawRuler, "rulr");
+            Render.ToSvg("protractor.svg", new Vector2D(150, 150), DrawProtractor, "prtt");
+            Render.ToSvg("coordinateScale.svg", new Vector2D(150, 150), DrawCoordinateScale, "cdsc");
+            Render.ToSvg("ruler.svg", new Vector2D(812, 812), DrawRuler, "rulr");
 
             var protractorForJS = CleanForJs(File.ReadAllText("protractor.svg"));
             var coordinateScaleForJS = CleanForJs(File.ReadAllText("coordinateScale.svg"));
@@ -56,44 +56,44 @@ namespace SvgImageGenerator
             var readingBackground = d.AllocatePenStyle(ReadingBackground, readingBackgroundThick);
 
 
-            d.DrawRoundedRectangle(new Vector(center + tickBegin - margin, center - halfHeight), new Vector(center + totalTicks + tickBegin + margin, center + halfHeight), background, 5);
-            d.DrawPolyline([new Vector(center + tickBegin, center - halfHeight + (readingBackgroundThick / 2)), new Vector(center + tickBegin + totalTicks, center - halfHeight + (readingBackgroundThick / 2))], readingBackground);
-            d.DrawPolyline([new Vector(center + tickBegin, center + halfHeight - (readingBackgroundThick / 2)), new Vector(center + tickBegin + totalTicks, center + halfHeight - (readingBackgroundThick / 2))], readingBackground);
+            d.DrawRoundedRectangle(new Vector2D(center + tickBegin - margin, center - halfHeight), new Vector2D(center + totalTicks + tickBegin + margin, center + halfHeight), background, 5);
+            d.DrawPolyline([new Vector2D(center + tickBegin, center - halfHeight + (readingBackgroundThick / 2)), new Vector2D(center + tickBegin + totalTicks, center - halfHeight + (readingBackgroundThick / 2))], readingBackground);
+            d.DrawPolyline([new Vector2D(center + tickBegin, center + halfHeight - (readingBackgroundThick / 2)), new Vector2D(center + tickBegin + totalTicks, center + halfHeight - (readingBackgroundThick / 2))], readingBackground);
 
-            d.DrawRoundedRectangle(new Vector(center + tickBegin - margin - 0.5, center - halfHeight - 0.5), new Vector(center + totalTicks + tickBegin + margin + 0.5, center + halfHeight + 0.5), outer, 5.5f);
+            d.DrawRoundedRectangle(new Vector2D(center + tickBegin - margin - 0.5, center - halfHeight - 0.5), new Vector2D(center + totalTicks + tickBegin + margin + 0.5, center + halfHeight + 0.5), outer, 5.5f);
 
             for (int i = 0; i <= totalTicks; i++)
             {
                 if (i % 100 == 0)
                 {
-                    d.DrawPolyline([new Vector(center + i + tickBegin, center - halfHeight), new Vector(center + i + tickBegin, center - halfHeight + tick100)], boldTick);
-                    d.DrawText(new Vector(center + i + tickBegin, center - halfHeight + tick100 + textMargin), (i / 100).ToString(), textTop);
-                    d.DrawPolyline([new Vector(center + i + tickBegin, center + halfHeight), new Vector(center + i + tickBegin, center + halfHeight - tick100)], boldTick);
-                    d.DrawText(new Vector(center + i + tickBegin, center + halfHeight - tick100 - textMargin), (i / 100).ToString(), textBottom);
+                    d.DrawPolyline([new Vector2D(center + i + tickBegin, center - halfHeight), new Vector2D(center + i + tickBegin, center - halfHeight + tick100)], boldTick);
+                    d.DrawText(new Vector2D(center + i + tickBegin, center - halfHeight + tick100 + textMargin), (i / 100).ToString(), textTop);
+                    d.DrawPolyline([new Vector2D(center + i + tickBegin, center + halfHeight), new Vector2D(center + i + tickBegin, center + halfHeight - tick100)], boldTick);
+                    d.DrawText(new Vector2D(center + i + tickBegin, center + halfHeight - tick100 - textMargin), (i / 100).ToString(), textBottom);
                 }
                 else if (i % 50 == 0)
                 {
-                    d.DrawPolyline([new Vector(center + i + tickBegin, center - halfHeight), new Vector(center + i + tickBegin, center - halfHeight + tick50)], normalTick);
-                    d.DrawPolyline([new Vector(center + i + tickBegin, center + halfHeight), new Vector(center + i + tickBegin, center + halfHeight - tick50)], normalTick);
+                    d.DrawPolyline([new Vector2D(center + i + tickBegin, center - halfHeight), new Vector2D(center + i + tickBegin, center - halfHeight + tick50)], normalTick);
+                    d.DrawPolyline([new Vector2D(center + i + tickBegin, center + halfHeight), new Vector2D(center + i + tickBegin, center + halfHeight - tick50)], normalTick);
                 }
                 else if (i % 10 == 0)
                 {
-                    d.DrawPolyline([new Vector(center + i + tickBegin, center - halfHeight), new Vector(center + i + tickBegin, center - halfHeight + tick10)], normalTick);
-                    d.DrawPolyline([new Vector(center + i + tickBegin, center + halfHeight), new Vector(center + i + tickBegin, center + halfHeight - tick10)], normalTick);
+                    d.DrawPolyline([new Vector2D(center + i + tickBegin, center - halfHeight), new Vector2D(center + i + tickBegin, center - halfHeight + tick10)], normalTick);
+                    d.DrawPolyline([new Vector2D(center + i + tickBegin, center + halfHeight), new Vector2D(center + i + tickBegin, center + halfHeight - tick10)], normalTick);
                 }
                 else
                 {
-                    d.DrawPolyline([new Vector(center + i + tickBegin, center - halfHeight), new Vector(center + i + tickBegin, center - halfHeight+ tick1)], normalTick);
-                    d.DrawPolyline([new Vector(center + i + tickBegin, center + halfHeight), new Vector(center + i + tickBegin, center + halfHeight - tick1)], normalTick);
+                    d.DrawPolyline([new Vector2D(center + i + tickBegin, center - halfHeight), new Vector2D(center + i + tickBegin, center - halfHeight+ tick1)], normalTick);
+                    d.DrawPolyline([new Vector2D(center + i + tickBegin, center + halfHeight), new Vector2D(center + i + tickBegin, center + halfHeight - tick1)], normalTick);
                 }
             }
 
-            d.DrawCircle(new Vector(center + totalTicks+ tickBegin+ tickBegin, center), 5f, outer);
-            d.DrawCircle(new Vector(center + totalTicks + tickBegin + tickBegin, center), 5.5f, backgroundOutline);
+            d.DrawCircle(new Vector2D(center + totalTicks+ tickBegin+ tickBegin, center), 5f, outer);
+            d.DrawCircle(new Vector2D(center + totalTicks + tickBegin + tickBegin, center), 5.5f, backgroundOutline);
 
-            d.DrawPolyline(new[] { new Vector(center + tickBegin, center), new Vector(center + tickBegin + tickBegin + totalTicks - 6, center) }, boldRed);
-            d.DrawPolyline(new[] { new Vector(center + tickBegin + tickBegin + totalTicks + 6, center), new Vector(center + tickBegin + totalTicks, center) }, boldRed);
-            d.DrawPolyline(new[] { new Vector(center, center - 4), new Vector(center, center + 4) }, boldRed);
+            d.DrawPolyline(new[] { new Vector2D(center + tickBegin, center), new Vector2D(center + tickBegin + tickBegin + totalTicks - 6, center) }, boldRed);
+            d.DrawPolyline(new[] { new Vector2D(center + tickBegin + tickBegin + totalTicks + 6, center), new Vector2D(center + tickBegin + totalTicks, center) }, boldRed);
+            d.DrawPolyline(new[] { new Vector2D(center, center - 4), new Vector2D(center, center + 4) }, boldRed);
 
         }
 
@@ -115,19 +115,19 @@ namespace SvgImageGenerator
             var readingBackground = d.AllocatePenStyle(ReadingBackground, readingBackgroundThick);
             var textRight10 = d.AllocateTextStyle(new[] { "Arial" }, SixLabors.Fonts.FontStyle.Regular, 5, new SolidColorBrush(Color.Black), null, false, TextAnchor.TopLeft);
 
-            d.DrawRoundedRectangle(new Vector(0.5, 0.5), new Vector(149.5, 149.5), outer, 5.5f);
-            d.DrawRoundedRectangle(new Vector(1, 1), new Vector(149, 149), background, 5);
+            d.DrawRoundedRectangle(new Vector2D(0.5, 0.5), new Vector2D(149.5, 149.5), outer, 5.5f);
+            d.DrawRoundedRectangle(new Vector2D(1, 1), new Vector2D(149, 149), background, 5);
 
 
-            d.DrawPolyline([new Vector(25, 25 - (readingBackgroundThick / 2)), new Vector(125, 25 - (readingBackgroundThick / 2))], readingBackground);
-            d.DrawPolyline([new Vector(125 + (readingBackgroundThick / 2), 25), new Vector(125 + (readingBackgroundThick / 2), 125)], readingBackground);
+            d.DrawPolyline([new Vector2D(25, 25 - (readingBackgroundThick / 2)), new Vector2D(125, 25 - (readingBackgroundThick / 2))], readingBackground);
+            d.DrawPolyline([new Vector2D(125 + (readingBackgroundThick / 2), 25), new Vector2D(125 + (readingBackgroundThick / 2), 125)], readingBackground);
 
 
 
-            d.DrawPolyline([new Vector(125, 1), new Vector(125, 149)], boldTick);
-            d.DrawPolyline([new Vector(25, 1), new Vector(25, 149)], boldTick);
-            d.DrawPolyline([new Vector(1, 125), new Vector(149, 125)], boldTick);
-            d.DrawPolyline([new Vector(1, 25), new Vector(149, 25)], boldTick);
+            d.DrawPolyline([new Vector2D(125, 1), new Vector2D(125, 149)], boldTick);
+            d.DrawPolyline([new Vector2D(25, 1), new Vector2D(25, 149)], boldTick);
+            d.DrawPolyline([new Vector2D(1, 125), new Vector2D(149, 125)], boldTick);
+            d.DrawPolyline([new Vector2D(1, 25), new Vector2D(149, 25)], boldTick);
 
 
 
@@ -138,25 +138,25 @@ namespace SvgImageGenerator
                 {
                     if (i != 0 && i != 100)
                     {
-                        d.DrawPolyline([new Vector(25 + (i * 1), 25 - tick10), new Vector(25 + (i * 1), 125)], boldTick);
-                        d.DrawPolyline([new Vector(25, 25 + (i * 1)), new Vector(125 + tick10, 25 + (i * 1))], boldTick);
+                        d.DrawPolyline([new Vector2D(25 + (i * 1), 25 - tick10), new Vector2D(25 + (i * 1), 125)], boldTick);
+                        d.DrawPolyline([new Vector2D(25, 25 + (i * 1)), new Vector2D(125 + tick10, 25 + (i * 1))], boldTick);
                     }
-                    d.DrawText(new Vector(25 + (i * 1), 25 - textOffset), ((100 - i) / 10).ToString(), textTop);
-                    d.DrawText(new Vector(125 + textOffset, 25 + (i * 1)), (i / 10).ToString(), textRight);
+                    d.DrawText(new Vector2D(25 + (i * 1), 25 - textOffset), ((100 - i) / 10).ToString(), textTop);
+                    d.DrawText(new Vector2D(125 + textOffset, 25 + (i * 1)), (i / 10).ToString(), textRight);
                 }
                 else if (i % 2 == 0)
                 {
-                    d.DrawPolyline([new Vector(25 + (i * 1), 25 - tick2), new Vector(25 + (i * 1), 25)], boldTick);
-                    d.DrawPolyline([new Vector(125, 25 + (i * 1)), new Vector(125 + tick2, 25 + (i * 1))], boldTick);
+                    d.DrawPolyline([new Vector2D(25 + (i * 1), 25 - tick2), new Vector2D(25 + (i * 1), 25)], boldTick);
+                    d.DrawPolyline([new Vector2D(125, 25 + (i * 1)), new Vector2D(125 + tick2, 25 + (i * 1))], boldTick);
                 }
                 else
                 {
-                    d.DrawPolyline([new Vector(25 + (i * 1), 25 - tick1), new Vector(25 + (i * 1), 25)], boldTick);
-                    d.DrawPolyline([new Vector(125, 25 + (i * 1)), new Vector(125 + tick1, 25 + (i * 1))], boldTick);
+                    d.DrawPolyline([new Vector2D(25 + (i * 1), 25 - tick1), new Vector2D(25 + (i * 1), 25)], boldTick);
+                    d.DrawPolyline([new Vector2D(125, 25 + (i * 1)), new Vector2D(125 + tick1, 25 + (i * 1))], boldTick);
                 }
             }
-            d.DrawText(new Vector(25, 25 - textOffset), "10", textTop);
-            d.DrawText(new Vector(125 + textOffset, 125 + 1), "10", textRight10);
+            d.DrawText(new Vector2D(25, 25 - textOffset), "10", textTop);
+            d.DrawText(new Vector2D(125 + textOffset, 125 + 1), "10", textRight10);
         }
 
         private static void DrawProtractor(IDrawSurface d)
@@ -198,14 +198,14 @@ namespace SvgImageGenerator
             var background = d.AllocateStyle(Background, "000000FF", 0.1);
             var readingBackground = d.AllocatePenStyle(ReadingBackground, readingBackgroundThick);
 
-            d.DrawCircle(new Vector(center, center), (float)center - 1, background);
+            d.DrawCircle(new Vector2D(center, center), (float)center - 1, background);
 
-            d.DrawCircle(new Vector(center, center), (float)milsRadius - readingBackgroundThick / 2, readingBackground);
-            d.DrawCircle(new Vector(center, center), (float)degreesRadius - readingBackgroundThick / 2, readingBackground);
-            d.DrawCircle(new Vector(center, center), (float)milsRadiusText - readingBackgroundThick / 2 + (textFontHeight / 2), readingBackground);
-            d.DrawCircle(new Vector(center, center), (float)degreesRadiusText - readingBackgroundThick / 2 + (textFontHeight / 2), readingBackground);
+            d.DrawCircle(new Vector2D(center, center), (float)milsRadius - readingBackgroundThick / 2, readingBackground);
+            d.DrawCircle(new Vector2D(center, center), (float)degreesRadius - readingBackgroundThick / 2, readingBackground);
+            d.DrawCircle(new Vector2D(center, center), (float)milsRadiusText - readingBackgroundThick / 2 + (textFontHeight / 2), readingBackground);
+            d.DrawCircle(new Vector2D(center, center), (float)degreesRadiusText - readingBackgroundThick / 2 + (textFontHeight / 2), readingBackground);
 
-            d.DrawCircle(new Vector(center, center), (float)center - 0.5f, outer);
+            d.DrawCircle(new Vector2D(center, center), (float)center - 0.5f, outer);
 
             //
 
@@ -218,8 +218,8 @@ namespace SvgImageGenerator
                 {
                     d.DrawPolyline(
                         new[] {
-                        new Vector((sin * degreesRadius) + center, (cos * degreesRadius) + center),
-                        new Vector((sin * degreesRadiusTick10) + center, (cos * degreesRadiusTick10) + center) },
+                        new Vector2D((sin * degreesRadius) + center, (cos * degreesRadius) + center),
+                        new Vector2D((sin * degreesRadiusTick10) + center, (cos * degreesRadiusTick10) + center) },
                         boldTick);
 
                     var sin1 = Math.Sin(-((i - textDegreesAngle) * Math.PI / 180.0) + Math.PI);
@@ -230,8 +230,8 @@ namespace SvgImageGenerator
                     d.DrawTextPath(
                         new[]
                         {
-                            new Vector((sin1 * degreesRadiusText) + center, (cos1 * degreesRadiusText) + center),
-                            new Vector((sin2 * degreesRadiusText) + center, (cos2 * degreesRadiusText) + center)
+                            new Vector2D((sin1 * degreesRadiusText) + center, (cos1 * degreesRadiusText) + center),
+                            new Vector2D((sin2 * degreesRadiusText) + center, (cos2 * degreesRadiusText) + center)
                         }
                         , i.ToString("000"), textNormal);
                 }
@@ -239,16 +239,16 @@ namespace SvgImageGenerator
                 {
                     d.DrawPolyline(
                         new[] {
-                            new Vector((sin * degreesRadius) + center, (cos * degreesRadius) + center),
-                            new Vector((sin * degreesRadiusTick5) + center, (cos * degreesRadiusTick5) + center) },
+                            new Vector2D((sin * degreesRadius) + center, (cos * degreesRadius) + center),
+                            new Vector2D((sin * degreesRadiusTick5) + center, (cos * degreesRadiusTick5) + center) },
                         normalTick);
                 }
                 else
                 {
                     d.DrawPolyline(
                         new[] {
-                            new Vector((sin * degreesRadius) + center, (cos * degreesRadius) + center),
-                            new Vector((sin * degreesRadiusTick1) + center, (cos * degreesRadiusTick1) + center) },
+                            new Vector2D((sin * degreesRadius) + center, (cos * degreesRadius) + center),
+                            new Vector2D((sin * degreesRadiusTick1) + center, (cos * degreesRadiusTick1) + center) },
                         normalTick);
                 }
             }
@@ -263,8 +263,8 @@ namespace SvgImageGenerator
                 {
                     d.DrawPolyline(
                         new[] {
-                        new Vector((sin * milsRadius) + center, (cos * milsRadius) + center),
-                        new Vector((sin * milsRadiusTick100) + center, (cos * milsRadiusTick100) + center) },
+                        new Vector2D((sin * milsRadius) + center, (cos * milsRadius) + center),
+                        new Vector2D((sin * milsRadiusTick100) + center, (cos * milsRadiusTick100) + center) },
                         boldTick);
 
 
@@ -276,8 +276,8 @@ namespace SvgImageGenerator
                     d.DrawTextPath(
                         new[]
                         {
-                            new Vector((sin1 * milsRadiusText) + center, (cos1 * milsRadiusText) + center),
-                            new Vector((sin2 * milsRadiusText) + center, (cos2 * milsRadiusText) + center)
+                            new Vector2D((sin1 * milsRadiusText) + center, (cos1 * milsRadiusText) + center),
+                            new Vector2D((sin2 * milsRadiusText) + center, (cos2 * milsRadiusText) + center)
                         }
                         , (i / 100).ToString("00"), textNormal);
                 }
@@ -285,30 +285,30 @@ namespace SvgImageGenerator
                 {
                     d.DrawPolyline(
                         new[] {
-                            new Vector((sin * milsRadius) + center, (cos * milsRadius) + center),
-                            new Vector((sin * milsRadiusTick20) + center, (cos * milsRadiusTick20) + center) },
+                            new Vector2D((sin * milsRadius) + center, (cos * milsRadius) + center),
+                            new Vector2D((sin * milsRadiusTick20) + center, (cos * milsRadiusTick20) + center) },
                         normalTick);
                 }
                 else
                 {
                     d.DrawPolyline(
                         new[] {
-                            new Vector((sin * milsRadius)  + center, (cos * milsRadius) + center),
-                            new Vector((sin * milsRadiusTick10) + center, (cos * milsRadiusTick10) + center) },
+                            new Vector2D((sin * milsRadius)  + center, (cos * milsRadius) + center),
+                            new Vector2D((sin * milsRadiusTick10) + center, (cos * milsRadiusTick10) + center) },
                         normalTick);
                 }
             }
 
-            d.DrawPolyline(new[] { new Vector(center - centerCrossRadius, center), new Vector(center + centerCrossRadius, center) }, boldTick);
-            d.DrawPolyline(new[] { new Vector(center, center - centerCrossRadius), new Vector(center, center + centerCrossRadius) }, boldTick);
+            d.DrawPolyline(new[] { new Vector2D(center - centerCrossRadius, center), new Vector2D(center + centerCrossRadius, center) }, boldTick);
+            d.DrawPolyline(new[] { new Vector2D(center, center - centerCrossRadius), new Vector2D(center, center + centerCrossRadius) }, boldTick);
 
-            d.DrawText(new Vector(center, center - cardinalNorthRadiusText), "N", textCardinalBC);
-            d.DrawTextPath(new[] { new Vector(center + cardinalHalfWidthText, center + cardinalRadiusText), new Vector(center - cardinalHalfWidthText, center + cardinalRadiusText) }, "S", textCardinal);
-            d.DrawTextPath(new[] { new Vector(center + cardinalRadiusText, center - cardinalHalfWidthText), new Vector(center + cardinalRadiusText, center + cardinalHalfWidthText) }, "E", textCardinal);
-            d.DrawTextPath(new[] { new Vector(center - cardinalRadiusText, center + cardinalHalfWidthText), new Vector(center - cardinalRadiusText, center - cardinalHalfWidthText) }, "W", textCardinal);
+            d.DrawText(new Vector2D(center, center - cardinalNorthRadiusText), "N", textCardinalBC);
+            d.DrawTextPath(new[] { new Vector2D(center + cardinalHalfWidthText, center + cardinalRadiusText), new Vector2D(center - cardinalHalfWidthText, center + cardinalRadiusText) }, "S", textCardinal);
+            d.DrawTextPath(new[] { new Vector2D(center + cardinalRadiusText, center - cardinalHalfWidthText), new Vector2D(center + cardinalRadiusText, center + cardinalHalfWidthText) }, "E", textCardinal);
+            d.DrawTextPath(new[] { new Vector2D(center - cardinalRadiusText, center + cardinalHalfWidthText), new Vector2D(center - cardinalRadiusText, center - cardinalHalfWidthText) }, "W", textCardinal);
 
-            d.DrawCircle(new Vector(center, center - cardinalRadiusText), dragRadius, outer);
-            d.DrawCircle(new Vector(center, center - cardinalRadiusText), dragRadius + 0.5f, normalTick);
+            d.DrawCircle(new Vector2D(center, center - cardinalRadiusText), dragRadius, outer);
+            d.DrawCircle(new Vector2D(center, center - cardinalRadiusText), dragRadius + 0.5f, normalTick);
         }
 
         private static string CleanForJs(string v)
