@@ -105,7 +105,7 @@ namespace GameMapStorageWebSite
             if (string.IsNullOrEmpty(connectionString))
             {
                 var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GameMapStorage");
-                Directory.CreateDirectory(directory);
+                try { Directory.CreateDirectory(directory); } catch (Exception ex) { /* Handle exception */ }
                 connectionString = "Data Source=" + Path.Combine(directory, "context.db");
             }
 
