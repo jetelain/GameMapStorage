@@ -28,7 +28,7 @@ namespace GameMapStorageWebSite.Controllers
         }
 
         [Route("maps/{gameName}")]
-        public async Task<IActionResult> Game(string gameName)
+        public async Task<IActionResult> Game(string gameName, string? tag = null)
         {
             var game = await _context.Games
                 .Where(g => g.Name == gameName)
@@ -38,11 +38,16 @@ namespace GameMapStorageWebSite.Controllers
                 return NotFound();
             }
 
-            var maps = await _context.GameMaps
+            var maps = _context.GameMaps
                 .Include(m => m.Game)
-                .Where(m => m.Game == game).ToListAsync();
+                .Where(m => m.Game == game);
 
-            return View(new HomeGameViewModel() { Maps = maps, Game = game, AcceptWebp = ImagePathHelper.AcceptWebp(Request) });
+            if (tag != null)
+            {
+                maps = maps.Where(m => m.Tags!.Contains(tag));
+            }
+
+            return View(new HomeGameViewModel() { Maps = await maps.ToListAsync(), Game = game, AcceptWebp = ImagePathHelper.AcceptWebp(Request), Tag = tag });
         }
 
 

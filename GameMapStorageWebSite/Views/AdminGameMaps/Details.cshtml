@@ -77,6 +77,14 @@
             <dd class="col-sm-8">
                 @Html.DisplayFor(model => model.Aliases)
             </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Tags)
+            </dt>
+            <dd class="col-sm-8">
+                @{
+                    await Html.RenderPartialAsync("_Tags", new TagsViewModel(Model!.Tags, Model!.Game!.Name));
+                }
+            </dd>
             <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.OriginX)
             </dt>

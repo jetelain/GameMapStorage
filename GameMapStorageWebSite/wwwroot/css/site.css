@@ -45,3 +45,13 @@ img.thumbnail-640-360 {
 .leaflet-container .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
     box-shadow: none;
 }
+
+.badge .badge-inner {
+    font-weight: normal;
+    color: black;
+    background: white;
+    padding: 0em 0.25em;
+    margin-right: -0.45em;
+    border-end-end-radius: 0.25em;
+    border-start-end-radius: 0.25em;
+}

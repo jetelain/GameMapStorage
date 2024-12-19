@@ -36,6 +36,9 @@ namespace GameMapStorageWebSite.Entities
         [Display(Name = "Y Origin")]
         public double OriginY { get; set; }
 
+        [Display(Name = "Tags")]
+        public string[]? Tags { get; set; }
+
         public DateTime? LastChangeUtc { get; set; }
 
         // FK to Game

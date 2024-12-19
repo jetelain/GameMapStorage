@@ -6,12 +6,24 @@
 <h1 class="text-center">
     @Model.Game.EnglishTitle
 </h1>
-@if (Model.Maps.Count > 0)
+@if (!string.IsNullOrEmpty(Model.Tag))
+{
+    <p class="text-center">
+        Maps with tag
+        @{
+            await Html.RenderPartialAsync("_Tags", new TagsViewModel([Model.Tag], Model.Game.Name));
+        }
+    </p>
+}
+else if (Model.Maps.Count > 0)
 {
     <p class="text-center">@string.Format("{0} maps in the atlas. Total of {1} km² and {2} cities.", Model.Maps.Count, Model.Maps.Sum(map => Math.Round(map.SizeInMeters * map.SizeInMeters / 1000000.0)), Model.Maps.Sum(map => map.CitiesCount))</p>
 }
 <p class="text-center">
-    
+    @if (!string.IsNullOrEmpty(Model.Tag))
+    {
+        <a asp-action="Game" asp-route-gameName="@Model.Game.Name" class="btn btn-sm btn-secondary me-2"><i class="fa-solid fa-arrow-left"></i> Show All Maps</a>
+    }
     <a href="@Model.Game.OfficialSiteUri" class="btn btn-sm btn-secondary"><i class="fa-solid fa-arrow-up-right-from-square"></i> Official Web Site</a>
     @if (!string.IsNullOrEmpty(Model.Game.SteamAppId))
     {

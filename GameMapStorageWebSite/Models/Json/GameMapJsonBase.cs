@@ -20,6 +20,7 @@ namespace GameMapStorageWebSite.Models.Json
             SizeInMeters = gameMap.SizeInMeters;
             Name = gameMap.Name;
             Aliases = gameMap.Aliases;
+            Tags = gameMap.Tags;
             LastChangeUtc = gameMap.LastChangeUtc;
             OriginX = gameMap.OriginX;
             OriginY = gameMap.OriginY;
@@ -44,6 +45,8 @@ namespace GameMapStorageWebSite.Models.Json
         public string? Name { get; set; }
 
         public string[]? Aliases { get; set; }
+
+        public string[]? Tags { get; set; }
 
         public string? Thumbnail { get; set; }
 

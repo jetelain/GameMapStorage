@@ -9,5 +9,6 @@ namespace GameMapStorageWebSite.Models
         public required Game Game { get; set; }
 
         public required List<GameMap> Maps { get; set; }
+        public string? Tag { get; internal set; }
     }
 }
