@@ -1,0 +1,16 @@
+﻿@model TagsViewModel
+@if (Model != null)
+{
+    foreach (var tag in Model.Tags)
+    {
+        var sep = tag.IndexOf(':');
+        if (sep != -1)
+        {
+            <a asp-controller="Home" asp-action="Game" asp-route-gameName="@Model.GameName" asp-route-tag="@tag" class="badge bg-secondary text-decoration-none">@tag.Substring(0, sep) <span class="badge-inner">@tag.Substring(sep + 1)</span></a>
+        }
+        else
+        {
+            <a asp-controller="Home" asp-action="Game" asp-route-gameName="@Model.GameName" asp-route-tag="@tag" class="badge bg-secondary text-decoration-none">@tag</a>
+        }
+    }
+}

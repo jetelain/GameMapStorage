@@ -63,12 +63,13 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize("AdminEdit")]
-        public async Task<IActionResult> Create([Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,Name,OriginX,OriginY,GameId")] GameMap gameMap, string? aliases)
+        public async Task<IActionResult> Create([Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,Name,OriginX,OriginY,GameId")] GameMap gameMap, string? aliases, string? tags)
         {
             if (ModelState.IsValid)
             {
                 gameMap.LastChangeUtc = DateTime.UtcNow;
-                gameMap.Aliases = GetAliases(aliases);
+                gameMap.Aliases = GetCommaSeparated(aliases);
+                gameMap.Tags = GetCommaSeparated(tags);
                 _context.Add(gameMap);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -100,7 +101,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize("AdminEdit")]
-        public async Task<IActionResult> Edit(int id, [Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,OriginX,OriginY,Name")] GameMap gameMap, string? aliases)
+        public async Task<IActionResult> Edit(int id, [Bind("GameMapId,EnglishTitle,AppendAttribution,SteamWorkshopId,OfficialSiteUri,SizeInMeters,OriginX,OriginY,Name")] GameMap gameMap, string? aliases, string? tags)
         {
             if (id != gameMap.GameMapId)
             {
@@ -121,7 +122,8 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 existing.Name = gameMap.Name;
                 existing.OriginX = gameMap.OriginX;
                 existing.OriginY = gameMap.OriginY;
-                existing.Aliases = GetAliases(aliases);
+                existing.Aliases = GetCommaSeparated(aliases);
+                existing.Tags = GetCommaSeparated(tags);
                 existing.LastChangeUtc = DateTime.UtcNow;
                 existing.CitiesCount = await _context.GameMapLocations.Where(l => l.GameMapId == gameMap.GameMapId && l.Type == LocationType.City).CountAsync();
                 _context.Update(existing);
@@ -131,7 +133,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
             return View(gameMap);
         }
 
-        private string[]? GetAliases(string? aliases)
+        private string[]? GetCommaSeparated(string? aliases)
         {
             if (string.IsNullOrEmpty(aliases) )
             {

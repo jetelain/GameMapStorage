@@ -40,6 +40,15 @@
                     <dd class="col-8">
                         @string.Format("{0} x {0} km, {1} km²", Math.Round(Model.Map.SizeInMeters / 1000.0, 1), Math.Round(Model.Map.SizeInMeters * Model.Map.SizeInMeters / 1000000.0))
                     </dd>
+                    @if (Model.Map.Tags != null && Model.Map.Tags.Length > 0)
+                    {
+                        <dt class="col-4">Tags</dt>
+                        <dd class="col-8">
+                            @{
+                                await Html.RenderPartialAsync("_Tags", new TagsViewModel(Model.Map.Tags, Model.Game.Name));
+                            }
+                        </dd>
+                    }
                 </dl>
 
                 <h2 class="h6">Links</h2>

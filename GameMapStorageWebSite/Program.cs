@@ -101,10 +101,15 @@ namespace GameMapStorageWebSite
                     jsonOptions.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
-            services.AddDbContext<GameMapStorageContext>(options =>
-                options.UseSqlite(
-                    configuration.GetConnectionString("GameMapStorageContext") ??
-                    "Data Source=" + Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GameMapStorage", "context.db")));
+            var connectionString = configuration.GetConnectionString("GameMapStorageContext");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GameMapStorage");
+                Directory.CreateDirectory(directory);
+                connectionString = "Data Source=" + Path.Combine(directory, "context.db");
+            }
+
+            services.AddDbContext<GameMapStorageContext>(options => options.UseSqlite(connectionString));
 
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
@@ -152,7 +157,7 @@ namespace GameMapStorageWebSite
         {
             if (config.Mode == DataMode.Proxy)
             {
-                services.AddScoped<IStorageService, ProxyStorageService>();
+                services.AddSingleton<IStorageService, ProxyStorageService>();
                 services.AddHttpClient("Proxy", client => { client.BaseAddress = config.ProxyUri!; })
                     .AddStandardResilienceHandler();
             }

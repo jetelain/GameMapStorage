@@ -35,6 +35,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
             target.LastChangeUtc = source.LastChangeUtc;
             target.Name = source.Name;
             target.Aliases = source.Aliases;
+            target.Tags = source.Tags;
             target.OriginX = source.OriginX;
             target.OriginY = source.OriginY;
 
@@ -111,6 +112,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Maps
                 LastChangeUtc = source.LastChangeUtc,
                 Name = source.Name,
                 Aliases = source.Aliases,
+                Tags = source.Tags,
                 OriginX = source.OriginX,
                 OriginY = source.OriginY,
 
