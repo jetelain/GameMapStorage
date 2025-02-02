@@ -28,7 +28,7 @@ namespace GameMapStorageWebSite.Controllers
         }
 
         [Route("maps/{gameName}")]
-        public async Task<IActionResult> Game(string gameName, string? tag = null)
+        public async Task<IActionResult> Game(string gameName, string? tag = null, string? steamWorkshopId = null)
         {
             var game = await _context.Games
                 .Where(g => g.Name == gameName)
@@ -46,8 +46,12 @@ namespace GameMapStorageWebSite.Controllers
             {
                 maps = maps.Where(m => m.Tags!.Contains(tag));
             }
+            if (steamWorkshopId != null)
+            {
+                maps = maps.Where(m => m.SteamWorkshopId == steamWorkshopId);
+            }
 
-            return View(new HomeGameViewModel() { Maps = await maps.ToListAsync(), Game = game, AcceptWebp = ImagePathHelper.AcceptWebp(Request), Tag = tag });
+            return View(new HomeGameViewModel() { Maps = await maps.ToListAsync(), Game = game, AcceptWebp = ImagePathHelper.AcceptWebp(Request), Tag = tag, SteamWorkshopId = steamWorkshopId });
         }
 
 
