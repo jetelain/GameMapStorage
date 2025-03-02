@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Models;
+using GameMapStorageWebSite.Services.Steam;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,13 @@ namespace GameMapStorageWebSite.Controllers
     {
         private readonly GameMapStorageContext _context;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
+        private readonly ISteamModService _steamModService;
 
-        public HomeController(GameMapStorageContext context, IAuthenticationSchemeProvider schemeProvider)
+        public HomeController(GameMapStorageContext context, IAuthenticationSchemeProvider schemeProvider, ISteamModService steamModService)
         {
             _context = context;
             _schemeProvider = schemeProvider;
+            _steamModService = steamModService;
         }
 
         public async Task<IActionResult> Index()
@@ -42,6 +45,8 @@ namespace GameMapStorageWebSite.Controllers
                 .Include(m => m.Game)
                 .Where(m => m.Game == game);
 
+            SteamModInfos? modInfos = null;
+
             if (tag != null)
             {
                 maps = maps.Where(m => m.Tags!.Contains(tag));
@@ -49,9 +54,10 @@ namespace GameMapStorageWebSite.Controllers
             if (steamWorkshopId != null)
             {
                 maps = maps.Where(m => m.SteamWorkshopId == steamWorkshopId);
+                modInfos = await _steamModService.GetModInfosAsync(steamWorkshopId);
             }
 
-            return View(new HomeGameViewModel() { Maps = await maps.ToListAsync(), Game = game, AcceptWebp = ImagePathHelper.AcceptWebp(Request), Tag = tag, SteamWorkshopId = steamWorkshopId });
+            return View(new HomeGameViewModel() { Maps = await maps.ToListAsync(), Game = game, AcceptWebp = ImagePathHelper.AcceptWebp(Request), Tag = tag, SteamWorkshopId = steamWorkshopId, ModInfos = modInfos });
         }
 
 
@@ -119,12 +125,20 @@ namespace GameMapStorageWebSite.Controllers
                 return View("NotYetAvailable", map);
             }
 
+            SteamModInfos? modInfos = null;
+
+            if (map.SteamWorkshopId != null)
+            {
+                modInfos = await _steamModService.GetModInfosAsync(map.SteamWorkshopId);
+            }
+
             return View(new HomeMapViewModel() {
                 Game = map.Game!, 
                 Map = map, 
                 Layer = layer,
                 AcceptWebp = ImagePathHelper.AcceptWebp(Request),
                 HasPaperMaps = await _context.GamePaperMaps.Where(m => m.GameMap == map).AnyAsync(),
+                ModInfos = modInfos,
                 MapInfos = new LayerDisplayOptions()
                 {
                     FactorX = layer.FactorX,

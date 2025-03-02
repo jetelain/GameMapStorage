@@ -15,12 +15,18 @@
         }
     </p>
 }
+else if (!string.IsNullOrEmpty(Model.SteamWorkshopId))
+{
+    <p class="text-center">
+        Maps from mod @Model.ModInfos?.Title
+    </p>
+}
 else if (Model.Maps.Count > 0)
 {
     <p class="text-center">@string.Format("{0} maps in the atlas. Total of {1} km² and {2} cities.", Model.Maps.Count, Model.Maps.Sum(map => Math.Round(map.SizeInMeters * map.SizeInMeters / 1000000.0)), Model.Maps.Sum(map => map.CitiesCount))</p>
 }
 <p class="text-center">
-    @if (!string.IsNullOrEmpty(Model.Tag))
+    @if (!string.IsNullOrEmpty(Model.Tag) || !string.IsNullOrEmpty(Model.SteamWorkshopId))
     {
         <a asp-action="Game" asp-route-gameName="@Model.Game.Name" class="btn btn-sm btn-secondary me-2"><i class="fa-solid fa-arrow-left"></i> Show All Maps</a>
     }
@@ -28,6 +34,10 @@ else if (Model.Maps.Count > 0)
     @if (!string.IsNullOrEmpty(Model.Game.SteamAppId))
     {
         <a href="https://store.steampowered.com/app/@(Model.Game.SteamAppId)/" class="btn btn-sm btn-secondary"><i class="fa-brands fa-steam"></i> Steam Store Page</a>
+    }    
+    @if (!string.IsNullOrEmpty(Model.SteamWorkshopId))
+    {
+        <a href="https://steamcommunity.com/workshop/filedetails/?id=@Model.SteamWorkshopId" class="btn btn-sm btn-secondary"><i class="fa-brands fa-steam"></i> @(Model.ModInfos?.Title ?? "Steam Workshop")</a>
     }
 </p>
 

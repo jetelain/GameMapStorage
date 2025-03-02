@@ -1,4 +1,5 @@
 ﻿using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.Steam;
 
 namespace GameMapStorageWebSite.Models
 {
@@ -14,5 +15,6 @@ namespace GameMapStorageWebSite.Models
 
         public required LayerDisplayOptions MapInfos { get; set; }
         public bool HasPaperMaps { get; internal set; }
+        public SteamModInfos? ModInfos { get; internal set; }
     }
 }

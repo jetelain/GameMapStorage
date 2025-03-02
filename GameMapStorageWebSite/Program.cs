@@ -7,11 +7,12 @@ using GameMapStorageWebSite.Security;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Mirroring;
+using GameMapStorageWebSite.Services.Steam;
 using GameMapStorageWebSite.Services.Storages;
 using GameMapStorageWebSite.Works;
-using GameMapStorageWebSite.Works.MirrorPaperMaps;
 using GameMapStorageWebSite.Works.MigrateArma3Maps;
 using GameMapStorageWebSite.Works.MirrorLayers;
+using GameMapStorageWebSite.Works.MirrorPaperMaps;
 using GameMapStorageWebSite.Works.ProcessLayers;
 using GameMapStorageWebSite.Works.UnpackLayers;
 using Microsoft.AspNetCore.Authentication.BearerToken;
@@ -141,6 +142,8 @@ namespace GameMapStorageWebSite
             services.AddSingleton<IDataConfigurationService>(config);
             
             services.AddScoped<IMirrorService, MirrorService>();
+            services.AddScoped<ISteamModService, SteamModService>();
+
 
 #if DEBUG
             services.AddOpenApiDocument();

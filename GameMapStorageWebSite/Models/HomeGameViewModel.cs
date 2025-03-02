@@ -1,4 +1,5 @@
 ﻿using GameMapStorageWebSite.Entities;
+using GameMapStorageWebSite.Services.Steam;
 
 namespace GameMapStorageWebSite.Models
 {
@@ -11,5 +12,6 @@ namespace GameMapStorageWebSite.Models
         public required List<GameMap> Maps { get; set; }
         public string? Tag { get; internal set; }
         public string? SteamWorkshopId { get; internal set; }
+        public SteamModInfos? ModInfos { get; internal set; }
     }
 }
