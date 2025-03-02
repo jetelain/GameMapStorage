@@ -35,6 +35,11 @@
                     {
                         <dt class="col-4">Author</dt>
                         <dd class="col-8">@Model.Map.AppendAttribution</dd>
+                    }                    
+                    @if (!string.IsNullOrEmpty(Model.ModInfos?.Title))
+                    {
+                        <dt class="col-4">Mod</dt>
+                        <dd class="col-8"><a asp-controller="Home" asp-action="Game" asp-route-gameName="@Model.Game.Name" asp-route-steamWorkshopId="@Model.Map.SteamWorkshopId">@Model.ModInfos.Title</a></dd>
                     }
                     <dt class="col-4">Size</dt>
                     <dd class="col-8">
