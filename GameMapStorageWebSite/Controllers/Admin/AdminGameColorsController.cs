@@ -60,10 +60,11 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize("AdminEdit")]
-        public async Task<IActionResult> Create([Bind("GameColorId,EnglishTitle,Name,Hexadecimal,ContrastHexadecimal,Usage,GameId")] GameColor gameColor)
+        public async Task<IActionResult> Create([Bind("GameColorId,EnglishTitle,Name,Hexadecimal,ContrastHexadecimal,Usage,GameId")] GameColor gameColor, string? aliases)
         {
             if (ModelState.IsValid)
             {
+                gameColor.Aliases = CommaSeparatedHelper.Parse(aliases?.ToLowerInvariant()); // aliases must be lowercase, to make SQL request simplier
                 _context.Add(gameColor);
                 await UpdateGameTimestamp(gameColor);
                 await _context.SaveChangesAsync();
@@ -97,7 +98,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize("AdminEdit")]
-        public async Task<IActionResult> Edit(int id, [Bind("GameColorId,EnglishTitle,Name,Hexadecimal,ContrastHexadecimal,Usage,GameId")] GameColor gameColor)
+        public async Task<IActionResult> Edit(int id, [Bind("GameColorId,EnglishTitle,Name,Hexadecimal,ContrastHexadecimal,Usage,GameId")] GameColor gameColor, string? aliases)
         {
             if (id != gameColor.GameColorId)
             {
@@ -108,6 +109,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
             {
                 try
                 {
+                    gameColor.Aliases = CommaSeparatedHelper.Parse(aliases?.ToLowerInvariant()); // aliases must be lowercase, to make SQL request simplier
                     _context.Update(gameColor);
                     await UpdateGameTimestamp(gameColor);
                     await _context.SaveChangesAsync();

@@ -68,8 +68,8 @@ namespace GameMapStorageWebSite.Controllers.Admin
             if (ModelState.IsValid)
             {
                 gameMap.LastChangeUtc = DateTime.UtcNow;
-                gameMap.Aliases = GetCommaSeparated(aliases);
-                gameMap.Tags = GetCommaSeparated(tags);
+                gameMap.Aliases = CommaSeparatedHelper.Parse(aliases);
+                gameMap.Tags = CommaSeparatedHelper.Parse(tags);
                 _context.Add(gameMap);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -122,8 +122,8 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 existing.Name = gameMap.Name;
                 existing.OriginX = gameMap.OriginX;
                 existing.OriginY = gameMap.OriginY;
-                existing.Aliases = GetCommaSeparated(aliases);
-                existing.Tags = GetCommaSeparated(tags);
+                existing.Aliases = CommaSeparatedHelper.Parse(aliases);
+                existing.Tags = CommaSeparatedHelper.Parse(tags);
                 existing.LastChangeUtc = DateTime.UtcNow;
                 existing.CitiesCount = await _context.GameMapLocations.Where(l => l.GameMapId == gameMap.GameMapId && l.Type == LocationType.City).CountAsync();
                 _context.Update(existing);
@@ -131,15 +131,6 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 return RedirectToAction(nameof(Details), new { id = gameMap.GameMapId });
             }
             return View(gameMap);
-        }
-
-        private string[]? GetCommaSeparated(string? aliases)
-        {
-            if (string.IsNullOrEmpty(aliases) )
-            {
-                return [];
-            }
-            return aliases.Split(';', ',').Select(a => a.Trim()).Where(a => !string.IsNullOrEmpty(a)).ToArray();
         }
 
         [HttpPost]

@@ -10,6 +10,9 @@ namespace GameMapStorageWebSite.Entities
 
         public required string Name { get; set; }
 
+        [Display(Name = "Aliases")]
+        public string[]? Aliases { get; set; }
+
         [Display(Name = "Color Code")]
         public required string Hexadecimal {  get; set; }
 

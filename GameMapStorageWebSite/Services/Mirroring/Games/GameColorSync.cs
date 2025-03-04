@@ -17,6 +17,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
             target.EnglishTitle = source.EnglishTitle!;
             target.Hexadecimal = source.Hexadecimal!;
             target.Name = source.Name!;
+            target.Aliases = source.Aliases;
             target.ContrastHexadecimal = source.ContrastHexadecimal!;
             return true;
         }
@@ -38,6 +39,7 @@ namespace GameMapStorageWebSite.Services.Mirroring.Games
                 Hexadecimal = source.Hexadecimal!,
                 ContrastHexadecimal = source.ContrastHexadecimal!,
                 Name = source.Name!,
+                Aliases = source.Aliases,
                 Usage = source.Usage,
                 GameColorId = keepId ? source.GameColorId : default
             };
