@@ -27,7 +27,7 @@ namespace GameMapStorageWebSite.Models.Json
 
         public string? Name { get; set; }
 
-        public string[]? Aliases { get; }
+        public string[]? Aliases { get; set; }
 
         public string? Hexadecimal { get; set; }
 
