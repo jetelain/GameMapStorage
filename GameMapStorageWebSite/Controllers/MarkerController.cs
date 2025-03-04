@@ -101,10 +101,16 @@ namespace GameMapStorageWebSite.Controllers
             {
                 return color;
             }
-            var gameColor = await _context.GameColors.FirstOrDefaultAsync(m => m.GameId == gameId && m.Name.ToLower() == colorHexOrName.ToLower());
+            var lcaseName = colorHexOrName.ToLower();
+
+            var gameColor = await _context.GameColors.FirstOrDefaultAsync(m => m.GameId == gameId && m.Name.ToLower() == lcaseName);
             if (gameColor == null)
             {
-                return null;
+                gameColor = await _context.GameColors.FirstOrDefaultAsync(m => m.GameId == gameId && m.Aliases!.Contains(lcaseName));
+                if (gameColor == null)
+                {
+                    return null;
+                }
             }
             return Rgba32.ParseHex(gameColor.Hexadecimal);
         }
