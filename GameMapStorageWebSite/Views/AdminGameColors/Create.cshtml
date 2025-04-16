@@ -24,7 +24,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Aliases" class="control-label"></label>
-                <input name="Aliases" value="@string.Join(';',Model.Aliases ?? [])" class="form-control" />
+                <input name="Aliases" value="@string.Join(';',Model?.Aliases ?? [])" class="form-control" />
                 <span asp-validation-for="Aliases" class="text-danger"></span>
             </div>
             <div class="form-group">
