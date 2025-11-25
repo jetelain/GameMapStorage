@@ -107,10 +107,10 @@ namespace GameMapStorageWebSite.Controllers
             {
                 foreach (var alias in aliases)
                 {
-                    sb.Append($@"Arma3Map.Maps.{alias} =");
+                    sb.Append($@"Arma3Map.Maps['{alias}'] =");
                 }
             }
-            sb.Append($@"Arma3Map.Maps.{layer.GameMap!.Name} = {{
+            sb.Append($@"Arma3Map.Maps['{layer.GameMap!.Name}'] = {{
   CRS: MGRS_CRS({layer.FactorX.ToString(CultureInfo.InvariantCulture)}, {layer.FactorY.ToString(CultureInfo.InvariantCulture)}, {layer.TileSize}),
 {json.Substring(1).TrimStart('\r','\n')};");
         }
