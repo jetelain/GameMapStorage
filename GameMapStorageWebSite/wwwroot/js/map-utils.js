@@ -540,7 +540,9 @@ var GameMapUtils;
         L.tileLayer(mapInfos.tilePattern, {
             attribution: mapInfos.attribution,
             tileSize: mapInfos.tileSize,
-            maxNativeZoom: mapInfos.maxZoom
+            maxNativeZoom: mapInfos.maxZoom,
+            noWrap: true,
+            bounds: [[0, 0], [mapInfos.sizeInMeters, mapInfos.sizeInMeters]]
         }).addTo(map);
         if (mapInfos.bounds) {
             map.fitBounds(mapInfos.bounds);
