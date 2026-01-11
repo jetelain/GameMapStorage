@@ -531,8 +531,9 @@ var GameMapUtils;
             zoomSnap: 0.25,
             zoomAnimation: !mapInfos.isSvg
         });
+        const sizeInMeters = mapInfos.sizeInMeters || (mapInfos.tileSize / mapInfos.factorX);
         map.grid = new MapGrid({
-            sizeInMeters: mapInfos.sizeInMeters || (mapInfos.tileSize / mapInfos.factorX),
+            sizeInMeters: sizeInMeters,
             originX: mapInfos.originX || 0,
             originY: mapInfos.originY || 0,
             defaultPrecision: 4
@@ -540,7 +541,9 @@ var GameMapUtils;
         L.tileLayer(mapInfos.tilePattern, {
             attribution: mapInfos.attribution,
             tileSize: mapInfos.tileSize,
-            maxNativeZoom: mapInfos.maxZoom
+            maxNativeZoom: mapInfos.maxZoom,
+            noWrap: true,
+            bounds: [[0, 0], [sizeInMeters, sizeInMeters]]
         }).addTo(map);
         if (mapInfos.bounds) {
             map.fitBounds(mapInfos.bounds);
