@@ -74,8 +74,7 @@
             })
             .catch(function(error) {
                 console.error('Map search error:', error);
-                resultsContainer.innerHTML = '<div class="p-3 text-danger">Error searching maps</div>';
-                resultsContainer.style.display = 'block';
+                showMessage(resultsContainer, 'Error searching maps', 'text-danger');
             });
     }
 
@@ -83,46 +82,60 @@
      * Display search results in the dropdown
      */
     function displayResults(results, container) {
-        if (results.length === 0) {
-            container.innerHTML = '<div class="p-3 text-muted">No maps found</div>';
-            container.style.display = 'block';
+        container.textContent = '';
+
+        if (!Array.isArray(results) || results.length === 0) {
+            showMessage(container, 'No maps found', 'text-muted');
             return;
         }
 
-        var html = '<div class="list-group list-group-flush">';
-        results.forEach(function(map) {
-            var escapedMapUrl = escapeHtml(map.mapUrl);
-            var escapedThumbnailUrl = escapeHtml(map.thumbnailUrl);
-            var escapedMapTitle = escapeHtml(map.mapTitle);
-            var escapedGameTitle = escapeHtml(map.gameTitle);
-            // Use original values for alt text since they'll be used in an attribute
-            var altText = escapeHtml('Map thumbnail for ' + map.mapTitle + ' in ' + map.gameTitle);
-            
-            html += '<a href="' + escapedMapUrl + '" class="list-group-item list-group-item-action">';
-            html += '<div class="d-flex align-items-center">';
-            html += '<img src="' + escapedThumbnailUrl + '" alt="' + altText + '" class="me-3" style="width: 80px; height: 80px; object-fit: cover;" />';
-            html += '<div>';
-            html += '<h6 class="mb-1">' + escapedMapTitle + '</h6>';
-            html += '<small class="text-muted">' + escapedGameTitle + '</small>';
-            html += '</div>';
-            html += '</div>';
-            html += '</a>';
-        });
-        html += '</div>';
+        var listGroup = document.createElement('div');
+        listGroup.className = 'list-group list-group-flush';
 
-        container.innerHTML = html;
+        results.forEach(function(map) {
+            var link = document.createElement('a');
+            link.className = 'list-group-item list-group-item-action';
+            link.href = map.mapUrl || '#';
+
+            var contentWrapper = document.createElement('div');
+            contentWrapper.className = 'd-flex align-items-center';
+
+            var thumbnail = document.createElement('img');
+            thumbnail.className = 'me-3';
+            thumbnail.src = map.thumbnailUrl || '';
+            thumbnail.alt = 'Map thumbnail for ' + (map.mapTitle || '') + ' in ' + (map.gameTitle || '');
+            thumbnail.style.width = '80px';
+            thumbnail.style.height = '80px';
+            thumbnail.style.objectFit = 'cover';
+
+            var textContainer = document.createElement('div');
+
+            var title = document.createElement('h6');
+            title.className = 'mb-1';
+            title.textContent = map.mapTitle || '';
+
+            var subtitle = document.createElement('small');
+            subtitle.className = 'text-muted';
+            subtitle.textContent = map.gameTitle || '';
+
+            textContainer.appendChild(title);
+            textContainer.appendChild(subtitle);
+            contentWrapper.appendChild(thumbnail);
+            contentWrapper.appendChild(textContainer);
+            link.appendChild(contentWrapper);
+            listGroup.appendChild(link);
+        });
+
+        container.appendChild(listGroup);
         container.style.display = 'block';
     }
 
-    /**
-     * Escape HTML to prevent XSS
-     */
-    function escapeHtml(text) {
-        if (text == null || text === undefined) {
-            return '';
-        }
-        var div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
+    function showMessage(container, message, textClass) {
+        container.textContent = '';
+        var messageDiv = document.createElement('div');
+        messageDiv.className = 'p-3 ' + (textClass || '');
+        messageDiv.textContent = message;
+        container.appendChild(messageDiv);
+        container.style.display = 'block';
     }
 })();
