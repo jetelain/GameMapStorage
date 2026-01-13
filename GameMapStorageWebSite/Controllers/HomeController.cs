@@ -39,11 +39,14 @@ namespace GameMapStorageWebSite.Controllers
             }
 
             var acceptWebp = ImagePathHelper.AcceptWebp(Request);
+            
+            // Escape LIKE special characters to prevent unintended pattern matching
+            var escapedQuery = query.Replace("%", "[%]").Replace("_", "[_]");
 
             var maps = await _context.GameMaps
                 .Include(m => m.Game)
-                .Where(m => EF.Functions.Like(m.EnglishTitle, $"%{query}%") || 
-                           (m.Name != null && EF.Functions.Like(m.Name, $"%{query}%")))
+                .Where(m => EF.Functions.Like(m.EnglishTitle, $"%{escapedQuery}%") || 
+                           (m.Name != null && EF.Functions.Like(m.Name, $"%{escapedQuery}%")))
                 .Take(10)
                 .Select(m => new MapSearchResultViewModel
                 {
@@ -53,7 +56,7 @@ namespace GameMapStorageWebSite.Controllers
                     GameName = m.Game!.Name,
                     GameTitle = m.Game!.EnglishTitle,
                     ThumbnailUrl = ImagePathHelper.GetThumbnail(acceptWebp, m),
-                    MapUrl = Url.Action("Map", "Home", new { gameName = m.Game!.Name, mapName = m.Name })!
+                    MapUrl = Url.Action("Map", "Home", new { gameName = m.Game!.Name, mapName = m.Name ?? "" })!
                 })
                 .ToListAsync();
 
