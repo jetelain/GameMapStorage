@@ -121,7 +121,7 @@ namespace GameMapStorageWebSite
                 && !userAgent.Contains("Chrome/", StringComparison.OrdinalIgnoreCase)
                 && !userAgent.Contains("Chromium/", StringComparison.OrdinalIgnoreCase))
             {
-                // Firefox has supported WebP since version 16
+                // Safari has supported WebP since version 16
                 return GetUserAgentVersion("Version/", userAgent) >= 16;
             }
 
@@ -144,9 +144,9 @@ namespace GameMapStorageWebSite
             }
 
             var versionString = userAgent[versionIndex..endIndex];
-            if (Version.TryParse(versionString, out var safariVersion))
+            if (Version.TryParse(versionString, out var parsedVersion))
             {
-                return safariVersion.Major;
+                return parsedVersion.Major;
             }
 
             return 0;
