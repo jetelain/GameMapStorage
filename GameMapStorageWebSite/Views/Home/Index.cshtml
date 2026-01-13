@@ -69,12 +69,23 @@
 
                             var html = '<div class="list-group list-group-flush">';
                             results.forEach(function(map) {
-                                html += '<a href="' + map.mapUrl + '" class="list-group-item list-group-item-action">';
+                                var escapeHtml = function(text) {
+                                    var div = document.createElement('div');
+                                    div.textContent = text;
+                                    return div.innerHTML;
+                                };
+                                
+                                var escapedMapUrl = $('<div>').text(map.mapUrl).html();
+                                var escapedThumbnailUrl = $('<div>').text(map.thumbnailUrl).html();
+                                var escapedMapTitle = escapeHtml(map.mapTitle);
+                                var escapedGameTitle = escapeHtml(map.gameTitle);
+                                
+                                html += '<a href="' + escapedMapUrl + '" class="list-group-item list-group-item-action">';
                                 html += '<div class="d-flex align-items-center">';
-                                html += '<img src="' + map.thumbnailUrl + '" alt="' + map.mapTitle + '" class="me-3" style="width: 80px; height: 80px; object-fit: cover;" />';
+                                html += '<img src="' + escapedThumbnailUrl + '" alt="' + escapedMapTitle + '" class="me-3" style="width: 80px; height: 80px; object-fit: cover;" />';
                                 html += '<div>';
-                                html += '<h6 class="mb-1">' + map.mapTitle + '</h6>';
-                                html += '<small class="text-muted">' + map.gameTitle + '</small>';
+                                html += '<h6 class="mb-1">' + escapedMapTitle + '</h6>';
+                                html += '<small class="text-muted">' + escapedGameTitle + '</small>';
                                 html += '</div>';
                                 html += '</div>';
                                 html += '</a>';

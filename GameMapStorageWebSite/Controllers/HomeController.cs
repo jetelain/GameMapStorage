@@ -39,12 +39,11 @@ namespace GameMapStorageWebSite.Controllers
             }
 
             var acceptWebp = ImagePathHelper.AcceptWebp(Request);
-            var searchTerm = query.ToLower();
 
             var maps = await _context.GameMaps
                 .Include(m => m.Game)
-                .Where(m => m.EnglishTitle.ToLower().Contains(searchTerm) || 
-                           (m.Name != null && m.Name.ToLower().Contains(searchTerm)))
+                .Where(m => EF.Functions.Like(m.EnglishTitle, $"%{query}%") || 
+                           (m.Name != null && EF.Functions.Like(m.Name, $"%{query}%")))
                 .Take(10)
                 .Select(m => new MapSearchResultViewModel
                 {
