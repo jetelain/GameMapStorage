@@ -3,6 +3,17 @@
     ViewData["Title"] = "Home page";
 }
 
+<div class="mb-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="position-relative">
+                <input type="text" id="mapSearchInput" class="form-control" placeholder="Search for a map..." autocomplete="off" data-search-url="@Url.Action("SearchMaps", "Home")" />
+                <div id="searchResults" class="position-absolute w-100 bg-white border rounded shadow mt-1" style="display: none; z-index: 1000; max-height: 400px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row row-cols-1 row-cols-md-4">
     @foreach (var game in Model.Games.OrderBy(m => m.EnglishTitle))
     {
@@ -20,3 +31,7 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/map-search.js" asp-append-version="true"></script>
+}
