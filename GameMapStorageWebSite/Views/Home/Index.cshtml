@@ -67,16 +67,14 @@
                                 return;
                             }
 
+                            var escapeHtml = function(text) {
+                                return $('<div>').text(text).html();
+                            };
+
                             var html = '<div class="list-group list-group-flush">';
                             results.forEach(function(map) {
-                                var escapeHtml = function(text) {
-                                    var div = document.createElement('div');
-                                    div.textContent = text;
-                                    return div.innerHTML;
-                                };
-                                
-                                var escapedMapUrl = $('<div>').text(map.mapUrl).html();
-                                var escapedThumbnailUrl = $('<div>').text(map.thumbnailUrl).html();
+                                var escapedMapUrl = escapeHtml(map.mapUrl);
+                                var escapedThumbnailUrl = escapeHtml(map.thumbnailUrl);
                                 var escapedMapTitle = escapeHtml(map.mapTitle);
                                 var escapedGameTitle = escapeHtml(map.gameTitle);
                                 
