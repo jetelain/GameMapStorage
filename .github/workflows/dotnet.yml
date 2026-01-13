@@ -25,5 +25,5 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release GameMapStorage.sln
 
-#    - name: Test
-#      run: dotnet test --no-build --verbosity normal --configuration Release GameMapStorage.sln
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release GameMapStorage.sln
