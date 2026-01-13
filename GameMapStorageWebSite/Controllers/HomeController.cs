@@ -30,6 +30,37 @@ namespace GameMapStorageWebSite.Controllers
             return View(new HomeIndexViewModel() { Games = games, AcceptWebp = ImagePathHelper.AcceptWebp(Request) });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> SearchMaps(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+            {
+                return Json(new List<MapSearchResultViewModel>());
+            }
+
+            var acceptWebp = ImagePathHelper.AcceptWebp(Request);
+            var searchTerm = query.ToLower();
+
+            var maps = await _context.GameMaps
+                .Include(m => m.Game)
+                .Where(m => m.EnglishTitle.ToLower().Contains(searchTerm) || 
+                           (m.Name != null && m.Name.ToLower().Contains(searchTerm)))
+                .Take(10)
+                .Select(m => new MapSearchResultViewModel
+                {
+                    GameMapId = m.GameMapId,
+                    MapName = m.Name ?? "",
+                    MapTitle = m.EnglishTitle,
+                    GameName = m.Game!.Name,
+                    GameTitle = m.Game!.EnglishTitle,
+                    ThumbnailUrl = ImagePathHelper.GetThumbnail(acceptWebp, m),
+                    MapUrl = Url.Action("Map", "Home", new { gameName = m.Game!.Name, mapName = m.Name })!
+                })
+                .ToListAsync();
+
+            return Json(maps);
+        }
+
         [Route("maps/{gameName}")]
         public async Task<IActionResult> Game(string gameName, string? tag = null, string? steamWorkshopId = null)
         {

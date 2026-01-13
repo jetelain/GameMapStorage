@@ -3,6 +3,17 @@
     ViewData["Title"] = "Home page";
 }
 
+<div class="mb-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="position-relative">
+                <input type="text" id="mapSearchInput" class="form-control" placeholder="Search for a map..." autocomplete="off" />
+                <div id="searchResults" class="position-absolute w-100 bg-white border rounded shadow-sm mt-1" style="display: none; z-index: 1000; max-height: 400px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row row-cols-1 row-cols-md-4">
     @foreach (var game in Model.Games.OrderBy(m => m.EnglishTitle))
     {
@@ -20,3 +31,74 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var searchTimeout;
+            var $searchInput = $('#mapSearchInput');
+            var $searchResults = $('#searchResults');
+
+            // Close search results when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#mapSearchInput, #searchResults').length) {
+                    $searchResults.hide();
+                }
+            });
+
+            $searchInput.on('input', function() {
+                clearTimeout(searchTimeout);
+                var query = $(this).val().trim();
+
+                if (query.length < 2) {
+                    $searchResults.hide();
+                    return;
+                }
+
+                searchTimeout = setTimeout(function() {
+                    $.ajax({
+                        url: '@Url.Action("SearchMaps", "Home")',
+                        type: 'GET',
+                        data: { query: query },
+                        success: function(results) {
+                            if (results.length === 0) {
+                                $searchResults.html('<div class="p-3 text-muted">No maps found</div>');
+                                $searchResults.show();
+                                return;
+                            }
+
+                            var html = '<div class="list-group list-group-flush">';
+                            results.forEach(function(map) {
+                                html += '<a href="' + map.mapUrl + '" class="list-group-item list-group-item-action">';
+                                html += '<div class="d-flex align-items-center">';
+                                html += '<img src="' + map.thumbnailUrl + '" alt="' + map.mapTitle + '" class="me-3" style="width: 80px; height: 80px; object-fit: cover;" />';
+                                html += '<div>';
+                                html += '<h6 class="mb-1">' + map.mapTitle + '</h6>';
+                                html += '<small class="text-muted">' + map.gameTitle + '</small>';
+                                html += '</div>';
+                                html += '</div>';
+                                html += '</a>';
+                            });
+                            html += '</div>';
+
+                            $searchResults.html(html);
+                            $searchResults.show();
+                        },
+                        error: function() {
+                            $searchResults.html('<div class="p-3 text-danger">Error searching maps</div>');
+                            $searchResults.show();
+                        }
+                    });
+                }, 300); // Debounce delay of 300ms
+            });
+
+            // Clear search on escape key
+            $searchInput.on('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    $(this).val('');
+                    $searchResults.hide();
+                }
+            });
+        });
+    </script>
+}
