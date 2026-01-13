@@ -7,7 +7,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="position-relative">
-                <input type="text" id="mapSearchInput" class="form-control" placeholder="Search for a map..." autocomplete="off" />
+                <input type="text" id="mapSearchInput" class="form-control" placeholder="Search for a map..." autocomplete="off" data-search-url="@Url.Action("SearchMaps", "Home")" />
                 <div id="searchResults" class="position-absolute w-100 bg-white border rounded shadow-sm mt-1" style="display: none; z-index: 1000; max-height: 400px; overflow-y: auto;"></div>
             </div>
         </div>
@@ -33,82 +33,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function() {
-            var searchTimeout;
-            var $searchInput = $('#mapSearchInput');
-            var $searchResults = $('#searchResults');
-
-            // Close search results when clicking outside
-            $(document).on('click', function(e) {
-                if (!$(e.target).closest('#mapSearchInput, #searchResults').length) {
-                    $searchResults.hide();
-                }
-            });
-
-            $searchInput.on('input', function() {
-                clearTimeout(searchTimeout);
-                var query = $(this).val().trim();
-
-                if (query.length < 2) {
-                    $searchResults.hide();
-                    return;
-                }
-
-                searchTimeout = setTimeout(function() {
-                    $.ajax({
-                        url: '@Url.Action("SearchMaps", "Home")',
-                        type: 'GET',
-                        data: { query: query },
-                        success: function(results) {
-                            if (results.length === 0) {
-                                $searchResults.html('<div class="p-3 text-muted">No maps found</div>');
-                                $searchResults.show();
-                                return;
-                            }
-
-                            var escapeHtml = function(text) {
-                                return $('<div>').text(text).html();
-                            };
-
-                            var html = '<div class="list-group list-group-flush">';
-                            results.forEach(function(map) {
-                                var escapedMapUrl = escapeHtml(map.mapUrl);
-                                var escapedThumbnailUrl = escapeHtml(map.thumbnailUrl);
-                                var escapedMapTitle = escapeHtml(map.mapTitle);
-                                var escapedGameTitle = escapeHtml(map.gameTitle);
-                                var altText = 'Map thumbnail for ' + escapedMapTitle + ' in ' + escapedGameTitle;
-                                
-                                html += '<a href="' + escapedMapUrl + '" class="list-group-item list-group-item-action">';
-                                html += '<div class="d-flex align-items-center">';
-                                html += '<img src="' + escapedThumbnailUrl + '" alt="' + altText + '" class="me-3" style="width: 80px; height: 80px; object-fit: cover;" />';
-                                html += '<div>';
-                                html += '<h6 class="mb-1">' + escapedMapTitle + '</h6>';
-                                html += '<small class="text-muted">' + escapedGameTitle + '</small>';
-                                html += '</div>';
-                                html += '</div>';
-                                html += '</a>';
-                            });
-                            html += '</div>';
-
-                            $searchResults.html(html);
-                            $searchResults.show();
-                        },
-                        error: function() {
-                            $searchResults.html('<div class="p-3 text-danger">Error searching maps</div>');
-                            $searchResults.show();
-                        }
-                    });
-                }, 300); // Debounce delay of 300ms
-            });
-
-            // Clear search on escape key
-            $searchInput.on('keydown', function(e) {
-                if (e.key === 'Escape' || e.keyCode === 27) {
-                    $(this).val('');
-                    $searchResults.hide();
-                }
-            });
-        });
-    </script>
+    <script src="~/js/map-search.js" asp-append-version="true"></script>
 }
