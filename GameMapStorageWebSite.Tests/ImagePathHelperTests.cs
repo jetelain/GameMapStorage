@@ -1,10 +1,38 @@
 using GameMapStorageWebSite;
+using Microsoft.AspNetCore.Http;
 using Xunit;
 
 namespace GameMapStorageWebSite.Tests;
 
 public class ImagePathHelperTests
 {
+    [Fact]
+    public void AcceptWebp_ReturnsTrue_WhenAcceptHeaderContainsWebp()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Accept = "text/html,application/xhtml+xml,image/webp";
+
+        Assert.True(ImagePathHelper.AcceptWebp(context.Request));
+    }
+
+    [Fact]
+    public void AcceptWebp_UsesUserAgentFallback_WhenHeaderMissing()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0";
+
+        Assert.True(ImagePathHelper.AcceptWebp(context.Request));
+    }
+
+    [Fact]
+    public void AcceptWebp_ReturnsFalse_WhenNoHeaderAndNoSupport()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.UserAgent = "curl/7.54.0";
+
+        Assert.False(ImagePathHelper.AcceptWebp(context.Request));
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]
