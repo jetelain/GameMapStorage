@@ -40,13 +40,13 @@ namespace GameMapStorageWebSite.Controllers
 
             var acceptWebp = ImagePathHelper.AcceptWebp(Request);
             
-            // Escape LIKE special characters to prevent unintended pattern matching
-            var escapedQuery = query.Replace("%", "[%]").Replace("_", "[_]");
+            // Escape LIKE special characters for SQLite (using backslash as escape character)
+            var escapedQuery = query.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
 
             var maps = await _context.GameMaps
                 .Include(m => m.Game)
-                .Where(m => EF.Functions.Like(m.EnglishTitle, $"%{escapedQuery}%") || 
-                           (m.Name != null && EF.Functions.Like(m.Name, $"%{escapedQuery}%")))
+                .Where(m => EF.Functions.Like(m.EnglishTitle, $"%{escapedQuery}%", "\\") || 
+                           (m.Name != null && EF.Functions.Like(m.Name, $"%{escapedQuery}%", "\\")))
                 .Take(10)
                 .Select(m => new MapSearchResultViewModel
                 {
