@@ -95,7 +95,8 @@
             var escapedThumbnailUrl = escapeHtml(map.thumbnailUrl);
             var escapedMapTitle = escapeHtml(map.mapTitle);
             var escapedGameTitle = escapeHtml(map.gameTitle);
-            var altText = 'Map thumbnail for ' + escapedMapTitle + ' in ' + escapedGameTitle;
+            // Use original values for alt text since they'll be used in an attribute
+            var altText = escapeHtml('Map thumbnail for ' + map.mapTitle + ' in ' + map.gameTitle);
             
             html += '<a href="' + escapedMapUrl + '" class="list-group-item list-group-item-action">';
             html += '<div class="d-flex align-items-center">';
@@ -117,8 +118,11 @@
      * Escape HTML to prevent XSS
      */
     function escapeHtml(text) {
+        if (text == null || text === undefined) {
+            return '';
+        }
         var div = document.createElement('div');
-        div.textContent = text;
+        div.textContent = String(text);
         return div.innerHTML;
     }
 })();
