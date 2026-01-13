@@ -77,10 +77,11 @@
                                 var escapedThumbnailUrl = escapeHtml(map.thumbnailUrl);
                                 var escapedMapTitle = escapeHtml(map.mapTitle);
                                 var escapedGameTitle = escapeHtml(map.gameTitle);
+                                var altText = 'Map thumbnail for ' + escapedMapTitle + ' in ' + escapedGameTitle;
                                 
                                 html += '<a href="' + escapedMapUrl + '" class="list-group-item list-group-item-action">';
                                 html += '<div class="d-flex align-items-center">';
-                                html += '<img src="' + escapedThumbnailUrl + '" alt="' + escapedMapTitle + '" class="me-3" style="width: 80px; height: 80px; object-fit: cover;" />';
+                                html += '<img src="' + escapedThumbnailUrl + '" alt="' + altText + '" class="me-3" style="width: 80px; height: 80px; object-fit: cover;" />';
                                 html += '<div>';
                                 html += '<h6 class="mb-1">' + escapedMapTitle + '</h6>';
                                 html += '<small class="text-muted">' + escapedGameTitle + '</small>';
@@ -103,7 +104,7 @@
 
             // Clear search on escape key
             $searchInput.on('keydown', function(e) {
-                if (e.key === 'Escape') {
+                if (e.key === 'Escape' || e.keyCode === 27) {
                     $(this).val('');
                     $searchResults.hide();
                 }
