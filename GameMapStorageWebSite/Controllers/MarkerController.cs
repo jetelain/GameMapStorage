@@ -62,11 +62,8 @@ namespace GameMapStorageWebSite.Controllers
                 return Results.NotFound();
             }
             var color = await GetColor(gameId, colorHexOrName); 
-            if (color == null)
-            {
-                return Results.NotFound();
-            }
-            return await ToResult(await _markers.ReadMarkerPng(marker, color.Value), PngContentType);
+
+            return await ToResult(await _markers.ReadMarkerPng(marker, color), PngContentType);
         }
 
         [Route("data/{gameId}/markers/{colorHexOrName}/{gameMarkerIdOrName}.webp")]
@@ -79,11 +76,8 @@ namespace GameMapStorageWebSite.Controllers
                 return Results.NotFound();
             }
             var color = await GetColor(gameId, colorHexOrName);
-            if (color == null)
-            {
-                return Results.NotFound();
-            }
-            return await ToResult(await _markers.ReadMarkerWebp(marker, color.Value), WebpContentType);
+
+            return await ToResult(await _markers.ReadMarkerWebp(marker, color), WebpContentType);
         }
 
         private async ValueTask<IGameMarkerIdentifier?> GetMarkerIdentifier(int gameId, string gameMarkerIdOrName)
@@ -95,7 +89,7 @@ namespace GameMapStorageWebSite.Controllers
             return await _context.GameMarkers.FirstOrDefaultAsync(m => m.GameId == gameId && m.Name.ToLower() == gameMarkerIdOrName.ToLower());
         }
 
-        private async ValueTask<Rgba32?> GetColor(int gameId, string colorHexOrName)
+        private async ValueTask<Rgba32> GetColor(int gameId, string colorHexOrName)
         {
             if (colorHexOrName.Length == 6 && Rgba32.TryParseHex(colorHexOrName, out var color))
             {
@@ -109,7 +103,7 @@ namespace GameMapStorageWebSite.Controllers
                 gameColor = await _context.GameColors.FirstOrDefaultAsync(m => m.GameId == gameId && m.Aliases!.Contains(lcaseName));
                 if (gameColor == null)
                 {
-                    return null;
+                    return new Rgba32(0, 0, 0); // default to black
                 }
             }
             return Rgba32.ParseHex(gameColor.Hexadecimal);
