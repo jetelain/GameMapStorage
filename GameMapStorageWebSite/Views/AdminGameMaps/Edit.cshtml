@@ -70,34 +70,10 @@
     </div>
 </div>
 
-<h4>Thumbnail</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="SetThumbnail" asp-route-id="@Model.GameMapId">
-            <input type="hidden" asp-for="GameMapId" />
-            @if (ViewBag.ImageError != null)
-            {
-                <div class="text-danger">
-                    @ViewBag.ImageError
-                </div>
-            }
-            <div class="form-group">
-                <img src="@ImagePathHelper.GetThumbnail(false, Model)" class="mw-100" />
-            </div>
-            <div class="form-group">
-                <label for="imageUri" class="control-label">URL to new map thumbnail</label>
-                <input name="imageUri" class="form-control" />
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-
-<div>
+<div class="mt-3">
     <a asp-action="Index">All maps list</a>
+    &nbsp;|&nbsp;
+    <a asp-action="SetThumbnail" asp-route-id="@Model.GameMapId">Edit thumbnail</a>
 </div>
 
 @section Scripts {

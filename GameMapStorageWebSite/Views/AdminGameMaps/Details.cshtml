@@ -21,6 +21,7 @@
     @if (canEdit)
     {
         <a asp-action="Edit" asp-route-id="@Model?.GameMapId" class="btn btn-sm btn-secondary"><i class="fa-solid fa-pen"></i> Edit Informations</a>
+        <a asp-action="SetThumbnail" asp-route-id="@Model?.GameMapId" class="btn btn-sm btn-secondary"><i class="fa-solid fa-image"></i> Set Thumbnail</a>
     }
 </p>
 

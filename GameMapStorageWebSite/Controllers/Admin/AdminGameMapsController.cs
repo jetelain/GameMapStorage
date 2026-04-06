@@ -133,10 +133,26 @@ namespace GameMapStorageWebSite.Controllers.Admin
             return View(gameMap);
         }
 
+        // GET: Admin/GameMaps/SetThumbnail/5
+        [Authorize("AdminEdit")]
+        public async Task<IActionResult> SetThumbnail(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var map = await _context.GameMaps.Include(m => m.Game).FirstOrDefaultAsync(m => m.GameMapId == id);
+            if (map == null)
+            {
+                return NotFound();
+            }
+            return View(map);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize("AdminEdit")]
-        public async Task<IActionResult> SetThumbnail(int id, [FromForm] int gameMapId, [FromForm] string imageUri)
+        public async Task<IActionResult> SetThumbnail(int id, [FromForm] int gameMapId, [FromForm] string? imageUri, IFormFile? imageFile)
         {
             if (id != gameMapId)
             {
@@ -147,22 +163,31 @@ namespace GameMapStorageWebSite.Controllers.Admin
             {
                 return NotFound();
             }
-            if (!string.IsNullOrEmpty(imageUri))
+            try
             {
-                try
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    using var stream = imageFile.OpenReadStream();
+                    using var image = await Image.LoadAsync(stream);
+                    await _thumbnailService.SetMapThumbnail(map, image);
+                }
+                else if (!string.IsNullOrEmpty(imageUri))
                 {
                     using var stream = await _factory.CreateClient("External").GetStreamAsync(imageUri);
                     using var image = await Image.LoadAsync(stream);
                     await _thumbnailService.SetMapThumbnail(map, image);
                 }
-                catch (Exception e)
+                else
                 {
-                    ViewBag.ImageError = e.Message;
-                    return View(nameof(Edit), map);
+                    return View(map);
                 }
-                return RedirectToAction(nameof(Details), new { id = gameMapId });
             }
-            return View(nameof(Edit), map);
+            catch (Exception e)
+            {
+                ViewBag.ImageError = e.Message;
+                return View(map);
+            }
+            return RedirectToAction(nameof(Details), new { id = gameMapId });
         }
 
         // GET: Admin/GameMaps/Delete/5
