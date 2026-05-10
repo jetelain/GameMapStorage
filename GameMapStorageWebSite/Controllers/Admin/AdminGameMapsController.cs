@@ -176,7 +176,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 {
                     if (imageFile.Length > MaxUploadBytes)
                     {
-                        ViewBag.ImageError = "The uploaded file exceeds the maximum allowed size of 20 MB.";
+                        ModelState.AddModelError(string.Empty, "The uploaded file exceeds the maximum allowed size of 20 MB.");
                         return View(map);
                     }
 
@@ -184,12 +184,12 @@ namespace GameMapStorageWebSite.Controllers.Admin
                     var info = await Image.IdentifyAsync(stream);
                     if (info == null)
                     {
-                        ViewBag.ImageError = "The uploaded file is not a recognised image format.";
+                        ModelState.AddModelError(string.Empty, "The uploaded file is not a recognised image format.");
                         return View(map);
                     }
                     if (info.Width > MaxImageDimension || info.Height > MaxImageDimension)
                     {
-                        ViewBag.ImageError = $"Image dimensions must not exceed {MaxImageDimension}×{MaxImageDimension} pixels.";
+                        ModelState.AddModelError(string.Empty, $"Image dimensions must not exceed {MaxImageDimension}×{MaxImageDimension} pixels.");
                         return View(map);
                     }
 
@@ -202,14 +202,14 @@ namespace GameMapStorageWebSite.Controllers.Admin
                     var imageUriValidated = ValidateImageUri(imageUri);
                     if (imageUriValidated == null)
                     {
-                        ViewBag.ImageError = "The URL is not valid or is not allowed.";
+                        ModelState.AddModelError(string.Empty, "The URL is not valid or is not allowed.");
                         return View(map);
                     }
 
                     using var image = await FetchRemoteImageAsync(imageUriValidated);
                     if (image == null)
                     {
-                        ViewBag.ImageError = "Could not retrieve a valid image from the provided URL.";
+                        ModelState.AddModelError(string.Empty, "Could not retrieve a valid image from the provided URL.");
                         return View(map);
                     }
                     await _thumbnailService.SetMapThumbnail(map, image);
@@ -223,13 +223,13 @@ namespace GameMapStorageWebSite.Controllers.Admin
             catch (UnknownImageFormatException ex)
             {
                 _logger.LogWarning(ex, "Unknown image format when setting thumbnail for map {MapId}.", id);
-                ViewBag.ImageError = "The image format is not supported.";
+                ModelState.AddModelError(string.Empty, "The image format is not supported.");
                 return View(map);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error when setting thumbnail for map {MapId}.", id);
-                ViewBag.ImageError = "An unexpected error occurred while processing the image. Please try again.";
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred while processing the image. Please try again.");
                 return View(map);
             }
             return RedirectToAction(nameof(Details), new { id = gameMapId });
