@@ -203,7 +203,9 @@ namespace GameMapStorageWebSite.Services
                 MinZoom = layer.MinZoom,
                 TileSize = layer.TileSize,
                 Type = layer.Type,
-                Locations = layer.GameMap.Locations?.Select(l => new PackageLocation(l.EnglishTitle, l.Type, l.X, l.Y))?.ToArray()
+                Locations = layer.GameMap.Locations?.Select(l => new PackageLocation(l.EnglishTitle, l.Type, l.X, l.Y))?.ToArray(),
+                SteamWorkshopId = layer.GameMap.SteamWorkshopId,
+                SteamWorkshopAuthor = !string.IsNullOrEmpty(layer.GameMap.SteamWorkshopId) ? layer.GameMap.AppendAttribution : null
             };
             var entry = zip.CreateEntry("index.json");
             using (var entryStream = entry.Open())
