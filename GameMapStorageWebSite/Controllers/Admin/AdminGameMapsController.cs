@@ -202,7 +202,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
                     var imageUriValidated = ValidateImageUri(imageUri);
                     if (imageUriValidated == null)
                     {
-                        ViewBag.ImageError = "The URL is not valid or is not allowed    .";
+                        ViewBag.ImageError = "The URL is not valid or is not allowed.";
                         return View(map);
                     }
 
