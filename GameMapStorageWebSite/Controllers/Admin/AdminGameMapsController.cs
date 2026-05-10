@@ -179,6 +179,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 }
                 else
                 {
+                    ModelState.AddModelError(string.Empty, "Please choose a file or provide a URL.");
                     return View(map);
                 }
             }
