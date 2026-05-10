@@ -215,7 +215,7 @@ namespace GameMapStorageWebSite.Services.DataPackages
                     OriginX = indexContent.OriginX,
                     OriginY = indexContent.OriginY,
                     SteamWorkshopId = indexContent.SteamWorkshopId,
-                    AppendAttribution = indexContent.SteamWorkshopAuthor
+                    AppendAttribution = indexContent.AppendAttribution
                 };
                 context.GameMaps.Add(map);
             }

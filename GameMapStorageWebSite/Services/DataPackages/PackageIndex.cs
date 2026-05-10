@@ -23,7 +23,7 @@ namespace GameMapStorageWebSite.Services.DataPackages
         public int? MaxZoom { get; set; }
         public Guid? GameMapLayerGuid { get; set; }
         public string? SteamWorkshopId { get; set; }
-        public string? SteamWorkshopAuthor { get; set; }
+        public string? AppendAttribution { get; set; }
 
         public int GetMaxZoom()
         {

@@ -205,7 +205,7 @@ namespace GameMapStorageWebSite.Services
                 Type = layer.Type,
                 Locations = layer.GameMap.Locations?.Select(l => new PackageLocation(l.EnglishTitle, l.Type, l.X, l.Y))?.ToArray(),
                 SteamWorkshopId = layer.GameMap.SteamWorkshopId,
-                SteamWorkshopAuthor = !string.IsNullOrEmpty(layer.GameMap.SteamWorkshopId) ? layer.GameMap.AppendAttribution : null
+                AppendAttribution = layer.GameMap.AppendAttribution
             };
             var entry = zip.CreateEntry("index.json");
             using (var entryStream = entry.Open())
