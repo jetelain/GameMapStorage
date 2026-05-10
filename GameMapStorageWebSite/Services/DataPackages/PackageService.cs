@@ -213,7 +213,9 @@ namespace GameMapStorageWebSite.Services.DataPackages
                     Locations = indexContent.Locations?.Select(l => new GameMapLocation() { EnglishTitle = l.EnglishTitle, Type = l.Type, X = l.X, Y = l.Y, GameMapLocationGuid = Guid.NewGuid() })?.ToList(),
                     CitiesCount = indexContent.Locations?.Count(l => l.Type == LocationType.City) ?? 0,
                     OriginX = indexContent.OriginX,
-                    OriginY = indexContent.OriginY
+                    OriginY = indexContent.OriginY,
+                    SteamWorkshopId = indexContent.SteamWorkshopId,
+                    AppendAttribution = indexContent.AppendAttribution
                 };
                 context.GameMaps.Add(map);
             }
