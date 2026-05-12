@@ -167,6 +167,11 @@ namespace GameMapStorageWebSite.Services.DataPackages
         {
             if (indexContent.Images != null)
             {
+                if (indexContent.Type == LayerType.Aerial)
+                {
+                    // By default, for aerial layers we only store webp, because pngs are usually very big for this type of layer
+                    return LayerFormat.WebpOnly;
+                }
                 return LayerFormat.PngAndWebp;
             }
             if (indexContent.Format != null)

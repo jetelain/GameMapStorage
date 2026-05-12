@@ -62,9 +62,12 @@ namespace GameMapStorageWebSite.Services
         {
             string targetBase = GetBasePath(layer, z, x, y);
 
-            await storageService.StoreAsync(targetBase + ".png", stream => tile.SaveAsPngAsync(stream));
+            if (layer.Format.HasPng())
+            {
+                await storageService.StoreAsync(targetBase + ".png", stream => tile.SaveAsPngAsync(stream));
+            }
 
-            if (layer.Format == LayerFormat.PngAndWebp)
+            if (layer.Format.HasWebp())
             {
                 await storageService.StoreAsync(targetBase + ".webp", stream => tile.SaveAsWebpAsync(stream, ImageHelper.WebpEncoder90));
             }
@@ -95,9 +98,9 @@ namespace GameMapStorageWebSite.Services
             {
                 throw new ArgumentException($"Image size was expected to be '{expectedSize}x{expectedSize}', but it was '{fullImage.Width}x{fullImage.Height}'.");
             }
-            if (layer.Format != LayerFormat.PngAndWebp)
+            if (!layer.Format.IsRaster())
             {
-                throw new ArgumentException($"Layer format was expected to be '{LayerFormat.PngAndWebp}', but it was '{layer.Format}'.");
+                throw new ArgumentException($"Layer format is not raster image, it is '{layer.Format}'.");
             }
             if ( zoom > layer.MaxZoom || zoom < layer.MinZoom)
             {
@@ -144,7 +147,7 @@ namespace GameMapStorageWebSite.Services
         {
             var packPng = mode.HasFlag(LayerStorageMode.PngTiles) && layer.Format.HasPng();
             var packWebp = mode.HasFlag(LayerStorageMode.WebpTiles) && layer.Format.HasWebp();
-            var packSource = mode.HasFlag(LayerStorageMode.SourcePng) && layer.Format.HasSourcePng();
+            var packSource = mode.HasFlag(LayerStorageMode.SourcePng) && layer.Format.IsRaster();
             var packSvg = layer.Format.HasSvg();
             ValidateLayer(layer);
             using var zip = new ZipArchive(target, ZipArchiveMode.Create);
@@ -237,12 +240,12 @@ namespace GameMapStorageWebSite.Services
             var hasPng = layer.Format.HasPng();
             var hasWebp = layer.Format.HasWebp();
             var hasSvg = layer.Format.HasSvg();
-            var hasSourcePng = layer.Format.HasSourcePng();
+            var mayHaveSourcePng = layer.Format.IsRaster();
 
             ValidateLayer(layer);
             for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                if (hasSourcePng)
+                if (mayHaveSourcePng)
                 {
                     await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
                 }
