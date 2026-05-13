@@ -20,12 +20,6 @@ namespace GameMapStorageWebSite.Services
         public ImageLayerService(IStorageService storageService)
         {
             this.storageService = storageService;
-
-            Configuration.Default.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions()
-            {
-                MaximumPoolSizeMegabytes = 32_768,
-                AllocationLimitMegabytes = 16_384 // a 40x40km map at 1.5px/ms is ~12GB, so 16GB limit for safety (max for aerial images)
-            });
         }
 
         public async Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage)
