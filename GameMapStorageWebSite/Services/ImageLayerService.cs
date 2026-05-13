@@ -7,6 +7,7 @@ using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
@@ -19,21 +20,27 @@ namespace GameMapStorageWebSite.Services
         public ImageLayerService(IStorageService storageService)
         {
             this.storageService = storageService;
+
+            Configuration.Default.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions()
+            {
+                MaximumPoolSizeMegabytes = 32_768,
+                AllocationLimitMegabytes = 16_384 // a 40x40km map at 1.5px/ms is ~12GB, so 16GB limit for safety (max for aerial images)
+            });
         }
 
         public async Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage)
         {
-            await AddZoomLevelFromImage(layer, maxZoom, fullImage);
+            await AddZoomLevelFromImage(layer, maxZoom, fullImage, true);
 
             for (var zoom = maxZoom - 1; zoom >= minZoom; zoom--)
             {
                 var newSize = GetSizeAtZoom(layer, zoom);
                 fullImage.Mutate(i => i.Resize(newSize, newSize));
-                await AddZoomLevelFromImage(layer, zoom, fullImage);
+                await AddZoomLevelFromImage(layer, zoom, fullImage, false);
             }
         }
 
-        public async Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage)
+        public async Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage, bool keepSourceImage = true)
         {
             ValidateLayerAndImage(layer, zoom, fullImage);
 
@@ -55,7 +62,16 @@ namespace GameMapStorageWebSite.Services
                 }
             });
 
-            await storageService.StoreAsync(GetBasePath(layer, zoom) + ".png", stream => fullImage.SaveAsPngAsync(stream));
+
+            if (keepSourceImage)
+            {
+                await storageService.StoreAsync(GetBasePath(layer, zoom) + ".png", stream => fullImage.SaveAsPngAsync(stream));
+            }
+            else
+            {
+                // Remove stale source image if exists
+                await storageService.Delete(GetBasePath(layer, zoom) + ".png");
+            }
         }
 
         private async Task AddTile(GameMapLayer layer, int z, int x, int y, Image<Rgba32> tile)

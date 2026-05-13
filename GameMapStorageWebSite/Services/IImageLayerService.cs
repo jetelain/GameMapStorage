@@ -9,7 +9,7 @@ namespace GameMapStorageWebSite.Services
     {
         Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage);
 
-        Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage);
+        Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage, bool keepSourceImage = true);
 
         Task<IStorageFile> ReadTilePng(IGameMapLayerIdentifier layer, int zoom, int x, int y);
 
