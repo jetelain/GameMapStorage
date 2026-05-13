@@ -27,7 +27,7 @@ namespace GameMapStorageWebSite
             {
                 return GetLayerPattern(layer, "svg");
             }
-            if (useWebp && layer.Format.HasWebp())
+            if (layer.Format.HasWebp() && (useWebp || !layer.Format.HasPng()))
             {
                 return GetLayerPattern(layer, "webp");
             }
@@ -39,18 +39,18 @@ namespace GameMapStorageWebSite
             return FormattableString.Invariant($"/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/{{z}}/{{x}}/{{y}}.{ext}");
         }
 
-        public static string GetLayerPreview(HttpRequest request, IGameMapLayerIdentifier layer)
+        public static string GetLayerPreview(HttpRequest request, GameMapLayer layer)
         {
             return GetLayerPreview(AcceptWebp(request), layer);
         }
 
-        public static string GetLayerPreview(bool useWebp, IGameMapLayerIdentifier layer)
+        public static string GetLayerPreview(bool useWebp, GameMapLayer layer)
         {
-            if (useWebp)
+            if (layer.Format.HasWebp() && (useWebp || !layer.Format.HasPng()))
             {
-                return FormattableString.Invariant($"/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/0/0/0.webp");
+                return FormattableString.Invariant($"/data/{layer.GameMap!.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/0/0/0.webp");
             }
-            return FormattableString.Invariant($"/data/{layer.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/0/0/0.png");
+            return FormattableString.Invariant($"/data/{layer.GameMap!.GameId}/maps/{layer.GameMapId}/{layer.GameMapLayerId}/0/0/0.png");
         }
 
         public static string GetThumbnail(HttpRequest request, IGameMapIdentifier gameMap)

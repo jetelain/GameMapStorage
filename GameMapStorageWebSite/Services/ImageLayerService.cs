@@ -7,6 +7,7 @@ using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Storages;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
@@ -23,17 +24,17 @@ namespace GameMapStorageWebSite.Services
 
         public async Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage)
         {
-            await AddZoomLevelFromImage(layer, maxZoom, fullImage);
+            await AddZoomLevelFromImage(layer, maxZoom, fullImage, true);
 
             for (var zoom = maxZoom - 1; zoom >= minZoom; zoom--)
             {
                 var newSize = GetSizeAtZoom(layer, zoom);
                 fullImage.Mutate(i => i.Resize(newSize, newSize));
-                await AddZoomLevelFromImage(layer, zoom, fullImage);
+                await AddZoomLevelFromImage(layer, zoom, fullImage, false);
             }
         }
 
-        public async Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage)
+        public async Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage, bool keepSourceImage = true)
         {
             ValidateLayerAndImage(layer, zoom, fullImage);
 
@@ -55,18 +56,42 @@ namespace GameMapStorageWebSite.Services
                 }
             });
 
-            await storageService.StoreAsync(GetBasePath(layer, zoom) + ".png", stream => fullImage.SaveAsPngAsync(stream));
+
+            if (keepSourceImage)
+            {
+                // Keep lossless image to be able to re-generate tiles in other formats in the future if needed
+                // ImageSharp Webp encoder is not able to save so large images, so we need to keep source png
+                await storageService.StoreAsync(GetBasePath(layer, zoom) + ".png", stream => fullImage.SaveAsPngAsync(stream));
+            }
+            else
+            {
+                // Remove stale source image if exists
+                await storageService.Delete(GetBasePath(layer, zoom) + ".png");
+            }
         }
 
         private async Task AddTile(GameMapLayer layer, int z, int x, int y, Image<Rgba32> tile)
         {
             string targetBase = GetBasePath(layer, z, x, y);
 
-            await storageService.StoreAsync(targetBase + ".png", stream => tile.SaveAsPngAsync(stream));
+            if (layer.Format.HasPng())
+            {
+                await storageService.StoreAsync(targetBase + ".png", stream => tile.SaveAsPngAsync(stream));
+            }
+            else
+            {
+                // Remove stale image if exists
+                await storageService.Delete(targetBase + ".png");
+            }
 
-            if (layer.Format == LayerFormat.PngAndWebp)
+            if (layer.Format.HasWebp())
             {
                 await storageService.StoreAsync(targetBase + ".webp", stream => tile.SaveAsWebpAsync(stream, ImageHelper.WebpEncoder90));
+            }
+            else
+            {
+                // Remove stale image if exists
+                await storageService.Delete(targetBase + ".webp");
             }
         }
 
@@ -95,9 +120,9 @@ namespace GameMapStorageWebSite.Services
             {
                 throw new ArgumentException($"Image size was expected to be '{expectedSize}x{expectedSize}', but it was '{fullImage.Width}x{fullImage.Height}'.");
             }
-            if (layer.Format != LayerFormat.PngAndWebp)
+            if (!layer.Format.IsRaster())
             {
-                throw new ArgumentException($"Layer format was expected to be '{LayerFormat.PngAndWebp}', but it was '{layer.Format}'.");
+                throw new ArgumentException($"Layer format is not raster image, it is '{layer.Format}'.");
             }
             if ( zoom > layer.MaxZoom || zoom < layer.MinZoom)
             {
@@ -144,7 +169,7 @@ namespace GameMapStorageWebSite.Services
         {
             var packPng = mode.HasFlag(LayerStorageMode.PngTiles) && layer.Format.HasPng();
             var packWebp = mode.HasFlag(LayerStorageMode.WebpTiles) && layer.Format.HasWebp();
-            var packSource = mode.HasFlag(LayerStorageMode.SourcePng) && layer.Format.HasSourcePng();
+            var packSource = mode.HasFlag(LayerStorageMode.SourcePng) && layer.Format.IsRaster();
             var packSvg = layer.Format.HasSvg();
             ValidateLayer(layer);
             using var zip = new ZipArchive(target, ZipArchiveMode.Create);
@@ -237,12 +262,12 @@ namespace GameMapStorageWebSite.Services
             var hasPng = layer.Format.HasPng();
             var hasWebp = layer.Format.HasWebp();
             var hasSvg = layer.Format.HasSvg();
-            var hasSourcePng = layer.Format.HasSourcePng();
+            var mayHaveSourcePng = layer.Format.IsRaster();
 
             ValidateLayer(layer);
             for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                if (hasSourcePng)
+                if (mayHaveSourcePng)
                 {
                     await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
                 }
