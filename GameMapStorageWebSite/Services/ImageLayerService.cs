@@ -59,6 +59,8 @@ namespace GameMapStorageWebSite.Services
 
             if (keepSourceImage)
             {
+                // Keep lossless image to be able to re-generate tiles in other formats in the future if needed
+                // ImageSharp Webp encoder is not able to save so large images, so we need to keep source png
                 await storageService.StoreAsync(GetBasePath(layer, zoom) + ".png", stream => fullImage.SaveAsPngAsync(stream));
             }
             else
@@ -76,10 +78,20 @@ namespace GameMapStorageWebSite.Services
             {
                 await storageService.StoreAsync(targetBase + ".png", stream => tile.SaveAsPngAsync(stream));
             }
+            else
+            {
+                // Remove stale image if exists
+                await storageService.Delete(targetBase + ".png");
+            }
 
             if (layer.Format.HasWebp())
             {
                 await storageService.StoreAsync(targetBase + ".webp", stream => tile.SaveAsWebpAsync(stream, ImageHelper.WebpEncoder90));
+            }
+            else
+            {
+                // Remove stale image if exists
+                await storageService.Delete(targetBase + ".webp");
             }
         }
 
