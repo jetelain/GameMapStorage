@@ -1,0 +1,41 @@
+name: .NET Linux Publish Release
+
+on:
+  release:
+    types: [ "published" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      id-token: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Restore dependencies
+      run: dotnet restore GameMapStorage.sln
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release GameMapStorage.sln -p:PublicRelease=true
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release GameMapStorage.sln
+      
+    - name: NuGet login (OIDC → temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
+    - name: Publish Nuget to nuget.org
+      run: dotnet nuget push **/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
+        
+    - name: Publish NuGet package to GitHub
+      run: |
+        dotnet nuget add source --username jetelain --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/jetelain/index.json"
+        dotnet nuget push **/*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s github --skip-duplicate
+

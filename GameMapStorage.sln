@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.4.11626.88 stable
+VisualStudioVersion = 18.4.11626.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameMapStorageWebSite", "GameMapStorageWebSite\GameMapStorageWebSite.csproj", "{43289AFF-053D-488F-8A7C-D25D3CD76ED4}"
 EndProject
@@ -13,8 +13,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameMapStorageWebSite.Tests
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github", "Github", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+		.github\workflows\dotnet-linux-pr.yml = .github\workflows\dotnet-linux-pr.yml
+		.github\workflows\dotnet-linux-pub.yml = .github\workflows\dotnet-linux-pub.yml
+		.github\workflows\dotnet-linux.yml = .github\workflows\dotnet-linux.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pmad.GameMapStorage.Client", "Pmad.GameMapStorage.Client\Pmad.GameMapStorage.Client.csproj", "{4D83066B-2D95-430C-97C1-BC8A63DDB9AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pmad.GameMapStorage.Client.Tests", "Pmad.GameMapStorage.Client.Tests\Pmad.GameMapStorage.Client.Tests.csproj", "{E6E46B78-3577-429C-9662-DBEA634E24DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +44,14 @@ Global
 		{FADB1D11-7EDB-218B-B5EB-FA322627F002}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FADB1D11-7EDB-218B-B5EB-FA322627F002}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FADB1D11-7EDB-218B-B5EB-FA322627F002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D83066B-2D95-430C-97C1-BC8A63DDB9AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D83066B-2D95-430C-97C1-BC8A63DDB9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D83066B-2D95-430C-97C1-BC8A63DDB9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D83066B-2D95-430C-97C1-BC8A63DDB9AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6E46B78-3577-429C-9662-DBEA634E24DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6E46B78-3577-429C-9662-DBEA634E24DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6E46B78-3577-429C-9662-DBEA634E24DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6E46B78-3577-429C-9662-DBEA634E24DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

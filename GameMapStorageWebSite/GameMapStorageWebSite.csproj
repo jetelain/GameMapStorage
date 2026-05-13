@@ -9,6 +9,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="Pmad.GameMapStorage.Client.Tests" />
+	</ItemGroup>
+	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="wwwroot\js\demo-map-utils.html" />
 	</ItemGroup>
 

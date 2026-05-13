@@ -1,0 +1,23 @@
+name: .NET Linux Test
+
+on:
+  pull_request:
+    branches: [ "**" ]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Restore dependencies
+      run: dotnet restore GameMapStorage.sln
+
+    - name: Build
+      run: dotnet build --no-restore --configuration Release GameMapStorage.sln
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release GameMapStorage.sln
