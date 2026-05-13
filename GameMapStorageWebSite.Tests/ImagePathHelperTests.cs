@@ -1,4 +1,5 @@
 using GameMapStorageWebSite;
+using GameMapStorageWebSite.Entities;
 using Microsoft.AspNetCore.Http;
 using Xunit;
 
@@ -79,5 +80,49 @@ public class ImagePathHelperTests
     public void SupportsWebpUserAgent_ReturnsFalse_ForOldSafari(string userAgent)
     {
         Assert.False(ImagePathHelper.SupportsWebpUserAgent(userAgent));
+    }
+
+    // --- GetLayerPattern ---
+
+    private static GameMapLayer MakeLayer(LayerFormat format) => new GameMapLayer
+    {
+        GameMapLayerId = 10,
+        GameMapId = 20,
+        Format = format,
+        GameMap = new GameMap { GameMapId = 20, GameId = 5, EnglishTitle = "Test" }
+    };
+
+    [Theory]
+    [InlineData(LayerFormat.PngOnly, false, "/data/5/maps/20/10/{z}/{x}/{y}.png")]
+    [InlineData(LayerFormat.PngOnly, true,  "/data/5/maps/20/10/{z}/{x}/{y}.png")]
+    [InlineData(LayerFormat.PngAndWebp, false, "/data/5/maps/20/10/{z}/{x}/{y}.png")]
+    [InlineData(LayerFormat.PngAndWebp, true,  "/data/5/maps/20/10/{z}/{x}/{y}.webp")]
+    [InlineData(LayerFormat.WebpOnly,   false, "/data/5/maps/20/10/{z}/{x}/{y}.webp")]
+    [InlineData(LayerFormat.WebpOnly,   true,  "/data/5/maps/20/10/{z}/{x}/{y}.webp")]
+    [InlineData(LayerFormat.SvgOnly,    false, "/data/5/maps/20/10/{z}/{x}/{y}.svg")]
+    [InlineData(LayerFormat.SvgOnly,    true,  "/data/5/maps/20/10/{z}/{x}/{y}.svg")]
+    [InlineData(LayerFormat.SvgAndWebp, false, "/data/5/maps/20/10/{z}/{x}/{y}.svg")]
+    [InlineData(LayerFormat.SvgAndWebp, true,  "/data/5/maps/20/10/{z}/{x}/{y}.svg")]
+    public void GetLayerPattern_ReturnsExpectedPath(LayerFormat format, bool useWebp, string expected)
+    {
+        var layer = MakeLayer(format);
+        Assert.Equal(expected, ImagePathHelper.GetLayerPattern(useWebp, layer));
+    }
+
+    // --- GetLayerPreview ---
+
+    [Theory]
+    [InlineData(LayerFormat.PngOnly,    false, "/data/5/maps/20/10/0/0/0.png")]
+    [InlineData(LayerFormat.PngOnly,    true,  "/data/5/maps/20/10/0/0/0.png")]
+    [InlineData(LayerFormat.PngAndWebp, false, "/data/5/maps/20/10/0/0/0.png")]
+    [InlineData(LayerFormat.PngAndWebp, true,  "/data/5/maps/20/10/0/0/0.webp")]
+    [InlineData(LayerFormat.WebpOnly,   false, "/data/5/maps/20/10/0/0/0.webp")]
+    [InlineData(LayerFormat.WebpOnly,   true,  "/data/5/maps/20/10/0/0/0.webp")]
+    [InlineData(LayerFormat.SvgAndWebp, false, "/data/5/maps/20/10/0/0/0.webp")]
+    [InlineData(LayerFormat.SvgAndWebp, true,  "/data/5/maps/20/10/0/0/0.webp")]
+    public void GetLayerPreview_ReturnsExpectedPath(LayerFormat format, bool useWebp, string expected)
+    {
+        var layer = MakeLayer(format);
+        Assert.Equal(expected, ImagePathHelper.GetLayerPreview(useWebp, layer));
     }
 }
