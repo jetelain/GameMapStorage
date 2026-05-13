@@ -2,6 +2,7 @@ using GameMapStorageWebSite;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using GameMapStorageWebSite.Services.DataPackages;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
@@ -65,6 +66,10 @@ public sealed class AdminWebApplicationFactory : WebApplicationFactory<Program>
             var pmDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IPaperMapService));
             if (pmDescriptor != null) services.Remove(pmDescriptor);
             services.AddSingleton(typeof(IPaperMapService), PaperMapService);
+
+            // Override data protection to avoid issues with ephemeral keys in tests
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Path.GetTempPath()));
         });
     }
 
