@@ -2,24 +2,24 @@ namespace Pmad.GameMapStorage.Client.Models
 {
     public class GameMarkerJson
     {
-        public int GameMarkerId { get; set; }
+        public int GameMarkerId { get; init; }
 
-        public string? EnglishTitle { get; set; }
+        public string? EnglishTitle { get; init; }
 
-        public string? Name { get; set; }
+        public string? Name { get; init; }
 
-        public MarkerUsage Usage { get; set; }
+        public MarkerUsage Usage { get; init; }
 
-        public string? ImagePng { get; set; }
+        public string? ImagePng { get; init; }
 
-        public string? ImageWebp { get; set; }
+        public string? ImageWebp { get; init; }
 
-        public bool IsColorCompatible { get; set; }
+        public bool IsColorCompatible { get; init; }
 
-        public DateTime? ImageLastChangeUtc { get; set; }
+        public DateTime? ImageLastChangeUtc { get; init; }
 
-        public string? MilSymbolEquivalent { get; set; }
+        public string? MilSymbolEquivalent { get; init; }
 
-        public string? SteamWorkshopId { get; set; }
+        public string? SteamWorkshopId { get; init; }
     }
 }

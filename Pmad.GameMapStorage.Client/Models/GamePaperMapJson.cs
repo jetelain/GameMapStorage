@@ -2,22 +2,22 @@ namespace Pmad.GameMapStorage.Client.Models
 {
     public class GamePaperMapJson
     {
-        public int GamePaperMapId { get; set; }
+        public int GamePaperMapId { get; init; }
 
-        public PaperFileFormat FileFormat { get; set; }
+        public PaperFileFormat FileFormat { get; init; }
 
-        public PaperSize PaperSize { get; set; }
+        public PaperSize PaperSize { get; init; }
 
-        public string? Name { get; set; }
+        public string? Name { get; init; }
 
-        public int Scale { get; set; }
+        public int Scale { get; init; }
 
-        public DateTime? LastChangeUtc { get; set; }
+        public DateTime? LastChangeUtc { get; init; }
 
-        public int FileSize { get; set; }
+        public int FileSize { get; init; }
 
-        public List<GamePaperMapPage>? Pages { get; set; }
+        public IReadOnlyList<GamePaperMapPage>? Pages { get; init; }
 
-        public string? DownloadUri { get; set; }
+        public string? DownloadUri { get; init; }
     }
 }

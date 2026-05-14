@@ -2,16 +2,16 @@ namespace Pmad.GameMapStorage.Client.Models
 {
     public class GameMapLocationJson
     {
-        public int GameMapLocationId { get; set; }
+        public int GameMapLocationId { get; init; }
 
-        public string? EnglishTitle { get; set; }
+        public string? EnglishTitle { get; init; }
 
-        public LocationType Type { get; set; }
+        public LocationType Type { get; init; }
 
-        public double X { get; set; }
+        public double X { get; init; }
 
-        public double Y { get; set; }
+        public double Y { get; init; }
 
-        public Guid? GameMapLocationGuid { get; set; }
+        public Guid? GameMapLocationGuid { get; init; }
     }
 }

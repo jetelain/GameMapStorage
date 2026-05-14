@@ -4,37 +4,37 @@ namespace Pmad.GameMapStorage.Client.Models
 {
     public class GameMapJsonBase
     {
-        public int GameMapId { get; set; }
+        public int GameMapId { get; init; }
 
-        public string? EnglishTitle { get; set; }
+        public string? EnglishTitle { get; init; }
 
-        public string? AppendAttribution { get; set; }
+        public string? AppendAttribution { get; init; }
 
-        public string? SteamWorkshopId { get; set; }
+        public string? SteamWorkshopId { get; init; }
 
-        public string? OfficialSiteUri { get; set; }
+        public string? OfficialSiteUri { get; init; }
 
-        public double SizeInMeters { get; set; }
+        public double SizeInMeters { get; init; }
 
-        public string? Name { get; set; }
+        public string? Name { get; init; }
 
-        public string[]? Aliases { get; set; }
+        public string[]? Aliases { get; init; }
 
-        public string[]? Tags { get; set; }
+        public string[]? Tags { get; init; }
 
-        public string? Thumbnail { get; set; }
+        public string? Thumbnail { get; init; }
 
-        public string? ThumbnailWebp { get; set; }
+        public string? ThumbnailWebp { get; init; }
 
-        public string? ThumbnailPng { get; set; }
+        public string? ThumbnailPng { get; init; }
 
-        public DateTime? LastChangeUtc { get; set; }
+        public DateTime? LastChangeUtc { get; init; }
 
-        public double OriginX { get; set; }
+        public double OriginX { get; init; }
 
-        public double OriginY { get; set; }
+        public double OriginY { get; init; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<GameMapLayerJson>? Layers { get; set; }
+        public IReadOnlyList<GameMapLayerJson>? Layers { get; init; }
     }
 }

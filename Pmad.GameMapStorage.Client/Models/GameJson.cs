@@ -5,9 +5,9 @@ namespace Pmad.GameMapStorage.Client.Models
     public class GameJson : GameJsonBase
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<GameColorJson>? Colors { get; set; }
+        public IReadOnlyList<GameColorJson>? Colors { get; init; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<GameMarkerJson>? Markers { get; set; }
+        public IReadOnlyList<GameMarkerJson>? Markers { get; init; }
     }
 }

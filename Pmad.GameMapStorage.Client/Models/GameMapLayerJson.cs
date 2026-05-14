@@ -4,47 +4,47 @@ namespace Pmad.GameMapStorage.Client.Models
 {
     public class GameMapLayerJson
     {
-        public int GameMapLayerId { get; set; }
+        public int GameMapLayerId { get; init; }
 
-        public LayerType Type { get; set; }
+        public LayerType Type { get; init; }
 
-        public LayerFormat Format { get; set; }
+        public LayerFormat Format { get; init; }
 
-        public int MinZoom { get; set; }
+        public int MinZoom { get; init; }
 
-        public int MaxZoom { get; set; }
+        public int MaxZoom { get; init; }
 
-        public int DefaultZoom { get; set; }
+        public int DefaultZoom { get; init; }
 
-        public bool IsDefault { get; set; }
+        public bool IsDefault { get; init; }
 
-        public int TileSize { get; set; }
+        public int TileSize { get; init; }
 
-        public double FactorX { get; set; }
+        public double FactorX { get; init; }
 
-        public double FactorY { get; set; }
+        public double FactorY { get; init; }
 
-        public string? Culture { get; set; }
+        public string? Culture { get; init; }
 
-        public DateTime? LastChangeUtc { get; set; }
+        public DateTime? LastChangeUtc { get; init; }
 
-        public DateTime? DataLastChangeUtc { get; set; }
+        public DateTime? DataLastChangeUtc { get; init; }
 
-        public Guid? GameMapLayerGuid { get; set; }
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? DownloadUri { get; set; }
+        public Guid? GameMapLayerGuid { get; init; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? PatternPng { get; set; }
+        public string? DownloadUri { get; init; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? PatternWebp { get; set; }
+        public string? PatternPng { get; init; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? PatternSvg { get; set; }
+        public string? PatternWebp { get; init; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Pattern { get; set; }
+        public string? PatternSvg { get; init; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Pattern { get; init; }
     }
 }

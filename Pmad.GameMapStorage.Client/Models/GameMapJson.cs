@@ -5,9 +5,9 @@ namespace Pmad.GameMapStorage.Client.Models
     public class GameMapJson : GameMapJsonBase
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Attribution { get; set; }
+        public string? Attribution { get; init; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<GameMapLocationJson>? Locations { get; set; }
+        public IReadOnlyList<GameMapLocationJson>? Locations { get; init; }
     }
 }

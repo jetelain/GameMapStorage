@@ -4,18 +4,18 @@ namespace Pmad.GameMapStorage.Client.Models
 {
     public class GameColorJson
     {
-        public int GameColorId { get; set; }
+        public int GameColorId { get; init; }
 
-        public string? EnglishTitle { get; set; }
+        public string? EnglishTitle { get; init; }
 
-        public string? Name { get; set; }
+        public string? Name { get; init; }
 
-        public string[]? Aliases { get; set; }
+        public string[]? Aliases { get; init; }
 
-        public string? Hexadecimal { get; set; }
+        public string? Hexadecimal { get; init; }
 
-        public ColorUsage Usage { get; set; }
+        public ColorUsage Usage { get; init; }
 
-        public string? ContrastHexadecimal { get; set; }
+        public string? ContrastHexadecimal { get; init; }
     }
 }
