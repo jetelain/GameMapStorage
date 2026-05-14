@@ -6,5 +6,8 @@ namespace Pmad.GameMapStorage.Client
     {
         [JsonPropertyName("AccessToken")]
         public string? AccessToken { get; set; }
+
+        [JsonPropertyName("ExpiresIn")]
+        public long ExpiresIn { get; set; }
     }
 }

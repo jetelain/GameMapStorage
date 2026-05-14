@@ -6,11 +6,13 @@ namespace Pmad.GameMapStorage.Client.Tests.Unit;
 
 public sealed class GameMapStorageAdminClientTests
 {
-    private static (GameMapStorageAdminClient client, StubHttpMessageHandler handler) CreateClient()
+    private static (GameMapStorageAdminClient client, StubHttpMessageHandler handler) CreateClient(TimeProvider? timeProvider = null)
     {
         var handler = new StubHttpMessageHandler();
         var httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://example.com/") };
-        return (new GameMapStorageAdminClient(httpClient), handler);
+        return timeProvider is null
+            ? (new GameMapStorageAdminClient(httpClient), handler)
+            : (new GameMapStorageAdminClient(httpClient, timeProvider), handler);
     }
 
     // ── AuthenticateAsync ──────────────────────────────────────────────────────
@@ -213,4 +215,93 @@ public sealed class GameMapStorageAdminClientTests
         Scale = 50000,
         Pages = [new GamePaperMapPage { PageNumber = 1 }]
     };
+
+    // ── Token refresh ─────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task CreateLayerFromPackageAsync_TokenExpired_RefreshesBeforeRequest()
+    {
+        var clock = new FakeTimeProvider();
+        var (client, handler) = CreateClient(clock);
+
+        // Authenticate with a token that expires in 60 seconds
+        handler.Setup("api/v1/tokens", """{"AccessToken":"tok1","ExpiresIn":60}""");
+        handler.Setup("api/v1/layers", "{}");
+        await client.AuthenticateAsync(1, "key");
+
+        // Advance time past expiry minus margin (30s) → token becomes stale
+        clock.Advance(TimeSpan.FromSeconds(61));
+
+        // Second token request should be made before posting
+        handler.Setup("api/v1/tokens", """{"AccessToken":"tok2","ExpiresIn":60}""");
+        using var stream = new MemoryStream([1, 2, 3]);
+        await client.CreateLayerFromPackageAsync(stream);
+
+        // Expect: first auth + refresh + layer upload
+        Assert.Equal(3, handler.Requests.Count);
+        Assert.Contains("api/v1/tokens", handler.Requests[2 - 1].Message.RequestUri!.ToString()); // refresh
+        Assert.Contains("api/v1/layers", handler.Requests[2].Message.RequestUri!.ToString());
+    }
+
+    [Fact]
+    public async Task CreateLayerFromPackageAsync_TokenStillValid_DoesNotRefresh()
+    {
+        var clock = new FakeTimeProvider();
+        var (client, handler) = CreateClient(clock);
+
+        handler.Setup("api/v1/tokens", """{"AccessToken":"tok1","ExpiresIn":3600}""");
+        handler.Setup("api/v1/layers", "{}");
+        await client.AuthenticateAsync(1, "key");
+
+        // Advance only 10 seconds — well within validity window
+        clock.Advance(TimeSpan.FromSeconds(10));
+
+        using var stream = new MemoryStream([1, 2, 3]);
+        await client.CreateLayerFromPackageAsync(stream);
+
+        // Only initial auth + layer upload; no refresh
+        Assert.Equal(2, handler.Requests.Count);
+        Assert.Contains("api/v1/tokens", handler.Requests[0].Message.RequestUri!.ToString());
+        Assert.Contains("api/v1/layers", handler.Requests[1].Message.RequestUri!.ToString());
+    }
+
+    [Fact]
+    public async Task CreateLayerFromPackageAsync_WithinMargin_RefreshesProactively()
+    {
+        var clock = new FakeTimeProvider();
+        var (client, handler) = CreateClient(clock);
+
+        // Token expires in 60 s; margin is 30 s → refresh when < 30 s remain
+        handler.Setup("api/v1/tokens", """{"AccessToken":"tok1","ExpiresIn":60}""");
+        handler.Setup("api/v1/layers", "{}");
+        await client.AuthenticateAsync(1, "key");
+        client.TokenExpiryMargin = TimeSpan.FromSeconds(30);
+
+        // Advance to 35 s → 25 s remain, which is inside the 30 s margin
+        clock.Advance(TimeSpan.FromSeconds(35));
+
+        handler.Setup("api/v1/tokens", """{"AccessToken":"tok2","ExpiresIn":60}""");
+        using var stream = new MemoryStream([1, 2, 3]);
+        await client.CreateLayerFromPackageAsync(stream);
+
+        Assert.Equal(3, handler.Requests.Count);
+        Assert.Contains("api/v1/tokens", handler.Requests[1].Message.RequestUri!.ToString());
+    }
+
+    [Fact]
+    public async Task TokenExpiryMargin_DefaultIs30Seconds()
+    {
+        var (client, _) = CreateClient();
+        Assert.Equal(TimeSpan.FromSeconds(30), client.TokenExpiryMargin);
+    }
+}
+
+/// <summary>Controllable <see cref="TimeProvider"/> for unit tests.</summary>
+internal sealed class FakeTimeProvider : TimeProvider
+{
+    private DateTimeOffset _now = DateTimeOffset.UtcNow;
+
+    public void Advance(TimeSpan delta) => _now += delta;
+
+    public override DateTimeOffset GetUtcNow() => _now;
 }
