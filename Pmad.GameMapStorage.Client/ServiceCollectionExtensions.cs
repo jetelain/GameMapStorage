@@ -20,7 +20,9 @@ namespace Pmad.GameMapStorage.Client
             Action<System.Net.Http.HttpClient> configureClient)
         {
             return services
-                .AddHttpClient<GameMapStorageClient>(configureClient);
+                .AddHttpClient<GameMapStorageClient>()
+                .ConfigureHttpClient(configureClient)
+                .AddTypedClient(httpClient => new GameMapStorageClient(httpClient));
         }
 
         /// <summary>
