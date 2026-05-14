@@ -104,13 +104,15 @@ await using var stream = File.OpenRead("altis.zip");
 await adminClient.CreateLayerFromPackageAsync(stream, "altis.zip");
 
 // Update an existing layer (layerId = GameMapLayerId)
-await using var stream = File.OpenRead("altis-v2.zip");
-await adminClient.UpdateLayerFromPackageAsync(layerId: 42, stream, "altis-v2.zip");
+await using var stream2 = File.OpenRead("altis-v2.zip");
+await adminClient.UpdateLayerFromPackageAsync(layerId: 42, stream2, "altis-v2.zip");
 ```
 
 ### Upload a paper map
 
 ```csharp
+using Pmad.GameMapStorage.Client.Models;
+
 var definition = new PaperMapDefinition
 {
 	GameName = "arma3",
@@ -127,8 +129,8 @@ await using var pdf = File.OpenRead("altis.pdf");
 await adminClient.CreatePaperMapAsync(definition, pdf, "altis.pdf");
 
 // Update (paperMapId = GamePaperMapId)
-await using var pdf = File.OpenRead("altis-v2.pdf");
-await adminClient.UpdatePaperMapAsync(paperMapId: 7, definition, pdf, "altis-v2.pdf");
+await using var pdf2 = File.OpenRead("altis-v2.pdf");
+await adminClient.UpdatePaperMapAsync(paperMapId: 7, definition, pdf2, "altis-v2.pdf");
 ```
 
 ### Admin client with DI
