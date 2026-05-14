@@ -14,8 +14,6 @@ namespace Pmad.GameMapStorage.Client
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache? _cache;
 
-        internal static readonly JsonSerializerOptions JsonOptions = GameMapStorageJsonContext.Default.Options;
-
         /// <summary>
         /// Duration for which responses are kept in the memory cache.
         /// Defaults to 30 minutes. Set to <see cref="TimeSpan.Zero"/> to disable caching.

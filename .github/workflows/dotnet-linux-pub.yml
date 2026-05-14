@@ -8,6 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       packages: write
       id-token: write
     steps:
@@ -31,7 +32,7 @@ jobs:
       with:
         user: ${{ secrets.NUGET_USER }}
 
-    - name: Publish Nuget to nuget.org
+    - name: Publish NuGet to nuget.org
       run: dotnet nuget push **/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
         
     - name: Publish NuGet package to GitHub
