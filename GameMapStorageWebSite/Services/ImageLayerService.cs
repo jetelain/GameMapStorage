@@ -64,6 +64,8 @@ namespace GameMapStorageWebSite.Services
                 }
             });
 
+            // Remove stale source HIMG if exists
+            await storageService.Delete(GetBasePath(layer, zoom) + ".himg");
 
             if (keepSourceImage)
             {
@@ -116,6 +118,9 @@ namespace GameMapStorageWebSite.Services
                     await AddTile(layer, zoom, x, y, tile);
                 }
             });
+
+            // Remove stale source PNG if exists
+            await storageService.Delete(GetBasePath(layer, zoom) + ".png");
 
             if (keepSourceImage)
             {
@@ -240,6 +245,7 @@ namespace GameMapStorageWebSite.Services
                 if (packSource)
                 {
                     await CreateEntry(zip, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                    await CreateEntry(zip, $"{zoom}.himg", GetBasePath(layer, zoom) + ".himg");
                 }
                 var count = MapUtils.GetTileRowCount(zoom);
                 for (int x = 0; x < count; x++)
