@@ -1,4 +1,3 @@
-/// <reference path="leaflet.d.ts" />
 declare namespace GameMapUtils {
     interface LatLngGraticuleOptions extends L.LayerOptions {
         font: string;
@@ -73,6 +72,7 @@ declare namespace GameMapUtils {
         on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any): this;
         onRemove(map: any): void;
         setClass(name: any): void;
+        querySelector<E extends Element = Element>(selectors: string): E | null;
     }
     function overlayButton(options?: OverlayButtonOptions): OverlayButton;
     interface OverlayDivOptions extends L.ControlOptions {
@@ -113,6 +113,7 @@ declare namespace GameMapUtils {
         _isActive: boolean;
         constructor(options?: ToggleButtonOptions);
         onAdd(map: L.Map): HTMLElement;
+        querySelector<E extends Element = Element>(selectors: string): E | null;
         onRemove(map: L.Map): void;
         abstract onDisable(map: L.Map): any;
         abstract onEnable(map: L.Map): any;

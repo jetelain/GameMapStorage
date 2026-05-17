@@ -71,13 +71,13 @@ namespace GameMapUtils {
                 className: 'btn-outline-secondary',
                 content: ''
             }, options));
-        }
-
-        onAdd (map) {
             this._previousClass = this.options.className;
             this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.className);
             L.DomEvent.disableClickPropagation(this._container);
             this._container.innerHTML = this.options.content;
+        }
+
+        onAdd (map) {
             return this._container;
         }
 
@@ -94,6 +94,10 @@ namespace GameMapUtils {
             this._container.classList.remove(this._previousClass);
             this._container.classList.add(name);
             this._previousClass = name;
+        }
+
+        querySelector<E extends Element = Element>(selectors: string): E | null {
+            return this._container.querySelector<E>(selectors);
         }
     };
 
@@ -203,18 +207,22 @@ namespace GameMapUtils {
                 onClassName: 'btn-primary',
                 content: ''
             }, options));
-        }
-
-        override onAdd(map: L.Map) {
-            this._map = map;
             this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.offClassName);
             L.DomEvent.disableClickPropagation(this._container);
             this._container.innerHTML = this.options.content;
             L.DomEvent.on(this._container, 'click', this._clickHandler, this);
+        }
+
+        override onAdd(map: L.Map) {
+            this._map = map;
             if (this.options.group) {
                 this.options.group.add(this);
             }
             return this._container;
+        }
+
+        querySelector<E extends Element = Element>(selectors: string): E | null {
+            return this._container.querySelector<E>(selectors);
         }
 
         override onRemove(map: L.Map) {
