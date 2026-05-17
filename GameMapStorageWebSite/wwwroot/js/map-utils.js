@@ -269,12 +269,12 @@ var GameMapUtils;
                 content: ''
             }, options));
             this._previousClass = '';
-        }
-        onAdd(map) {
             this._previousClass = this.options.className;
             this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.className);
             L.DomEvent.disableClickPropagation(this._container);
             this._container.innerHTML = this.options.content;
+        }
+        onAdd(map) {
             return this._container;
         }
         on(type, listener) {
@@ -287,6 +287,9 @@ var GameMapUtils;
             this._container.classList.remove(this._previousClass);
             this._container.classList.add(name);
             this._previousClass = name;
+        }
+        querySelector(selectors) {
+            return this._container.querySelector(selectors);
         }
     }
     GameMapUtils.OverlayButton = OverlayButton;
@@ -372,17 +375,20 @@ var GameMapUtils;
                 onClassName: 'btn-primary',
                 content: ''
             }, options));
-        }
-        onAdd(map) {
-            this._map = map;
             this._container = L.DomUtil.create('button', this.options.baseClassName + ' ' + this.options.offClassName);
             L.DomEvent.disableClickPropagation(this._container);
             this._container.innerHTML = this.options.content;
             L.DomEvent.on(this._container, 'click', this._clickHandler, this);
+        }
+        onAdd(map) {
+            this._map = map;
             if (this.options.group) {
                 this.options.group.add(this);
             }
             return this._container;
+        }
+        querySelector(selectors) {
+            return this._container.querySelector(selectors);
         }
         onRemove(map) {
             if (this._isActive) {
