@@ -54,7 +54,7 @@ namespace GameMapStorageWebSite.Controllers.Admin
         [HttpPost]
         [ValidateAntiForgeryToken]
         [DisableRequestSizeLimit]
-        [RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue, ValueLengthLimit = int.MaxValue)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 4_294_967_294L /* 4 GiB */, ValueLengthLimit = int.MaxValue)]
         [Authorize("AdminEdit")]
         public async Task<IActionResult> CreateFromPackage(IFormFile package)
         {
