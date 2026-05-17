@@ -5,6 +5,9 @@ using System.Text.Json.Serialization;
 using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services.DataPackages;
 using GameMapStorageWebSite.Services.Storages;
+using Pmad.HugeImages;
+using Pmad.HugeImages.IO;
+using Pmad.HugeImages.Processing;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Memory;
@@ -22,9 +25,14 @@ namespace GameMapStorageWebSite.Services
             this.storageService = storageService;
         }
 
-        public async Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage)
+        public Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage)
         {
-            await AddZoomLevelFromImage(layer, maxZoom, fullImage, true);
+            return AddZoomLevelRangeFromImage(layer, minZoom, maxZoom, fullImage, keepSourceImage: true);
+        }
+
+        private async Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage, bool keepSourceImage)
+        {
+            await AddZoomLevelFromImage(layer, maxZoom, fullImage, keepSourceImage);
 
             for (var zoom = maxZoom - 1; zoom >= minZoom; zoom--)
             {
@@ -36,7 +44,7 @@ namespace GameMapStorageWebSite.Services
 
         public async Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage, bool keepSourceImage = true)
         {
-            ValidateLayerAndImage(layer, zoom, fullImage);
+            ValidateLayerAndImage(layer, zoom, fullImage.Size);
 
             var count = MapUtils.GetTileRowCount(zoom);
 
@@ -67,6 +75,57 @@ namespace GameMapStorageWebSite.Services
             {
                 // Remove stale source image if exists
                 await storageService.Delete(GetBasePath(layer, zoom) + ".png");
+            }
+        }
+
+        public async Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, HugeImage<Rgb24> fullImage)
+        {
+            await AddZoomLevelFromImage(layer, maxZoom, fullImage, true);
+
+            if (maxZoom - 1 >= minZoom)
+            {
+                // Scale down the original image to the size of the next zoom level. This should fit a classic image in memory.
+                var newSize = GetSizeAtZoom(layer, maxZoom - 1);
+                using var scaled = await fullImage.ToScaledImageAsync(newSize, newSize);
+
+                // Free memory used by the original image as soon as possible, as we don't need it anymore
+                await fullImage.OffloadAsync();
+
+                await AddZoomLevelRangeFromImage(layer, minZoom, maxZoom - 1, scaled, false);
+            }
+        }
+
+        public async Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, HugeImage<Rgb24> fullImage, bool keepSourceImage = true)
+        {
+            ValidateLayerAndImage(layer, zoom, fullImage.Size);
+
+            var count = MapUtils.GetTileRowCount(zoom);
+
+            var tileSize = layer.TileSize;
+
+            await Parallel.ForAsync(0, count, async (x, _) =>
+            {
+                using var tile = new Image<Rgba32>(tileSize, tileSize);
+                for (int y = 0; y < count; y++)
+                {
+                    await tile.MutateAsync(async p =>
+                    {
+                        p.Clear(Color.Transparent);
+                        await p.DrawHugeImageAsync(fullImage, new Point(x * tileSize, y * tileSize), 1.0f);
+                    });
+                    await AddTile(layer, zoom, x, y, tile);
+                }
+            });
+
+            if (keepSourceImage)
+            {
+                // Keep lossless image to be able to re-generate tiles in other formats in the future if needed
+                await storageService.StoreAsync(GetBasePath(layer, zoom) + ".himg", stream => fullImage.SaveAsync(stream));
+            }
+            else
+            {
+                // Remove stale source image if exists
+                await storageService.Delete(GetBasePath(layer, zoom) + ".himg");
             }
         }
 
@@ -112,13 +171,13 @@ namespace GameMapStorageWebSite.Services
                 y.ToString(NumberFormatInfo.InvariantInfo));
         }
 
-        private void ValidateLayerAndImage(GameMapLayer layer, int zoom, Image fullImage)
+        private void ValidateLayerAndImage(GameMapLayer layer, int zoom, Size imageSize)
         {
             ValidateLayer(layer);
             var expectedSize = GetSizeAtZoom(layer, zoom);
-            if (fullImage.Width != expectedSize || fullImage.Height != expectedSize)
+            if (imageSize.Width != expectedSize || imageSize.Height != expectedSize)
             {
-                throw new ArgumentException($"Image size was expected to be '{expectedSize}x{expectedSize}', but it was '{fullImage.Width}x{fullImage.Height}'.");
+                throw new ArgumentException($"Image size was expected to be '{expectedSize}x{expectedSize}', but it was '{imageSize.Width}x{imageSize.Height}'.");
             }
             if (!layer.Format.IsRaster())
             {

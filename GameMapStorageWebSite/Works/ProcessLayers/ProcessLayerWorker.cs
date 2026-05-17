@@ -1,9 +1,12 @@
 ﻿using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services;
 using Microsoft.EntityFrameworkCore;
+using Pmad.HugeImages;
+using Pmad.HugeImages.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace GameMapStorageWebSite.Works.ProcessLayers
 {
@@ -53,8 +56,16 @@ namespace GameMapStorageWebSite.Works.ProcessLayers
 
             foreach (var item in workData.Items)
             {
-                using var image = await Image.LoadAsync(new DecoderOptions() { Configuration = configuration }, Path.Combine(workspace, item.FileName));
-                await imageLayerService.AddZoomLevelRangeFromImage(layer, item.MinZoom, item.MaxZoom, image);
+                if (item.FileName.EndsWith(".himg", StringComparison.OrdinalIgnoreCase))
+                {
+                    using var himg = await HugeImageIO.LoadReadOnlyLockedAsync<Rgb24>(Path.Combine(workspace, item.FileName), new HugeImageSettingsBase() { MemoryLimit = 17_179_869_184 });
+                    await imageLayerService.AddZoomLevelRangeFromImage(layer, item.MinZoom, item.MaxZoom, himg);
+                }
+                else
+                {
+                    using var image = await Image.LoadAsync(new DecoderOptions() { Configuration = configuration }, Path.Combine(workspace, item.FileName));
+                    await imageLayerService.AddZoomLevelRangeFromImage(layer, item.MinZoom, item.MaxZoom, image);
+                }
             }
 
             foreach (var item in workData.Items)
