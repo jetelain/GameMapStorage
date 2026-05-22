@@ -24,6 +24,10 @@ declare namespace GameMapUtils {
         _canvas: HTMLCanvasElement;
         _grid?: GameMapUtils.MapGrid;
         constructor(options?: Partial<LatLngGraticuleOptions>);
+        /**
+         * Called by super constructor to initialize the options. Do not call this method directly.
+         * @private
+         */
         initialize(options: any): void;
         /**
          * Update the graticule style. If the graticule is already added to map, it will be redrawn immediately.

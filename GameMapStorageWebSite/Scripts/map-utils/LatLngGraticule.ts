@@ -23,6 +23,18 @@ namespace GameMapUtils {
         drawLines: boolean;
     }
 
+    function applyComputedDefaults(options: Partial<LatLngGraticuleOptions>): Partial<LatLngGraticuleOptions> {
+        if (!options.fontColor) {
+            // If fontColor is not specified, use the same color as the graticule lines
+            options.fontColor = options.color;
+        }
+        if (options.font && options.font.indexOf(' ') < 0) {
+            // If the font option is specified but does not include a font family, add a default font family (e.g., 'Verdana')
+            options.font += ' ' + 'Verdana';
+        }
+        return options;
+    }
+
     /**
      *  Create a Canvas as ImageOverlay to draw the Lat/Lon Graticule,
      *  and show the axis tick label on the edge of the map.
@@ -40,22 +52,17 @@ namespace GameMapUtils {
                 opacity: 1,
                 weight: 0.8,
                 color: '#444',
+                fontColor: '#444',
                 font: '12px Verdana',
                 drawLines: false
-            }, options));
-
-            var defaultFontName = 'Verdana';
-            var _ff = this.options.font.split(' ');
-            if (_ff.length < 2) {
-                this.options.font += ' ' + defaultFontName;
-            }
-            if (!this.options.fontColor) {
-                this.options.fontColor = this.options.color;
-            }
+            }, applyComputedDefaults(options)));
         }
 
+        /**
+         * Called by super constructor to initialize the options. Do not call this method directly.
+         * @private
+         */
         initialize(options) {
-            // Called by super
             L.Util.setOptions(this, options);
         }
 
@@ -67,7 +74,10 @@ namespace GameMapUtils {
         setStyle(options: Partial<LatLngGraticuleOptions>) {
             L.Util.setOptions(this, options);
             if (this._container) {
-                this._reset();
+                if (this._map) {
+                    this._reset();
+                }
+                this._updateOpacity();
             }
             return this;
         }
@@ -109,7 +119,9 @@ namespace GameMapUtils {
 
         setOpacity (opacity) {
             this.options.opacity = opacity;
-            this._updateOpacity();
+            if (this._container) {
+                this._updateOpacity();
+            }
             return this;
         }
 
@@ -247,62 +259,51 @@ namespace GameMapUtils {
                 endLng = Math.trunc(endLng + pointPerLon);
                 startLng = Math.trunc(startLng - pointPerLon);
 
-                function drawLatLine(self: LatLngGraticule, lat_tick: number) {
-
-                    const left = self._latLngToCanvasPoint(L.latLng(lat_tick, startLng));
-                    const right = self._latLngToCanvasPoint(L.latLng(lat_tick, endLng));
-
-                    const latstr = GameMapUtils.formatCoordinate(lat_tick + grid.options.originY, 2);
-                    const txtWidth = ctx.measureText(latstr).width;
-
-                    if (drawLines) {
-                        ctx.beginPath();
-                        ctx.moveTo(left.x + 1, left.y);
-                        ctx.lineTo(right.x - 1, right.y);
-                        ctx.stroke();
-                    }
-
-                    if (drawLabels) {
-                        const _yy = left.y + (txtHeight / 2) - 2;
-                        ctx.fillText(latstr, 0, _yy);
-                        ctx.fillText(latstr, ww - txtWidth, _yy);
-                    }
-                };
+                if (drawLines) {
+                    ctx.beginPath();
+                }
 
                 if (latInterval > 0) {
                     for (let lat = latGap; lat <= endLat; lat += latInterval) {
                         if (lat >= startLat && lat <= sizeInMeters) {
-                            drawLatLine(this, lat);
+                            const left = this._latLngToCanvasPoint(L.latLng(lat, startLng));
+                            const right = this._latLngToCanvasPoint(L.latLng(lat, endLng));
+                            if (drawLines) {
+                                ctx.moveTo(left.x + 1, left.y);
+                                ctx.lineTo(right.x - 1, right.y);
+                            }
+                            if (drawLabels) {
+                                const latstr = GameMapUtils.formatCoordinate(lat + grid.options.originY, 2);
+                                const txtWidth = ctx.measureText(latstr).width;
+                                const _yy = left.y + (txtHeight / 2) - 2;
+                                ctx.fillText(latstr, 0, _yy);
+                                ctx.fillText(latstr, ww - txtWidth, _yy);
+                            }
                         }
                     }
                 }
 
-                function drawLngLine(self: LatLngGraticule, lon_tick: number) {
-                    const bottom = self._latLngToCanvasPoint(L.latLng(startLat, lon_tick));
-                    const top = self._latLngToCanvasPoint(L.latLng(endLat, lon_tick));
-
-                    const lngstr = GameMapUtils.formatCoordinate(lon_tick + grid.options.originX, 2);
-                    const txtWidth = ctx.measureText(lngstr).width;
-
-                    if (drawLines) {
-                        ctx.beginPath();
-                        ctx.moveTo(top.x, top.y + 1);
-                        ctx.lineTo(bottom.x, bottom.y - 1);
-                        ctx.stroke();
-                    }
-                    if (drawLabels) {
-                        ctx.fillText(lngstr, top.x - (txtWidth / 2), txtHeight + 1);
-                        ctx.fillText(lngstr, bottom.x - (txtWidth / 2), hh - 3);
-                    }
-
-                };
-
                 if (lngInterval > 0) {
                     for (let lng = lngGap; lng <= endLng; lng += lngInterval) {
                         if (lng >= startLng && lng <= sizeInMeters) {
-                            drawLngLine(this, lng);
+                            const bottom = this._latLngToCanvasPoint(L.latLng(startLat, lng));
+                            const top = this._latLngToCanvasPoint(L.latLng(endLat, lng));
+                            if (drawLines) {
+                                ctx.moveTo(top.x, top.y + 1);
+                                ctx.lineTo(bottom.x, bottom.y - 1);
+                            }
+                            if (drawLabels) {
+                                const lngstr = GameMapUtils.formatCoordinate(lng + grid.options.originX, 2);
+                                const txtWidth = ctx.measureText(lngstr).width;
+                                ctx.fillText(lngstr, top.x - (txtWidth / 2), txtHeight + 1);
+                                ctx.fillText(lngstr, bottom.x - (txtWidth / 2), hh - 3);
+                            }
                         }
                     }
+                }
+
+                if (drawLines) {
+                    ctx.stroke();
                 }
             }
         }
