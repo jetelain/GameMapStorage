@@ -1,10 +1,17 @@
 declare namespace GameMapUtils {
     interface LatLngGraticuleOptions extends L.LayerOptions {
+        /** The font to use for the graticule labels (default: '12px Verdana') */
         font: string;
+        /** The color of the font (default: same as color) */
         fontColor: string;
+        /** The color of the graticule lines (default: '#444') */
         color: string;
+        /** The opacity of the graticule lines (default: 1) */
         opacity: number;
+        /** The weight of the graticule lines (default: 0.8) */
         weight: number;
+        /** Whether to draw the graticule lines (default: false) */
+        drawLines: boolean;
     }
     /**
      *  Create a Canvas as ImageOverlay to draw the Lat/Lon Graticule,
@@ -16,8 +23,14 @@ declare namespace GameMapUtils {
         _container: HTMLDivElement;
         _canvas: HTMLCanvasElement;
         _grid?: GameMapUtils.MapGrid;
-        constructor(options?: LatLngGraticuleOptions);
+        constructor(options?: Partial<LatLngGraticuleOptions>);
         initialize(options: any): void;
+        /**
+         * Update the graticule style. If the graticule is already added to map, it will be redrawn immediately.
+         * @param options The options to update
+         * @returns
+         */
+        setStyle(options: Partial<LatLngGraticuleOptions>): this;
         onAdd(map: L.Map): this;
         onRemove(map: L.Map): this;
         addTo(map: any): this;
@@ -29,7 +42,7 @@ declare namespace GameMapUtils {
         _reset(): void;
         _onCanvasLoad(): void;
         _updateOpacity(): void;
-        __draw(label: boolean): void;
+        __draw(drawLabels: boolean, drawLines?: boolean): void;
         _latLngToCanvasPoint(latlng: any): L.Point;
     }
     function latlngGraticule(options?: LatLngGraticuleOptions): LatLngGraticule;

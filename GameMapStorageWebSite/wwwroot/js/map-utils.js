@@ -13,7 +13,8 @@ var GameMapUtils;
                 opacity: 1,
                 weight: 0.8,
                 color: '#444',
-                font: '12px Verdana'
+                font: '12px Verdana',
+                drawLines: false
             }, options));
             var defaultFontName = 'Verdana';
             var _ff = this.options.font.split(' ');
@@ -25,7 +26,20 @@ var GameMapUtils;
             }
         }
         initialize(options) {
+            // Called by super
             L.Util.setOptions(this, options);
+        }
+        /**
+         * Update the graticule style. If the graticule is already added to map, it will be redrawn immediately.
+         * @param options The options to update
+         * @returns
+         */
+        setStyle(options) {
+            L.Util.setOptions(this, options);
+            if (this._container) {
+                this._reset();
+            }
+            return this;
         }
         onAdd(map) {
             this._map = map;
@@ -44,8 +58,8 @@ var GameMapUtils;
             return this;
         }
         onRemove(map) {
-            this._grid = null;
-            map.getPanes().overlayPane.removeChild(this._container);
+            this._grid = undefined;
+            map.getPane('overlayPane').removeChild(this._container);
             map.off('viewreset', this._reset, this);
             map.off('move', this._reset, this);
             map.off('moveend', this._reset, this);
@@ -61,15 +75,15 @@ var GameMapUtils;
             return this;
         }
         bringToFront() {
-            if (this._canvas) {
-                this._map.getPane('overlayPane').appendChild(this._canvas);
+            if (this._container) {
+                this._map.getPane('overlayPane').appendChild(this._container);
             }
             return this;
         }
         bringToBack() {
-            var pane = this._map.getPane('overlayPane');
-            if (this._canvas) {
-                pane.insertBefore(this._canvas, pane.firstChild);
+            if (this._container) {
+                let pane = this._map.getPane('overlayPane');
+                pane.insertBefore(this._container, pane.firstChild);
             }
             return this;
         }
@@ -102,7 +116,7 @@ var GameMapUtils;
             canvas.height = size.y;
             canvas.style.width = size.x + 'px';
             canvas.style.height = size.y + 'px';
-            this.__draw(true);
+            this.__draw(true, this.options.drawLines);
         }
         _onCanvasLoad() {
             this.fire('load');
@@ -110,7 +124,7 @@ var GameMapUtils;
         _updateOpacity() {
             L.DomUtil.setOpacity(this._canvas, this.options.opacity);
         }
-        __draw(label) {
+        __draw(drawLabels, drawLines = false) {
             function _parse_px_to_int(txt) {
                 if (txt.length > 2) {
                     if (txt.charAt(txt.length - 2) == 'p') {
@@ -161,11 +175,13 @@ var GameMapUtils;
                     const right = self._latLngToCanvasPoint(L.latLng(lat_tick, endLng));
                     const latstr = GameMapUtils.formatCoordinate(lat_tick + grid.options.originY, 2);
                     const txtWidth = ctx.measureText(latstr).width;
-                    //ctx.beginPath();
-                    //ctx.moveTo(left.x + 1, left.y);
-                    //ctx.lineTo(right.x - 1, right.y);
-                    //ctx.stroke();
-                    if (label) {
+                    if (drawLines) {
+                        ctx.beginPath();
+                        ctx.moveTo(left.x + 1, left.y);
+                        ctx.lineTo(right.x - 1, right.y);
+                        ctx.stroke();
+                    }
+                    if (drawLabels) {
                         const _yy = left.y + (txtHeight / 2) - 2;
                         ctx.fillText(latstr, 0, _yy);
                         ctx.fillText(latstr, ww - txtWidth, _yy);
@@ -184,11 +200,13 @@ var GameMapUtils;
                     const top = self._latLngToCanvasPoint(L.latLng(endLat, lon_tick));
                     const lngstr = GameMapUtils.formatCoordinate(lon_tick + grid.options.originX, 2);
                     const txtWidth = ctx.measureText(lngstr).width;
-                    //ctx.beginPath();
-                    //ctx.moveTo(top.x, top.y + 1);
-                    //ctx.lineTo(bottom.x, bottom.y - 1);
-                    //ctx.stroke();
-                    if (label) {
+                    if (drawLines) {
+                        ctx.beginPath();
+                        ctx.moveTo(top.x, top.y + 1);
+                        ctx.lineTo(bottom.x, bottom.y - 1);
+                        ctx.stroke();
+                    }
+                    if (drawLabels) {
                         ctx.fillText(lngstr, top.x - (txtWidth / 2), txtHeight + 1);
                         ctx.fillText(lngstr, bottom.x - (txtWidth / 2), hh - 3);
                     }
