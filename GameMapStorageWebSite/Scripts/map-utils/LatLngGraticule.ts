@@ -23,7 +23,10 @@ namespace GameMapUtils {
         drawLines: boolean;
     }
 
-    function applyComputedDefaults(options: Partial<LatLngGraticuleOptions>): Partial<LatLngGraticuleOptions> {
+    function applyComputedDefaults(options?: Partial<LatLngGraticuleOptions>): Partial<LatLngGraticuleOptions> {
+        if (!options) {
+            return {};
+        }
         if (!options.fontColor) {
             // If fontColor is not specified, use the same color as the graticule lines
             options.fontColor = options.color;
@@ -72,7 +75,7 @@ namespace GameMapUtils {
          * @returns
          */
         setStyle(options: Partial<LatLngGraticuleOptions>) {
-            L.Util.setOptions(this, options);
+            L.Util.setOptions(this, applyComputedDefaults(options));
             if (this._container) {
                 if (this._map) {
                     this._reset();

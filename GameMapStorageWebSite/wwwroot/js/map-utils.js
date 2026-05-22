@@ -3,6 +3,9 @@
 var GameMapUtils;
 (function (GameMapUtils) {
     function applyComputedDefaults(options) {
+        if (!options) {
+            return {};
+        }
         if (!options.fontColor) {
             // If fontColor is not specified, use the same color as the graticule lines
             options.fontColor = options.color;
