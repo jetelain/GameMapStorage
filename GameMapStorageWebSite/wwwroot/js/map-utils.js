@@ -115,6 +115,9 @@ var GameMapUtils;
             if (this._map.options.zoomAnimation && L.Browser.any3d) {
                 L.DomUtil.addClass(this._container, 'leaflet-zoom-animated');
             }
+            else {
+                L.DomUtil.addClass(this._container, 'leaflet-zoom-hide');
+            }
             this._canvas = L.DomUtil.create('canvas', '');
             this._updateOpacity();
             this._container.appendChild(this._canvas);
@@ -150,6 +153,7 @@ var GameMapUtils;
             L.DomUtil.setTransform(this._container, offset, scale);
         }
         __draw(drawLines = false) {
+            var _a, _b;
             const canvas = this._canvas, map = this._map, grid = this._grid;
             if (L.Browser.canvas && map) {
                 const dpr = window.devicePixelRatio || 1;
@@ -189,7 +193,7 @@ var GameMapUtils;
                         const right = this._map.latLngToContainerPoint(L.latLng(lat, endLng));
                         const label = GameMapUtils.formatCoordinate(lat + grid.options.originY, gridPrecision);
                         const box = ctx.measureText(label);
-                        latTicks.push({ label: label, width: box.width, height: box.fontBoundingBoxAscent, left: left, right: right, isBold: lat % boldInterval === 0 });
+                        latTicks.push({ label: label, width: box.width, height: (_a = box.fontBoundingBoxAscent) !== null && _a !== void 0 ? _a : box.actualBoundingBoxAscent, left: left, right: right, isBold: lat % boldInterval === 0 });
                     }
                 }
                 if (gridInterval > 0) {
@@ -199,7 +203,7 @@ var GameMapUtils;
                         const top = this._map.latLngToContainerPoint(L.latLng(endLat, lng));
                         const label = GameMapUtils.formatCoordinate(lng + grid.options.originX, gridPrecision);
                         const box = ctx.measureText(label);
-                        lngTicks.push({ label: label, width: box.width, height: box.fontBoundingBoxAscent, top: top, bottom: bottom, isBold: lng % boldInterval === 0 });
+                        lngTicks.push({ label: label, width: box.width, height: (_b = box.fontBoundingBoxAscent) !== null && _b !== void 0 ? _b : box.actualBoundingBoxAscent, top: top, bottom: bottom, isBold: lng % boldInterval === 0 });
                     }
                 }
                 if (drawLines) {

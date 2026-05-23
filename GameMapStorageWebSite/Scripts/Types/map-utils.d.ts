@@ -13,7 +13,7 @@ declare namespace GameMapUtils {
         /** Whether to draw the graticule lines (default: false) */
         drawLines: boolean;
         /** The background color of the label (default: undefined (for transparent)) */
-        labelBackground: string;
+        labelBackground?: string;
     }
     /**
      * Create a Canvas to draw MGRS compatible Graticule, and show the axis tick label on the edge of the map.

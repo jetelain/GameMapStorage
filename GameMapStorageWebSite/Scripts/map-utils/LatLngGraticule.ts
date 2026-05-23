@@ -285,7 +285,7 @@ namespace GameMapUtils {
                         const right = this._map.latLngToContainerPoint(L.latLng(lat, endLng));
                         const label = GameMapUtils.formatCoordinate(lat + grid.options.originY, gridPrecision);
                         const box = ctx.measureText(label);
-                        latTicks.push({ label: label, width: box.width, height: box.fontBoundingBoxAscent, left: left, right: right, isBold: lat % boldInterval === 0 });
+                        latTicks.push({ label: label, width: box.width, height: box.fontBoundingBoxAscent ?? box.actualBoundingBoxAscent, left: left, right: right, isBold: lat % boldInterval === 0 });
                     }
                 }
 
@@ -296,7 +296,7 @@ namespace GameMapUtils {
                         const top = this._map.latLngToContainerPoint(L.latLng(endLat, lng));
                         const label = GameMapUtils.formatCoordinate(lng + grid.options.originX, gridPrecision);
                         const box = ctx.measureText(label);
-                        lngTicks.push({ label: label, width: box.width, height: box.fontBoundingBoxAscent, top: top, bottom: bottom, isBold: lng % boldInterval === 0  });
+                        lngTicks.push({ label: label, width: box.width, height: box.fontBoundingBoxAscent ?? box.actualBoundingBoxAscent, top: top, bottom: bottom, isBold: lng % boldInterval === 0  });
                     }
                 }
 
