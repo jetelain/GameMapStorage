@@ -232,7 +232,6 @@ namespace GameMapUtils {
                     fontColor = this.options.fontColor,
                     labelBackground = this.options.labelBackground;
 
-
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.save();
@@ -281,19 +280,17 @@ namespace GameMapUtils {
                 if (gridInterval > 0) {
                     const firstLat = Math.max(0, latGap + Math.ceil((startLat - latGap) / gridInterval) * gridInterval);
                     for (let lat = firstLat; lat <= endLat; lat += gridInterval) {
-                        const left = this._map.latLngToContainerPoint(L.latLng(lat, startLng));
-                        const right = this._map.latLngToContainerPoint(L.latLng(lat, endLng));
+                        const left = map.latLngToContainerPoint(L.latLng(lat, startLng));
+                        const right = map.latLngToContainerPoint(L.latLng(lat, endLng));
                         const label = GameMapUtils.formatCoordinate(lat + grid.options.originY, gridPrecision);
                         const box = ctx.measureText(label);
                         latTicks.push({ label: label, width: box.width, height: box.fontBoundingBoxAscent ?? box.actualBoundingBoxAscent, left: left, right: right, isBold: lat % boldInterval === 0 });
                     }
-                }
 
-                if (gridInterval > 0) {
                     const firstLng = Math.max(0, lngGap + Math.ceil((startLng - lngGap) / gridInterval) * gridInterval);
                     for (let lng = firstLng; lng <= endLng; lng += gridInterval) {
-                        const bottom = this._map.latLngToContainerPoint(L.latLng(startLat, lng));
-                        const top = this._map.latLngToContainerPoint(L.latLng(endLat, lng));
+                        const bottom = map.latLngToContainerPoint(L.latLng(startLat, lng));
+                        const top = map.latLngToContainerPoint(L.latLng(endLat, lng));
                         const label = GameMapUtils.formatCoordinate(lng + grid.options.originX, gridPrecision);
                         const box = ctx.measureText(label);
                         lngTicks.push({ label: label, width: box.width, height: box.fontBoundingBoxAscent ?? box.actualBoundingBoxAscent, top: top, bottom: bottom, isBold: lng % boldInterval === 0  });
