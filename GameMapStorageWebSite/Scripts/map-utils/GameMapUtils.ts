@@ -102,6 +102,7 @@ namespace GameMapUtils {
         sizeInMeters?: number;
         isSvg?: boolean;
         bounds?: [[number, number], [number, number]];
+        isAerial?: boolean;
     }
 
     export function basicInit(mapInfos: LayerDisplayOptions, mapDivId: string | HTMLElement = 'map'): MapWithGrid {
@@ -139,7 +140,7 @@ namespace GameMapUtils {
             map.setView(mapInfos.defaultPosition, mapInfos.defaultZoom);
         }
 
-        GameMapUtils.latlngGraticule().addTo(map);
+        GameMapUtils.latlngGraticule(mapInfos.isAerial ? { drawLines: true, color: '#fff8', fontColor: '#fff', labelBackground: '#0004' } : {}).addTo(map);
 
         L.control.scale({ maxWidth: 200, imperial: false }).addTo(map);
 

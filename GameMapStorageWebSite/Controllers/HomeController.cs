@@ -187,7 +187,8 @@ namespace GameMapStorageWebSite.Controllers
                     OriginX = map.OriginX,
                     OriginY = map.OriginY,
                     IsSvg = layer.Format.HasSvg(),
-                    Bounds = x != null && y != null && w != null && h != null ? [[y.Value, x.Value], [y.Value + h.Value, x.Value + w.Value]] : null
+                    Bounds = x != null && y != null && w != null && h != null ? [[y.Value, x.Value], [y.Value + h.Value, x.Value + w.Value]] : null,
+                    IsAerial = layer.Type == LayerType.Aerial
                 }
             });
         }

@@ -45,5 +45,8 @@ namespace GameMapStorageWebSite.Models
 
         [JsonPropertyName("bounds")]
         public double[][]? Bounds { get; internal set; }
+
+        [JsonPropertyName("isAerial")]
+        public required bool IsAerial { get; set; }
     }
 }

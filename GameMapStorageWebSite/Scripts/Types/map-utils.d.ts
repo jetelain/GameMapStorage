@@ -1,5 +1,5 @@
 declare namespace GameMapUtils {
-    interface LatLngGraticuleOptions extends L.LayerOptions {
+    interface MgrsGraticuleOptions extends L.LayerOptions {
         /** The font to use for the graticule labels (default: '12px Verdana') */
         font: string;
         /** The color of the font (default: same as color) */
@@ -8,22 +8,26 @@ declare namespace GameMapUtils {
         color: string;
         /** The opacity of the graticule lines (default: 1) */
         opacity: number;
-        /** The weight of the graticule lines (default: 0.8) */
+        /** The weight of the graticule lines (default: 1px physical) */
         weight: number;
         /** Whether to draw the graticule lines (default: false) */
         drawLines: boolean;
+        /** The background color of the label (default: undefined (for transparent)) */
+        labelBackground: string;
     }
     /**
-     *  Create a Canvas as ImageOverlay to draw the Lat/Lon Graticule,
-     *  and show the axis tick label on the edge of the map.
-     *  Intitial version author: lanwei@cloudybay.com.tw
+     * Create a Canvas to draw MGRS compatible Graticule, and show the axis tick label on the edge of the map.
+     *
+     * Assume that map coordinates are MGRS compatible coordinates in meters.
+     *
+     * Based on LatLngGraticule from lanwei@cloudybay.com.tw
      */
-    class LatLngGraticule extends L.Layer {
-        options: LatLngGraticuleOptions;
+    class MgrsGraticule extends L.Layer {
+        options: MgrsGraticuleOptions;
         _container: HTMLDivElement;
         _canvas: HTMLCanvasElement;
         _grid?: GameMapUtils.MapGrid;
-        constructor(options?: Partial<LatLngGraticuleOptions>);
+        constructor(options?: Partial<MgrsGraticuleOptions>);
         /**
          * Called by super constructor to initialize the options. Do not call this method directly.
          * @private
@@ -34,7 +38,7 @@ declare namespace GameMapUtils {
          * @param options The options to update
          * @returns
          */
-        setStyle(options: Partial<LatLngGraticuleOptions>): this;
+        setStyle(options: Partial<MgrsGraticuleOptions>): this;
         onAdd(map: L.Map): this;
         onRemove(map: L.Map): this;
         addTo(map: any): this;
@@ -46,10 +50,16 @@ declare namespace GameMapUtils {
         _reset(): void;
         _onCanvasLoad(): void;
         _updateOpacity(): void;
-        __draw(drawLabels: boolean, drawLines?: boolean): void;
-        _latLngToCanvasPoint(latlng: any): L.Point;
+        _animateZoom(e: any): void;
+        __draw(drawLines?: boolean): void;
     }
-    function latlngGraticule(options?: LatLngGraticuleOptions): LatLngGraticule;
+    function mgrsGraticule(options?: Partial<MgrsGraticuleOptions>): MgrsGraticule;
+    interface LatLngGraticuleOptions extends GameMapUtils.MgrsGraticuleOptions {
+    }
+    class LatLngGraticule extends GameMapUtils.MgrsGraticule {
+        constructor(options?: Partial<LatLngGraticuleOptions>);
+    }
+    function latlngGraticule(options?: Partial<LatLngGraticuleOptions>): LatLngGraticule;
 }
 declare namespace GameMapUtils {
     interface GridMousePositionOptions extends L.ControlOptions {
@@ -188,6 +198,7 @@ declare namespace GameMapUtils {
         sizeInMeters?: number;
         isSvg?: boolean;
         bounds?: [[number, number], [number, number]];
+        isAerial?: boolean;
     }
     function basicInit(mapInfos: LayerDisplayOptions, mapDivId?: string | HTMLElement): MapWithGrid;
     function basicInitFromAPI(gameName: string, mapName: string, mapDivId?: string | HTMLElement, apiBasePath?: string): Promise<L.Map | null>;
