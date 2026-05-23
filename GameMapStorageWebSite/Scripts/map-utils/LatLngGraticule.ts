@@ -23,7 +23,7 @@ namespace GameMapUtils {
         drawLines: boolean;
 
         /** The background color of the label (default: undefined (for transparent)) */
-        labelBackground: string;
+        labelBackground?: string;
     }
 
     function applyComputedDefaults(options?: Partial<MgrsGraticuleOptions>): Partial<MgrsGraticuleOptions> {
@@ -159,6 +159,9 @@ namespace GameMapUtils {
 
             if (this._map.options.zoomAnimation && L.Browser.any3d) { 
                 L.DomUtil.addClass(this._container, 'leaflet-zoom-animated');
+            }
+            else {
+                L.DomUtil.addClass(this._container, 'leaflet-zoom-hide');
             }
 
             this._canvas = L.DomUtil.create('canvas', '');
