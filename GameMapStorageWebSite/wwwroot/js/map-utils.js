@@ -153,7 +153,7 @@ var GameMapUtils;
             L.DomUtil.setTransform(this._container, offset, scale);
         }
         __draw(drawLines = false) {
-            var _a, _b;
+            var _a, _b, _c, _d;
             const canvas = this._canvas, map = this._map, grid = this._grid;
             if (L.Browser.canvas && map) {
                 const dpr = window.devicePixelRatio || 1;
@@ -193,7 +193,7 @@ var GameMapUtils;
                         const right = map.latLngToContainerPoint(L.latLng(lat, endLng));
                         const label = GameMapUtils.formatCoordinate(lat + grid.options.originY, gridPrecision);
                         const box = ctx.measureText(label);
-                        latTicks.push({ label: label, width: box.width, height: (_a = box.fontBoundingBoxAscent) !== null && _a !== void 0 ? _a : box.actualBoundingBoxAscent, left: left, right: right, isBold: lat % boldInterval === 0 });
+                        latTicks.push({ label: label, width: box.width, height: (_b = (_a = box.fontBoundingBoxAscent) !== null && _a !== void 0 ? _a : box.actualBoundingBoxAscent) !== null && _b !== void 0 ? _b : 12, left: left, right: right, isBold: lat % boldInterval === 0 });
                     }
                     const firstLng = Math.max(0, lngGap + Math.ceil((startLng - lngGap) / gridInterval) * gridInterval);
                     for (let lng = firstLng; lng <= endLng; lng += gridInterval) {
@@ -201,7 +201,7 @@ var GameMapUtils;
                         const top = map.latLngToContainerPoint(L.latLng(endLat, lng));
                         const label = GameMapUtils.formatCoordinate(lng + grid.options.originX, gridPrecision);
                         const box = ctx.measureText(label);
-                        lngTicks.push({ label: label, width: box.width, height: (_b = box.fontBoundingBoxAscent) !== null && _b !== void 0 ? _b : box.actualBoundingBoxAscent, top: top, bottom: bottom, isBold: lng % boldInterval === 0 });
+                        lngTicks.push({ label: label, width: box.width, height: (_d = (_c = box.fontBoundingBoxAscent) !== null && _c !== void 0 ? _c : box.actualBoundingBoxAscent) !== null && _d !== void 0 ? _d : 12, top: top, bottom: bottom, isBold: lng % boldInterval === 0 });
                     }
                 }
                 if (drawLines) {
