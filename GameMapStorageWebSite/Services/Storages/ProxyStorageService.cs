@@ -39,9 +39,14 @@
             return null;
         }
 
-        public Task StoreAsync(string path, Func<Stream, Task> write)
+        public Task<long> StoreAsync(string path, Func<Stream, Task> write)
         {
             return localStorage.StoreAsync(path, write);
+        }
+
+        public Task<long?> GetSizeAsync(string path)
+        {
+            return localStorage.GetSizeAsync(path);
         }
     }
 }

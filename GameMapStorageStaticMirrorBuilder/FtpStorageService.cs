@@ -51,7 +51,7 @@ namespace GameMapStorageStaticMirrorBuilder
             return null;
         }
 
-        public async Task StoreAsync(string path, Func<Stream, Task> write)
+        public async Task<long> StoreAsync(string path, Func<Stream, Task> write)
         {
             await semaphore.WaitAsync();
             try
@@ -79,16 +79,27 @@ namespace GameMapStorageStaticMirrorBuilder
                     await client.DeleteFile(fullPath);
                 }
 
+                long bytesWritten;
                 using (var target = await client.OpenWrite(fullPath, FtpDataType.Binary, false))
                 {
-                    await write(target);
+                    using var counting = new CountingStream(target);
+                    await write(counting);
+                    bytesWritten = counting.BytesWritten;
                 }
                 await client.GetReply();
+                return bytesWritten;
             }
             finally
             {
                 semaphore.Release();
             }
+        }
+
+        public async Task<long?> GetSizeAsync(string path)
+        {
+            var fullPath = GetFullRemotePath(path);
+            var size = await client.GetFileSize(fullPath, -1);
+            return size >= 0 ? size : null;
         }
 
         public async ValueTask DisposeAsync()

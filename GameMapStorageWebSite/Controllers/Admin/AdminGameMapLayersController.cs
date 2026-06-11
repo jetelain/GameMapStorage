@@ -1,8 +1,10 @@
 ﻿using GameMapStorageWebSite.Entities;
 using GameMapStorageWebSite.Services.DataPackages;
+using GameMapStorageWebSite.Works.ComputeLayerStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace GameMapStorageWebSite.Controllers.Admin
 {
@@ -173,6 +175,29 @@ namespace GameMapStorageWebSite.Controllers.Admin
                 return RedirectToAction(nameof(Details), new { id = gameMapLayer.GameMapLayerId });
             }
             return View(gameMapLayer);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize("AdminEdit")]
+        public async Task<IActionResult> ComputeLayerStorage(int id)
+        {
+            var gameMapLayer = await _context.GameMapLayers.FindAsync(id);
+            if (gameMapLayer == null)
+            {
+                return NotFound();
+            }
+            var work = new BackgroundWork
+            {
+                Type = BackgroundWorkType.ComputeLayerStorage,
+                State = BackgroundWorkState.Pending,
+                CreatedUtc = DateTime.UtcNow,
+                GameMapLayerId = id,
+                Data = JsonSerializer.Serialize(new ComputeLayerStorageWorkData { GameMapLayerId = id })
+            };
+            _context.Works.Add(work);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         // GET: AdminGameMapLayers/Delete/5
