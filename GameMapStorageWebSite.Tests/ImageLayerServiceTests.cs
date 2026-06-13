@@ -374,4 +374,66 @@ public class ImageLayerServiceTests
 
         await Assert.ThrowsAsync<ArgumentException>(() => svc.AddLayerImagesFromArchive(layer, archive));
     }
+
+    [Fact]
+    public async Task AddLayerImagesFromArchive_HimgSourceFile_IsUnpackedAndCounted()
+    {
+        var storage = new FakeStorageService();
+        var svc = new ImageLayerService(storage);
+        var himgContent = new byte[] { 10, 20, 30, 40, 50 };
+        using var archive = BuildArchive(("0.himg", himgContent));
+
+        var result = await svc.AddLayerImagesFromArchive(MakeLayer(LayerFormat.PngOnly), archive);
+
+        // Size must be counted in SourceFiles
+        Assert.Equal(himgContent.Length, result.SourceFiles);
+        // Content must be forwarded to storage under the expected path
+        Assert.Equal(himgContent, storage.Files[SourcePath(0, ".himg")]);
+    }
+
+    [Fact]
+    public async Task AddLayerImagesFromArchive_BothPngAndHimgSources_AreBothCounted()
+    {
+        var storage = new FakeStorageService();
+        var svc = new ImageLayerService(storage);
+        using var archive = BuildArchive(
+            ("0.png",  new byte[1024]),
+            ("0.himg", new byte[4096]));
+
+        var result = await svc.AddLayerImagesFromArchive(MakeLayer(LayerFormat.PngOnly), archive);
+
+        Assert.Equal(1024 + 4096, result.SourceFiles);
+        Assert.True(storage.Files.ContainsKey(SourcePath(0, ".png")));
+        Assert.True(storage.Files.ContainsKey(SourcePath(0, ".himg")));
+    }
+
+    [Fact]
+    public async Task AddLayerImagesFromArchive_HimgSourceFile_MultipleZooms_AccumulatesSourceFiles()
+    {
+        var svc = new ImageLayerService(new FakeStorageService());
+        using var archive = BuildArchive(
+            ("0.himg", new byte[2000]),
+            ("1.himg", new byte[3000]));
+
+        var result = await svc.AddLayerImagesFromArchive(
+            MakeLayer(LayerFormat.PngOnly, minZoom: 0, maxZoom: 1), archive);
+
+        Assert.Equal(5000, result.SourceFiles);
+    }
+
+    [Fact]
+    public async Task AddLayerImagesFromArchive_SvgFormat_DoesNotUnpackHimgSource()
+    {
+        // SVG layers are not raster — himg entries must be ignored even if present in the archive
+        var storage = new FakeStorageService();
+        var svc = new ImageLayerService(storage);
+        using var archive = BuildArchive(
+            ("0.himg", new byte[999]),
+            ("0/0/0.svg", new byte[128]));
+
+        var result = await svc.AddLayerImagesFromArchive(MakeLayer(LayerFormat.SvgOnly), archive);
+
+        Assert.Equal(0, result.SourceFiles);
+        Assert.False(storage.Files.ContainsKey(SourcePath(0, ".himg")));
+    }
 }

@@ -342,15 +342,16 @@ namespace GameMapStorageWebSite.Services
             var hasPng = layer.Format.HasPng();
             var hasWebp = layer.Format.HasWebp();
             var hasSvg = layer.Format.HasSvg();
-            var mayHaveSourcePng = layer.Format.IsRaster();
+            var mayHaveSourceImage = layer.Format.IsRaster();
 
             ValidateLayer(layer);
             long pngTiles = 0, webpTiles = 0, svgTiles = 0, sourceFiles = 0;
             for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                if (mayHaveSourcePng)
+                if (mayHaveSourceImage)
                 {
                     sourceFiles += await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                    sourceFiles += await UnPack(archive, $"{zoom}.himg", GetBasePath(layer, zoom) + ".himg");
                 }
                 var count = MapUtils.GetTileRowCount(zoom);
                 for (int x = 0; x < count; x++)

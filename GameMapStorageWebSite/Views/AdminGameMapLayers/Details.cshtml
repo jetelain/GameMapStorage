@@ -16,6 +16,7 @@
 
 <h1>@Html.DisplayFor(model => model.Type)</h1>
 <form method="post" class="mt-1 mb-3">
+    @Html.AntiForgeryToken()
     <a class="btn btn-sm btn-primary" asp-action="Index"><i class="fa-solid fa-arrow-left"></i> All Layers List</a>
     <a class="btn btn-sm btn-primary" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.GameMap!.Game!.Name" asp-route-mapName="@Model.GameMap!.Name" asp-route-layerId="@Model.GameMapLayerId"><i class="fa-solid fa-map"></i> View</a>
     <a class="btn btn-sm btn-primary" asp-controller="Download" asp-action="GetLayerArchive" asp-route-gameId="@Model.GameMap!.GameId" asp-route-gameMapId="@Model.GameMapId" asp-route-gameMapLayerId="@Model.GameMapLayerId"><i class="fa-solid fa-download"></i> Download Package</a>
