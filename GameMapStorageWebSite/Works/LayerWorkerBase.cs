@@ -30,6 +30,13 @@ namespace GameMapStorageWebSite.Works
                 layer.StorageSvgTiles = sizes.SvgTiles;
                 layer.StorageSourceFiles = sizes.SourceFiles;
             }
+            else
+            {
+                layer.StoragePngTiles = null;
+                layer.StorageWebpTiles = null;
+                layer.StorageSvgTiles = null;
+                layer.StorageSourceFiles = null;
+            }
             context.Update(layer);
             await context.SaveChangesAsync();
         }
