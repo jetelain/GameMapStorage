@@ -15,21 +15,18 @@
 </nav>
 
 <h1>@Html.DisplayFor(model => model.Type)</h1>
-<p>
+<form method="post" class="mt-1 mb-3">
     <a class="btn btn-sm btn-primary" asp-action="Index"><i class="fa-solid fa-arrow-left"></i> All Layers List</a>
     <a class="btn btn-sm btn-primary" asp-controller="Home" asp-action="Map" asp-route-gameName="@Model.GameMap!.Game!.Name" asp-route-mapName="@Model.GameMap!.Name" asp-route-layerId="@Model.GameMapLayerId"><i class="fa-solid fa-map"></i> View</a>
     <a class="btn btn-sm btn-primary" asp-controller="Download" asp-action="GetLayerArchive" asp-route-gameId="@Model.GameMap!.GameId" asp-route-gameMapId="@Model.GameMapId" asp-route-gameMapLayerId="@Model.GameMapLayerId"><i class="fa-solid fa-download"></i> Download Package</a>
-
-
     @if (canEdit)
     {
         <a asp-action="Edit" class="btn btn-sm btn-secondary ms-2" asp-route-id="@Model?.GameMapLayerId"><i class="fa-solid fa-pen"></i> Edit Informations</a>
         <a asp-action="UpdateFromPackage" class="btn btn-sm btn-secondary" asp-route-id="@Model?.GameMapLayerId"><i class="fa-solid fa-upload"></i> Update From Package</a>
-        <form asp-action="ComputeLayerStorage" asp-route-id="@Model!.GameMapLayerId" method="post" class="d-inline ms-2">
-            <button type="submit" class="btn btn-sm btn-secondary"><i class="fa-solid fa-hard-drive"></i> Compute Storage</button>
-        </form>
+        <button asp-action ="ComputeLayerStorage" asp-route-id="@Model!.GameMapLayerId" type="submit" class="btn btn-sm btn-secondary"><i class="fa-solid fa-hard-drive"></i> Compute Storage</button>
     }
-</p>
+</form>
+
 
 <h2 class="h4">Informations</h2>
 <hr />
