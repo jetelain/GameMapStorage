@@ -13,13 +13,13 @@
         Syndicated,
 
         /// <summary>
-        /// Mirror mode, the application syncs a copy of database and storage of an other instance, and uses it as a read-only mirror.
+        /// Mirror mode, the application syncs a copy of database and storage of another instance, and uses it as a read-only mirror.
         /// </summary>
         Mirror,
 
         /// <summary>
         /// Mode used for debugging and testing:
-        /// The application use a copy of a production database, and a proxy to access data from the corresponding
+        /// The application uses a copy of a production database, and a proxy to access data from the corresponding
         /// instance (to avoid downloading all the data).
         /// </summary>
         Proxy
