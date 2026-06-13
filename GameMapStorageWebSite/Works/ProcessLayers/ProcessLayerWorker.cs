@@ -54,17 +54,18 @@ namespace GameMapStorageWebSite.Works.ProcessLayers
                 AllocationLimitMegabytes = 16_384 // a 40x40km map at 1.5px/ms is ~12GB, so 16GB limit for safety (max for aerial images)
             });
 
+            var totalSizes = new LayerStorageSize();
             foreach (var item in workData.Items)
             {
                 if (item.FileName.EndsWith(".himg", StringComparison.OrdinalIgnoreCase))
                 {
                     using var himg = await HugeImageIO.LoadReadOnlyLockedAsync<Rgb24>(Path.Combine(workspace, item.FileName), new HugeImageSettingsBase() { MemoryLimit = 17_179_869_184 });
-                    await imageLayerService.AddZoomLevelRangeFromImage(layer, item.MinZoom, item.MaxZoom, himg);
+                    totalSizes.Add(await imageLayerService.AddZoomLevelRangeFromImage(layer, item.MinZoom, item.MaxZoom, himg));
                 }
                 else
                 {
                     using var image = await Image.LoadAsync(new DecoderOptions() { Configuration = configuration }, Path.Combine(workspace, item.FileName));
-                    await imageLayerService.AddZoomLevelRangeFromImage(layer, item.MinZoom, item.MaxZoom, image);
+                    totalSizes.Add(await imageLayerService.AddZoomLevelRangeFromImage(layer, item.MinZoom, item.MaxZoom, image));
                 }
             }
 
@@ -73,7 +74,7 @@ namespace GameMapStorageWebSite.Works.ProcessLayers
                 File.Delete(Path.Combine(workspace, item.FileName));
             }
 
-            await MarkLayerAsReady(layer);
+            await MarkLayerAsReady(layer, totalSizes);
         }
 
 

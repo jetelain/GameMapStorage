@@ -43,17 +43,21 @@ namespace GameMapStorageStaticMirrorBuilder
             return Task.FromResult<IStorageFile?>(null);
         }
 
-        public async Task StoreAsync(string path, Func<Stream, Task> write)
+        public async Task<long> StoreAsync(string path, Func<Stream, Task> write)
         {
             await semaphore.WaitAsync();
             try
             {
                 var fullPath = GetFullRemotePath(path);
                 CreateDirectory(GetParentDirectory(fullPath));
+                long bytesWritten;
                 using (var target = client.Create(fullPath))
                 {
-                    await write(target);
+                    using var counting = new CountingStream(target);
+                    await write(counting);
+                    bytesWritten = counting.BytesWritten;
                 }
+                return bytesWritten;
             }
             finally
             {
@@ -77,6 +81,16 @@ namespace GameMapStorageStaticMirrorBuilder
                 }
                 directories.Add(directory);
             }
+        }
+
+        public Task<long?> GetSizeAsync(string path)
+        {
+            var fullPath = GetFullRemotePath(path);
+            if (client.Exists(fullPath))
+            {
+                return Task.FromResult<long?>(client.GetAttributes(fullPath).Size);
+            }
+            return Task.FromResult<long?>(null);
         }
 
         public ValueTask DisposeAsync()

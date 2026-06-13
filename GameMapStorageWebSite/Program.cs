@@ -15,6 +15,7 @@ using GameMapStorageWebSite.Works.MirrorLayers;
 using GameMapStorageWebSite.Works.MirrorPaperMaps;
 using GameMapStorageWebSite.Works.ProcessLayers;
 using GameMapStorageWebSite.Works.UnpackLayers;
+using GameMapStorageWebSite.Works.ComputeLayerStorage;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -137,6 +138,7 @@ namespace GameMapStorageWebSite
             services.AddScoped<IWorker<MirrorLayerWorkData>, MirrorLayerWorker>();
             services.AddScoped<IWorker<UnpackLayerWorkData>, UnpackLayerWorker>();
             services.AddScoped<IWorker<MirrorPaperMapWorkData>, MirrorPaperMapWorker>();
+            services.AddScoped<IWorker<ComputeLayerStorageWorkData>, ComputeLayerStorageWorker>();
             services.AddScoped<BackgroundWorker>();
             services.AddHostedService<BackgroundWorkerHostedService>();
             services.AddSingleton<IDataConfigurationService>(config);

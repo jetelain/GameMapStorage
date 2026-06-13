@@ -42,17 +42,18 @@ namespace GameMapStorageWebSite.Works.UnpackLayers
 
             var archivePath = Path.Combine(workspaceService.GetLayerWorkspace(layer.GameMapLayerId), "content.zip");
 
+            LayerStorageSize sizes;
             using (var archiveStream = File.OpenRead(archivePath))
             {
                 using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read))
                 {
-                    await imageLayerService.AddLayerImagesFromArchive(layer, archive);
+                    sizes = await imageLayerService.AddLayerImagesFromArchive(layer, archive);
                 }
             }
 
             File.Delete(archivePath);
 
-            await MarkLayerAsReady(layer);
+            await MarkLayerAsReady(layer, sizes);
         }
     }
 }

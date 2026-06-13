@@ -1,5 +1,9 @@
 ﻿namespace GameMapStorageWebSite.Services.Storages
 {
+    /// <summary>
+    /// Storage used in <see cref="DataMode.Proxy"/> mode: it first tries to access the local storage,
+    /// and if the file is not found, it fetches it from the remote instance using HTTP.
+    /// </summary>
     public class ProxyStorageService : IStorageService, IDisposable
     {
         private readonly ILocalStorageService localStorage;
@@ -39,9 +43,29 @@
             return null;
         }
 
-        public Task StoreAsync(string path, Func<Stream, Task> write)
+        public Task<long> StoreAsync(string path, Func<Stream, Task> write)
         {
             return localStorage.StoreAsync(path, write);
+        }
+
+        public async Task<long?> GetSizeAsync(string path)
+        {
+            var size = await localStorage.GetSizeAsync(path);
+            if (size != null)
+            {
+                return size;
+            }
+
+            using var request = new HttpRequestMessage(HttpMethod.Head, path);
+            using var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode) 
+            {
+                if (response.Content.Headers.ContentLength.HasValue)
+                {
+                    return response.Content.Headers.ContentLength.Value;
+                }
+            }
+            return null;
         }
     }
 }

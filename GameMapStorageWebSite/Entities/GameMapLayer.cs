@@ -31,6 +31,14 @@
 
         public Guid? GameMapLayerGuid {  get; set; }
 
+        public long? StoragePngTiles { get; set; }
+
+        public long? StorageWebpTiles { get; set; }
+
+        public long? StorageSvgTiles { get; set; }
+
+        public long? StorageSourceFiles { get; set; }
+
         // FK to GameMap
         public int GameMapId { get; set; }
 

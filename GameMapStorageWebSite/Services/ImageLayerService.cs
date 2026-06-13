@@ -25,30 +25,31 @@ namespace GameMapStorageWebSite.Services
             this.storageService = storageService;
         }
 
-        public Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage)
+        public Task<LayerStorageSize> AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage)
         {
             return AddZoomLevelRangeFromImage(layer, minZoom, maxZoom, fullImage, keepSourceImage: true);
         }
 
-        private async Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage, bool keepSourceImage)
+        private async Task<LayerStorageSize> AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage, bool keepSourceImage)
         {
-            await AddZoomLevelFromImage(layer, maxZoom, fullImage, keepSourceImage);
+            var sizes = await AddZoomLevelFromImage(layer, maxZoom, fullImage, keepSourceImage);
 
             for (var zoom = maxZoom - 1; zoom >= minZoom; zoom--)
             {
                 var newSize = GetSizeAtZoom(layer, zoom);
                 fullImage.Mutate(i => i.Resize(newSize, newSize));
-                await AddZoomLevelFromImage(layer, zoom, fullImage, false);
+                sizes.Add(await AddZoomLevelFromImage(layer, zoom, fullImage, false));
             }
+            return sizes;
         }
 
-        public async Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage, bool keepSourceImage = true)
+        public async Task<LayerStorageSize> AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage, bool keepSourceImage = true)
         {
             ValidateLayerAndImage(layer, zoom, fullImage.Size);
 
             var count = MapUtils.GetTileRowCount(zoom);
-
             var tileSize = layer.TileSize;
+            long pngTiles = 0, webpTiles = 0;
 
             await Parallel.ForAsync(0, count, async ( x , _ ) =>
             {
@@ -60,29 +61,34 @@ namespace GameMapStorageWebSite.Services
                         p.Clear(Color.Transparent);
                         p.DrawImage(fullImage, new Point(-(x * tileSize), -(y * tileSize)), 1.0f);
                     });
-                    await AddTile(layer, zoom, x, y, tile);
+                    var (png, webp) = await AddTile(layer, zoom, x, y, tile);
+                    Interlocked.Add(ref pngTiles, png);
+                    Interlocked.Add(ref webpTiles, webp);
                 }
             });
 
             // Remove stale source HIMG if exists
             await storageService.Delete(GetBasePath(layer, zoom) + ".himg");
 
+            long sourceFiles = 0;
             if (keepSourceImage)
             {
                 // Keep lossless image to be able to re-generate tiles in other formats in the future if needed
                 // ImageSharp Webp encoder is not able to save so large images, so we need to keep source png
-                await storageService.StoreAsync(GetBasePath(layer, zoom) + ".png", stream => fullImage.SaveAsPngAsync(stream));
+                sourceFiles = await storageService.StoreAsync(GetBasePath(layer, zoom) + ".png", stream => fullImage.SaveAsPngAsync(stream));
             }
             else
             {
                 // Remove stale source image if exists
                 await storageService.Delete(GetBasePath(layer, zoom) + ".png");
             }
+
+            return new LayerStorageSize { PngTiles = pngTiles, WebpTiles = webpTiles, SourceFiles = sourceFiles };
         }
 
-        public async Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, HugeImage<Rgb24> fullImage)
+        public async Task<LayerStorageSize> AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, HugeImage<Rgb24> fullImage)
         {
-            await AddZoomLevelFromImage(layer, maxZoom, fullImage, true);
+            var sizes = await AddZoomLevelFromImage(layer, maxZoom, fullImage, true);
 
             if (maxZoom - 1 >= minZoom)
             {
@@ -93,17 +99,18 @@ namespace GameMapStorageWebSite.Services
                 // Free memory used by the original image as soon as possible, as we don't need it anymore
                 await fullImage.OffloadAsync();
 
-                await AddZoomLevelRangeFromImage(layer, minZoom, maxZoom - 1, scaled, false);
+                sizes.Add(await AddZoomLevelRangeFromImage(layer, minZoom, maxZoom - 1, scaled, false));
             }
+            return sizes;
         }
 
-        public async Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, HugeImage<Rgb24> fullImage, bool keepSourceImage = true)
+        public async Task<LayerStorageSize> AddZoomLevelFromImage(GameMapLayer layer, int zoom, HugeImage<Rgb24> fullImage, bool keepSourceImage = true)
         {
             ValidateLayerAndImage(layer, zoom, fullImage.Size);
 
             var count = MapUtils.GetTileRowCount(zoom);
-
             var tileSize = layer.TileSize;
+            long pngTiles = 0, webpTiles = 0;
 
             await Parallel.ForAsync(0, count, async (x, _) =>
             {
@@ -115,32 +122,38 @@ namespace GameMapStorageWebSite.Services
                         p.Clear(Color.Transparent);
                         await p.DrawHugeImageAsync(fullImage, new Point(x * tileSize, y * tileSize), 1.0f);
                     });
-                    await AddTile(layer, zoom, x, y, tile);
+                    var (png, webp) = await AddTile(layer, zoom, x, y, tile);
+                    Interlocked.Add(ref pngTiles, png);
+                    Interlocked.Add(ref webpTiles, webp);
                 }
             });
 
             // Remove stale source PNG if exists
             await storageService.Delete(GetBasePath(layer, zoom) + ".png");
 
+            long sourceFiles = 0;
             if (keepSourceImage)
             {
                 // Keep lossless image to be able to re-generate tiles in other formats in the future if needed
-                await storageService.StoreAsync(GetBasePath(layer, zoom) + ".himg", stream => fullImage.SaveAsync(stream));
+                sourceFiles = await storageService.StoreAsync(GetBasePath(layer, zoom) + ".himg", stream => fullImage.SaveAsync(stream));
             }
             else
             {
                 // Remove stale source image if exists
                 await storageService.Delete(GetBasePath(layer, zoom) + ".himg");
             }
+
+            return new LayerStorageSize { PngTiles = pngTiles, WebpTiles = webpTiles, SourceFiles = sourceFiles };
         }
 
-        private async Task AddTile(GameMapLayer layer, int z, int x, int y, Image<Rgba32> tile)
+        private async Task<(long png, long webp)> AddTile(GameMapLayer layer, int z, int x, int y, Image<Rgba32> tile)
         {
             string targetBase = GetBasePath(layer, z, x, y);
+            long png = 0, webp = 0;
 
             if (layer.Format.HasPng())
             {
-                await storageService.StoreAsync(targetBase + ".png", stream => tile.SaveAsPngAsync(stream));
+                png = await storageService.StoreAsync(targetBase + ".png", stream => tile.SaveAsPngAsync(stream));
             }
             else
             {
@@ -150,13 +163,15 @@ namespace GameMapStorageWebSite.Services
 
             if (layer.Format.HasWebp())
             {
-                await storageService.StoreAsync(targetBase + ".webp", stream => tile.SaveAsWebpAsync(stream, ImageHelper.WebpEncoder90));
+                webp = await storageService.StoreAsync(targetBase + ".webp", stream => tile.SaveAsWebpAsync(stream, ImageHelper.WebpEncoder90));
             }
             else
             {
                 // Remove stale image if exists
                 await storageService.Delete(targetBase + ".webp");
             }
+
+            return (png, webp);
         }
 
         private static string GetBasePath(IGameMapLayerIdentifier layer, int z)
@@ -322,19 +337,21 @@ namespace GameMapStorageWebSite.Services
             return Task.FromResult<IStorageFile>(new MemoryStorageFile(s => WriteArchiveTo(layer, s, mode), layer.LastChangeUtc));
         }
 
-        public async Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive)
+        public async Task<LayerStorageSize> AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive)
         {
             var hasPng = layer.Format.HasPng();
             var hasWebp = layer.Format.HasWebp();
             var hasSvg = layer.Format.HasSvg();
-            var mayHaveSourcePng = layer.Format.IsRaster();
+            var mayHaveSourceImage = layer.Format.IsRaster();
 
             ValidateLayer(layer);
+            long pngTiles = 0, webpTiles = 0, svgTiles = 0, sourceFiles = 0;
             for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
             {
-                if (mayHaveSourcePng)
+                if (mayHaveSourceImage)
                 {
-                    await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                    sourceFiles += await UnPack(archive, $"{zoom}.png", GetBasePath(layer, zoom) + ".png");
+                    sourceFiles += await UnPack(archive, $"{zoom}.himg", GetBasePath(layer, zoom) + ".himg");
                 }
                 var count = MapUtils.GetTileRowCount(zoom);
                 for (int x = 0; x < count; x++)
@@ -343,29 +360,67 @@ namespace GameMapStorageWebSite.Services
                     {
                         if (hasPng)
                         {
-                            await UnPack(archive, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
+                            pngTiles += await UnPack(archive, $"{zoom}/{x}/{y}.png", GetBasePath(layer, zoom, x, y) + ".png");
                         }
                         if (hasWebp)
                         {
-                            await UnPack(archive, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
+                            webpTiles += await UnPack(archive, $"{zoom}/{x}/{y}.webp", GetBasePath(layer, zoom, x, y) + ".webp");
                         }
                         if (hasSvg)
                         {
-                            await UnPack(archive, $"{zoom}/{x}/{y}.svg", GetBasePath(layer, zoom, x, y) + ".svg");
+                            svgTiles += await UnPack(archive, $"{zoom}/{x}/{y}.svg", GetBasePath(layer, zoom, x, y) + ".svg");
                         }
                     }
                 }
             }
+            return new LayerStorageSize { PngTiles = pngTiles, WebpTiles = webpTiles, SvgTiles = svgTiles, SourceFiles = sourceFiles };
         }
 
-        private async Task UnPack(ZipArchive zip, string entryName, string storageFile)
+        private async Task<long> UnPack(ZipArchive zip, string entryName, string storageFile)
         {
             var entry = zip.GetEntry(entryName);
-            if ( entry != null)
+            if (entry != null)
             {
                 using var source = entry.Open();
-                await storageService.StoreAsync(storageFile, source.CopyToAsync);
+                return await storageService.StoreAsync(storageFile, source.CopyToAsync);
             }
+            return 0;
+        }
+
+        public async Task<LayerStorageSize> ComputeLayerStorageSize(GameMapLayer layer)
+        {
+            ValidateLayer(layer);
+
+            var hasPng = layer.Format.HasPng();
+            var hasWebp = layer.Format.HasWebp();
+            var hasSvg = layer.Format.HasSvg();
+            var mayHaveSource = layer.Format.IsRaster();
+
+            long pngTiles = 0, webpTiles = 0, svgTiles = 0, sourceFiles = 0;
+
+            for (int zoom = layer.MinZoom; zoom <= layer.MaxZoom; zoom++)
+            {
+                if (mayHaveSource)
+                {
+                    sourceFiles += await storageService.GetSizeAsync(GetBasePath(layer, zoom) + ".png") ?? 0;
+                    sourceFiles += await storageService.GetSizeAsync(GetBasePath(layer, zoom) + ".himg") ?? 0;
+                }
+                var count = MapUtils.GetTileRowCount(zoom);
+                for (int x = 0; x < count; x++)
+                {
+                    for (int y = 0; y < count; y++)
+                    {
+                        if (hasPng)
+                            pngTiles += await storageService.GetSizeAsync(GetBasePath(layer, zoom, x, y) + ".png") ?? 0;
+                        if (hasWebp)
+                            webpTiles += await storageService.GetSizeAsync(GetBasePath(layer, zoom, x, y) + ".webp") ?? 0;
+                        if (hasSvg)
+                            svgTiles += await storageService.GetSizeAsync(GetBasePath(layer, zoom, x, y) + ".svg") ?? 0;
+                    }
+                }
+            }
+
+            return new LayerStorageSize { PngTiles = pngTiles, WebpTiles = webpTiles, SvgTiles = svgTiles, SourceFiles = sourceFiles };
         }
     }
 }

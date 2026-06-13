@@ -9,11 +9,11 @@ namespace GameMapStorageWebSite.Services
 {
     public interface IImageLayerService
     {
-        Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage);
+        Task<LayerStorageSize> AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, Image fullImage);
 
-        Task AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, HugeImage<Rgb24> fullImage);
+        Task<LayerStorageSize> AddZoomLevelRangeFromImage(GameMapLayer layer, int minZoom, int maxZoom, HugeImage<Rgb24> fullImage);
 
-        Task AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage, bool keepSourceImage = true);
+        Task<LayerStorageSize> AddZoomLevelFromImage(GameMapLayer layer, int zoom, Image fullImage, bool keepSourceImage = true);
 
         Task<IStorageFile> ReadTilePng(IGameMapLayerIdentifier layer, int zoom, int x, int y);
 
@@ -25,6 +25,8 @@ namespace GameMapStorageWebSite.Services
 
         Task<IStorageFile> GetArchive(GameMapLayer layer, LayerStorageMode mode = LayerStorageMode.Full);
 
-        Task AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive);
+        Task<LayerStorageSize> AddLayerImagesFromArchive(GameMapLayer layer, ZipArchive archive);
+
+        Task<LayerStorageSize> ComputeLayerStorageSize(GameMapLayer layer);
     }
 }

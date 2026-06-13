@@ -10,6 +10,8 @@
 
         UnpackLayer,
 
-        MirrorPaperMap
+        MirrorPaperMap,
+
+        ComputeLayerStorage
     }
 }

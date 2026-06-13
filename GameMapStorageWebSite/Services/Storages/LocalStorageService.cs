@@ -36,12 +36,23 @@
             return Task.FromResult<IStorageFile?>(null);
         }
 
-        public async Task StoreAsync(string path, Func<Stream, Task> write)
+        public async Task<long> StoreAsync(string path, Func<Stream, Task> write)
         {
             var target = Path.Combine(basePath, path);
             Directory.CreateDirectory(Path.GetDirectoryName(target)!);
             using var stream = File.Create(target);
             await write(stream);
+            return stream.Position;
+        }
+
+        public Task<long?> GetSizeAsync(string path)
+        {
+            var target = Path.Combine(basePath, path);
+            if (File.Exists(target))
+            {
+                return Task.FromResult<long?>(new FileInfo(target).Length);
+            }
+            return Task.FromResult<long?>(null);
         }
     }
 }
